@@ -3,6 +3,7 @@ import Libraries.Versions.androidx_constraint_layout_version
 import Libraries.Versions.androidx_core_version
 import Libraries.Versions.androidx_lifecycle_version
 import Libraries.Versions.androidx_version
+import Libraries.Versions.firebase_firestore_version
 import Libraries.Versions.google_material_version
 import TestLibraries.Versions.espresso_version
 import TestLibraries.Versions.junit_version
@@ -24,6 +25,7 @@ object Plugins{
     const val androidApplication = "com.android.application"
     const val kotlinAndroid = "kotlin-android"
     const val kotlinAndroidExtensions = "kotlin-android-extensions"
+    const val googleServices = "com.google.gms.google-services"
 }
 
 object Libraries {
@@ -34,6 +36,7 @@ object Libraries {
         const val androidx_constraint_layout_version = "1.1.3"
         const val androidx_lifecycle_version = "2.0.0"
         const val google_material_version = "1.0.0"
+        const val firebase_firestore_version = "21.1.1"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -47,6 +50,8 @@ object Libraries {
     const val androidx_navigation_fragment_ktx = "androidx.navigation:navigation-fragment-ktx:$androidx_version"
     const val androidx_navigation_ui = "androidx.navigation:navigation-ui:$androidx_version"
     const val androidx_navigation_ui_ktx = "androidx.navigation:navigation-ui-ktx:$androidx_version"
+    const val firebase_firestore = "com.google.firebase:firebase-firestore:$firebase_firestore_version"
+
 }
 
 object TestLibraries {

@@ -5,6 +5,7 @@ plugins{
     id(Plugins.androidApplication)
     id(Plugins.kotlinAndroid)
     id(Plugins.kotlinAndroidExtensions)
+    id(Plugins.googleServices)
 }
 
 android {
@@ -42,6 +43,9 @@ dependencies {
     implementation(Libraries.androidx_navigation_fragment_ktx)
     implementation(Libraries.androidx_navigation_ui)
     implementation(Libraries.androidx_navigation_ui_ktx)
+    implementation(Libraries.firebase_firestore)
+
+    implementation("com.google.firebase:firebase-analytics:17.2.0")
 
     testImplementation(TestLibraries.junit)
     androidTestImplementation(TestLibraries.androidx_test_espresso_core)

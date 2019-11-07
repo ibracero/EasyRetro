@@ -202,4 +202,7 @@ fabric.properties
 
 !/gradle/wrapper/gradle-wrapper.jar
 
+### Google services configuration ###
+app/google-services.json
+
 # End of https://www.gitignore.io/api/android,androidstudio
