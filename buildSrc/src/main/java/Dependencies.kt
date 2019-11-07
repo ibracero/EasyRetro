@@ -3,6 +3,8 @@ import Libraries.Versions.androidx_constraint_layout_version
 import Libraries.Versions.androidx_core_version
 import Libraries.Versions.androidx_lifecycle_version
 import Libraries.Versions.androidx_version
+import Libraries.Versions.coroutines_version
+import Libraries.Versions.firebase_analytics_version
 import Libraries.Versions.firebase_firestore_version
 import Libraries.Versions.google_material_version
 import TestLibraries.Versions.espresso_version
@@ -37,6 +39,8 @@ object Libraries {
         const val androidx_lifecycle_version = "2.0.0"
         const val google_material_version = "1.0.0"
         const val firebase_firestore_version = "21.1.1"
+        const val firebase_analytics_version = "17.2.1"
+        const val coroutines_version = "1.3.2"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -51,7 +55,9 @@ object Libraries {
     const val androidx_navigation_ui = "androidx.navigation:navigation-ui:$androidx_version"
     const val androidx_navigation_ui_ktx = "androidx.navigation:navigation-ui-ktx:$androidx_version"
     const val firebase_firestore = "com.google.firebase:firebase-firestore:$firebase_firestore_version"
-
+    const val firebase_analytics = "com.google.firebase:firebase-analytics:$firebase_analytics_version"
+    const val coroutines_core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    const val coroutines_android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 }
 
 object TestLibraries {

@@ -25,7 +25,7 @@ class FirebaseDataStore {
     }
 
     private val db = FirebaseFirestore.getInstance()
-    var currentRetroId: String? = null
+    private var currentRetroId: String? = null
 
 
     fun createRetro(callback: () -> Unit) {

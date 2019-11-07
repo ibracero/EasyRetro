@@ -5,14 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ibracero.retrum.data.RepositoryImpl
 
-class HomeViewModel : ViewModel() {
+class PositiveViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
         value = "This is home Fragment"
     }
     val text: LiveData<String> = _text
-
-    init {
-        RepositoryImpl().createRetro()
-    }
 }

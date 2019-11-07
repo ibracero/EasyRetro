@@ -10,20 +10,20 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ibracero.retrum.R
 
-class HomeFragment : Fragment() {
+class PositiveFragment : Fragment() {
 
-    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var positiveViewModel: PositiveViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        homeViewModel =
-            ViewModelProviders.of(this).get(HomeViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_home, container, false)
-        val textView: TextView = root.findViewById(R.id.text_home)
-        homeViewModel.text.observe(this, Observer {
+        positiveViewModel =
+            ViewModelProviders.of(this).get(PositiveViewModel::class.java)
+        val root = inflater.inflate(R.layout.fragment_positive, container, false)
+        val textView: TextView = root.findViewById(R.id.text_positive)
+        positiveViewModel.text.observe(this, Observer {
             textView.text = it
         })
         return root

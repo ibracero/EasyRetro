@@ -44,8 +44,10 @@ dependencies {
     implementation(Libraries.androidx_navigation_ui)
     implementation(Libraries.androidx_navigation_ui_ktx)
     implementation(Libraries.firebase_firestore)
+    implementation("com.google.firebase:firebase-analytics:17.2.1")
+    implementation(Libraries.coroutines_core)
+    implementation(Libraries.coroutines_android)
 
-    implementation("com.google.firebase:firebase-analytics:17.2.0")
 
     testImplementation(TestLibraries.junit)
     androidTestImplementation(TestLibraries.androidx_test_espresso_core)
