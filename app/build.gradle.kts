@@ -1,7 +1,7 @@
 import BuildTypes.DEBUG
 import BuildTypes.RELEASE
 
-plugins{
+plugins {
     id(Plugins.androidApplication)
     id(Plugins.kotlinAndroid)
     id(Plugins.kotlinAndroidExtensions)
@@ -27,7 +27,10 @@ android {
         getByName(RELEASE) {
             isMinifyEnabled = true
             isDebuggable = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
@@ -44,9 +47,11 @@ dependencies {
     implementation(Libraries.androidx_navigation_ui)
     implementation(Libraries.androidx_navigation_ui_ktx)
     implementation(Libraries.firebase_firestore)
-    implementation("com.google.firebase:firebase-analytics:17.2.1")
+    implementation(Libraries.firebase_analytics)
     implementation(Libraries.coroutines_core)
     implementation(Libraries.coroutines_android)
+    implementation(Libraries.koin_android)
+    implementation(Libraries.koin_android_viewmodel)
 
 
     testImplementation(TestLibraries.junit)

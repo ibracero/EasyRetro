@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_positive"
-        android:name="com.ibracero.retrum.ui.home.PositiveFragment"
+        android:name="com.ibracero.retrum.ui.positive.PositiveFragment"
         android:label="@string/title_positive"
         tools:layout="@layout/fragment_positive" />
 
     <fragment
         android:id="@+id/navigation_negative"
-        android:name="com.ibracero.retrum.ui.dashboard.DashboardFragment"
+        android:name="com.ibracero.retrum.ui.negative.NegativeFragment"
         android:label="@string/title_negative"
         tools:layout="@layout/fragment_negative" />
 
     <fragment
         android:id="@+id/navigation_actions"
-        android:name="com.ibracero.retrum.ui.notifications.NotificationsFragment"
+        android:name="com.ibracero.retrum.ui.actions.ActionsFragment"
         android:label="@string/title_actions"
         tools:layout="@layout/fragment_actions" />
 </navigation>

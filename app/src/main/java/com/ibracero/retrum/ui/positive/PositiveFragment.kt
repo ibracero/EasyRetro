@@ -1,31 +1,26 @@
-package com.ibracero.retrum.ui.home
+package com.ibracero.retrum.ui.positive
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.ibracero.retrum.R
+import kotlinx.android.synthetic.main.fragment_positive.*
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class PositiveFragment : Fragment() {
 
-    private lateinit var positiveViewModel: PositiveViewModel
+    private val positiveViewModel: PositiveViewModel by viewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        positiveViewModel =
-            ViewModelProviders.of(this).get(PositiveViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_positive, container, false)
-        val textView: TextView = root.findViewById(R.id.text_positive)
-        positiveViewModel.text.observe(this, Observer {
-            textView.text = it
-        })
+        positiveViewModel.text.observe(this, Observer { text_positive.text = it })
         return root
     }
 }
