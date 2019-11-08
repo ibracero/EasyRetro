@@ -37,27 +37,26 @@ class FirebaseDataStore {
     private val db = FirebaseFirestore.getInstance()
 
     suspend fun loadRetro(): RetroResponse {
-        return suspendCoroutine { continuation ->
-            var uuid = RETRO_UUID
-            var title: String = ""
-            val positivePoints: MutableList<StatementResponse> = mutableListOf()
-            val negativePoints: MutableList<StatementResponse> = mutableListOf()
-            val actionPoints: MutableList<StatementResponse> = mutableListOf()
 
-            val retroRef = db.collection(TABLE_RETROS)
-                .document(RETRO_UUID)
+        val uuid = RETRO_UUID
+        val retroRef = db.collection(TABLE_RETROS)
+            .document(RETRO_UUID)
 
+        val title = suspendCoroutine<String> { continuation ->
             retroRef
                 .get()
                 .addOnSuccessListener {
-                    title = it.getString("title").orEmpty()
+                    continuation.resume(it.getString("title").orEmpty())
                 }
+        }
 
+        val positivePoints = suspendCoroutine<List<StatementResponse>> { continuation ->
             retroRef.collection("positive_points")
                 .get()
                 .addOnSuccessListener {
+                    val positives = mutableListOf<StatementResponse>()
                     for (doc in it) {
-                        positivePoints.add(
+                        positives.add(
                             StatementResponse(
                                 uuid = doc.id,
                                 userEmail = doc.getString("user_email").orEmpty(),
@@ -65,13 +64,17 @@ class FirebaseDataStore {
                             )
                         )
                     }
+                    continuation.resume(positives.toList())
                 }
+        }
 
+        val negativePoints = suspendCoroutine<List<StatementResponse>> { continuation ->
             retroRef.collection("negative_points")
                 .get()
                 .addOnSuccessListener {
+                    val positives = mutableListOf<StatementResponse>()
                     for (doc in it) {
-                        negativePoints.add(
+                        positives.add(
                             StatementResponse(
                                 uuid = doc.id,
                                 userEmail = doc.getString("user_email").orEmpty(),
@@ -79,13 +82,17 @@ class FirebaseDataStore {
                             )
                         )
                     }
+                    continuation.resume(positives.toList())
                 }
+        }
 
+        val actionPoints = suspendCoroutine<List<StatementResponse>> { continuation ->
             retroRef.collection("action_points")
                 .get()
                 .addOnSuccessListener {
+                    val positives = mutableListOf<StatementResponse>()
                     for (doc in it) {
-                        actionPoints.add(
+                        positives.add(
                             StatementResponse(
                                 uuid = doc.id,
                                 userEmail = doc.getString("user_email").orEmpty(),
@@ -93,18 +100,17 @@ class FirebaseDataStore {
                             )
                         )
                     }
+                    continuation.resume(positives.toList())
                 }
-
-            continuation.resume(
-                RetroResponse(
-                    uuid = uuid,
-                    title = title,
-                    positivePoints = positivePoints.toList(),
-                    negativePoints = negativePoints.toList(),
-                    actionPoints = actionPoints.toList()
-                )
-            )
         }
+
+        return RetroResponse(
+            uuid = uuid,
+            title = title,
+            positivePoints = positivePoints.toList(),
+            negativePoints = negativePoints.toList(),
+            actionPoints = actionPoints.toList()
+        )
     }
 
     suspend fun addStatementToBoard(statementType: StatementType, description: String) {

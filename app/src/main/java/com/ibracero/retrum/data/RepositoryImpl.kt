@@ -20,12 +20,12 @@ class RepositoryImpl(
     val localDataStore: LocalDataStore,
     val firebaseDataStore: FirebaseDataStore,
     val retroMapper: RetroMapper,
-    val statementMapper: StatementMapper
+    val statementMapper: StatementMapper,
     dispatchers: CoroutineDispatcherProvider
 ) : Repository {
 
     private val job = Job()
-    private val coroutineContext = job + dispatchers.main
+    private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
     override fun loadRetro() {

@@ -20,9 +20,9 @@ class PositiveFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_positive, container, false)
-//        positiveViewModel.positivePoints.observe(this, Observer { processPositivePoints(it) })
+        positiveViewModel.positivePoints.observe(this, Observer { processPositivePoints(it) })
 //        create_retro.setOnClickListener { positiveViewModel.loadRetro() }
-        positiveViewModel.openRetro()
+//        positiveViewModel.openRetro()
         return root
     }
 
