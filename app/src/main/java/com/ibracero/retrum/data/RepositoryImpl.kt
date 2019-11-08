@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.Statement
+import com.ibracero.retrum.data.mapper.RetroMapper
+import com.ibracero.retrum.data.mapper.StatementMapper
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.Companion.RETRO_UUID
 import com.ibracero.retrum.domain.Repository
@@ -17,16 +19,25 @@ import kotlin.coroutines.CoroutineContext
 class RepositoryImpl(
     val localDataStore: LocalDataStore,
     val firebaseDataStore: FirebaseDataStore,
+    val retroMapper: RetroMapper,
+    val statementMapper: StatementMapper
     dispatchers: CoroutineDispatcherProvider
 ) : Repository {
 
-    val job = Job()
-    val coroutineContext = job + dispatchers.main
-    val scope = CoroutineScope(coroutineContext)
+    private val job = Job()
+    private val coroutineContext = job + dispatchers.main
+    private val scope = CoroutineScope(coroutineContext)
 
     override fun loadRetro() {
         scope.launch {
-            val retro = firebaseDataStore.loadRetro()
+            val retroResponse = firebaseDataStore.loadRetro()
+            localDataStore.createOrUpdateRetro(retroMapper.map(retroResponse))
+            localDataStore.createOrUpdateStatements(
+                retroResponse.positivePoints
+                    .plus(retroResponse.negativePoints)
+                    .plus(retroResponse.actionPoints)
+                    .map(statementMapper::map)
+            )
         }
     }
 

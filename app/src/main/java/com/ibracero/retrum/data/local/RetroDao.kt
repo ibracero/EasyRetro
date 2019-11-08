@@ -23,4 +23,7 @@ interface RetroDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun createOrUpdateRetro(retro: Retro)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun createOrUpdateStatements(statements: List<Statement>)
 }

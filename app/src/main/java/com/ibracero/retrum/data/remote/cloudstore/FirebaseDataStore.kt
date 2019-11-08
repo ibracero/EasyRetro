@@ -39,7 +39,7 @@ class FirebaseDataStore {
     suspend fun loadRetro(): RetroResponse {
         return suspendCoroutine { continuation ->
             var uuid = RETRO_UUID
-            var title: String? = ""
+            var title: String = ""
             val positivePoints: MutableList<StatementResponse> = mutableListOf()
             val negativePoints: MutableList<StatementResponse> = mutableListOf()
             val actionPoints: MutableList<StatementResponse> = mutableListOf()
@@ -97,7 +97,11 @@ class FirebaseDataStore {
 
             continuation.resume(
                 RetroResponse(
-
+                    uuid = uuid,
+                    title = title,
+                    positivePoints = positivePoints.toList(),
+                    negativePoints = negativePoints.toList(),
+                    actionPoints = actionPoints.toList()
                 )
             )
         }
