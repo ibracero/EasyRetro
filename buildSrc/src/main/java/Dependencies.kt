@@ -8,6 +8,7 @@ import Libraries.Versions.firebase_analytics_version
 import Libraries.Versions.firebase_firestore_version
 import Libraries.Versions.google_material_version
 import Libraries.Versions.koin_version
+import Libraries.Versions.timber_version
 import TestLibraries.Versions.espresso_version
 import TestLibraries.Versions.junit_version
 
@@ -43,6 +44,7 @@ object Libraries {
         const val firebase_analytics_version = "17.2.1"
         const val coroutines_version = "1.3.2"
         const val koin_version = "2.0.1"
+        const val timber_version = "4.7.1"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -62,6 +64,7 @@ object Libraries {
     const val coroutines_android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     const val koin_android = "org.koin:koin-android:$koin_version"
     const val koin_android_viewmodel = "org.koin:koin-android-viewmodel:$koin_version"
+    const val timber = "com.jakewharton.timber:timber:$timber_version"
 }
 
 object TestLibraries {

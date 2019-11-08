@@ -52,6 +52,7 @@ dependencies {
     implementation(Libraries.coroutines_android)
     implementation(Libraries.koin_android)
     implementation(Libraries.koin_android_viewmodel)
+    implementation(Libraries.timber)
 
 
     testImplementation(TestLibraries.junit)
