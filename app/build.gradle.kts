@@ -1,10 +1,12 @@
 import BuildTypes.DEBUG
 import BuildTypes.RELEASE
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
 
 plugins {
     id(Plugins.androidApplication)
     id(Plugins.kotlinAndroid)
     id(Plugins.kotlinAndroidExtensions)
+    id(Plugins.kotlinKapt)
     id(Plugins.googleServices)
 }
 
@@ -53,6 +55,9 @@ dependencies {
     implementation(Libraries.koin_android)
     implementation(Libraries.koin_android_viewmodel)
     implementation(Libraries.timber)
+    implementation(Libraries.androidx_room)
+    implementation(Libraries.androidx_room)
+    kapt(Libraries.androidx_room_compiler)
 
 
     testImplementation(TestLibraries.junit)

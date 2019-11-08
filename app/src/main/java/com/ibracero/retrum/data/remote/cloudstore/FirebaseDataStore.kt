@@ -1,14 +1,13 @@
 package com.ibracero.retrum.data.remote.cloudstore
 
-import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.BOARD_ACTION_POINTS
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.BOARD_WENT_BADLY
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.BOARD_WENT_WELL
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.FIELD_ITEM_DESCRIPTION
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.FIELD_USER_ID
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.TABLE_RETROS
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.TABLE_USERS
 import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.domain.StatementType.*
 import timber.log.Timber
@@ -18,6 +17,10 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class FirebaseDataStore {
+
+    companion object {
+        const val RETRO_UUID = "EZBGkeRIaYnftxblLXFu"
+    }
 
     private object DatabaseInfo {
         const val TABLE_USERS = "users"
@@ -32,23 +35,71 @@ class FirebaseDataStore {
     }
 
     private val db = FirebaseFirestore.getInstance()
-    private var currentRetroId: String = "EZBGkeRIaYnftxblLXFu"
 
+    suspend fun loadRetro(): RetroResponse {
+        return suspendCoroutine { continuation ->
+            var uuid = RETRO_UUID
+            var title: String? = ""
+            val positivePoints: MutableList<StatementResponse> = mutableListOf()
+            val negativePoints: MutableList<StatementResponse> = mutableListOf()
+            val actionPoints: MutableList<StatementResponse> = mutableListOf()
 
-    suspend fun getLatestOrCreateRetro() {
-        suspendCoroutine { continuation: Continuation<Unit> ->
-            db.collection(TABLE_RETROS)
-                .document(currentRetroId)
+            val retroRef = db.collection(TABLE_RETROS)
+                .document(RETRO_UUID)
+
+            retroRef
                 .get()
                 .addOnSuccessListener {
-                    currentRetroId = it.id
-                    Timber.d("Retro added with ID: $currentRetroId")
-                    continuation.resume(Unit)
+                    title = it.getString("title").orEmpty()
                 }
-                .addOnFailureListener {
-                    Timber.e(it, "Retro could not be added due to an exception")
-                    continuation.resumeWithException(it)
+
+            retroRef.collection("positive_points")
+                .get()
+                .addOnSuccessListener {
+                    for (doc in it) {
+                        positivePoints.add(
+                            StatementResponse(
+                                uuid = doc.id,
+                                userEmail = doc.getString("user_email").orEmpty(),
+                                description = doc.getString("description").orEmpty()
+                            )
+                        )
+                    }
                 }
+
+            retroRef.collection("negative_points")
+                .get()
+                .addOnSuccessListener {
+                    for (doc in it) {
+                        negativePoints.add(
+                            StatementResponse(
+                                uuid = doc.id,
+                                userEmail = doc.getString("user_email").orEmpty(),
+                                description = doc.getString("description").orEmpty()
+                            )
+                        )
+                    }
+                }
+
+            retroRef.collection("action_points")
+                .get()
+                .addOnSuccessListener {
+                    for (doc in it) {
+                        actionPoints.add(
+                            StatementResponse(
+                                uuid = doc.id,
+                                userEmail = doc.getString("user_email").orEmpty(),
+                                description = doc.getString("description").orEmpty()
+                            )
+                        )
+                    }
+                }
+
+            continuation.resume(
+                RetroResponse(
+
+                )
+            )
         }
     }
 
@@ -72,7 +123,7 @@ class FirebaseDataStore {
     private suspend fun addItemToBoard(board: String, item: HashMap<String, String>) {
         suspendCoroutine { continuation: Continuation<Unit> ->
             db.collection(TABLE_RETROS)
-                .document(currentRetroId)
+                .document(RETRO_UUID)
                 .collection(board)
                 .add(item).addOnSuccessListener {
                     continuation.resume(Unit)

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.domain.Repository
+import com.ibracero.retrum.domain.StatementType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -18,18 +19,19 @@ class PositiveViewModel(
     private val coroutineContext = job + dispatchers.main
     private val scope = CoroutineScope(coroutineContext)
 
-    val positivePoints = MutableLiveData<State>()
+    val positivePoints = repository.getStatements(StatementType.POSITIVE)
 
     fun openRetro() {
-        scope.launch {
+/*        scope.launch {
             positivePoints.value = State.Loading
-            repository.openRetro()
-        }
+            repository.loadRetro()
+        }*/
+        repository.loadRetro()
     }
 
-    fun addPositivePoint(positivePoint: String){
+    fun addPositivePoint(positivePoint: String) {
         scope.launch {
-            repository.addPositivePoint(positivePoint)
+            repository.addStatement(StatementType.POSITIVE, positivePoint)
         }
     }
 
@@ -37,10 +39,4 @@ class PositiveViewModel(
         job.cancel()
         super.onCleared()
     }
-}
-
-sealed class State {
-    object Loading : State()
-    class PositivePointsUpdated(positivePoints: List<String>) : State()
-    class Error(exception: Throwable) : State()
 }
