@@ -25,6 +25,6 @@ class PositiveViewModel(
     }
 
     fun addPositivePoint(positivePoint: String) {
-        repository.addStatement(StatementType.POSITIVE, positivePoint)
+        repository.addStatement()
     }
 }

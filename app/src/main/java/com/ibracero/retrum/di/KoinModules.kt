@@ -3,10 +3,9 @@ package com.ibracero.retrum.di
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.RepositoryImpl
 import com.ibracero.retrum.data.local.LocalDataStore
-import com.ibracero.retrum.data.local.RetroDao
 import com.ibracero.retrum.data.local.RetrumDatabase
-import com.ibracero.retrum.data.mapper.RetroMapper
-import com.ibracero.retrum.data.mapper.StatementMapper
+import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
+import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.ui.positive.PositiveViewModel
@@ -22,8 +21,8 @@ val appModule = module {
             localDataStore = get(),
             firebaseDataStore = get(),
             dispatchers = get(),
-            retroMapper = get(),
-            statementMapper = get()
+            retroRemoteToDomainMapper = get(),
+            statementRemoteToDomainMapper = get()
         )
     }
 
@@ -35,7 +34,7 @@ val appModule = module {
 
     single { CoroutineDispatcherProvider() }
 
-    factory { RetroMapper() }
+    factory { RetroRemoteToDomainMapper() }
 
-    factory { StatementMapper() }
+    factory { StatementRemoteToDomainMapper() }
 }

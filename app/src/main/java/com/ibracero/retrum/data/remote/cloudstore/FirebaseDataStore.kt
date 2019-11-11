@@ -1,19 +1,9 @@
 package com.ibracero.retrum.data.remote.cloudstore
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.ibracero.retrum.data.local.Statement
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.BOARD_ACTION_POINTS
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.BOARD_WENT_BADLY
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.BOARD_WENT_WELL
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.FIELD_ITEM_DESCRIPTION
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.FIELD_USER_ID
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.TABLE_RETROS
-import com.ibracero.retrum.domain.StatementType
-import com.ibracero.retrum.domain.StatementType.*
 import timber.log.Timber
-import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class FirebaseDataStore {
@@ -25,122 +15,86 @@ class FirebaseDataStore {
     private object DatabaseInfo {
         const val TABLE_USERS = "users"
         const val TABLE_RETROS = "retros"
-
-        const val BOARD_WENT_WELL = "went_well"
-        const val BOARD_WENT_BADLY = "went_badly"
-        const val BOARD_ACTION_POINTS = "action_points"
-
-        const val FIELD_USER_ID = "user_id"
-        const val FIELD_ITEM_DESCRIPTION = "description"
     }
 
     private val db = FirebaseFirestore.getInstance()
 
-    suspend fun loadRetro(): RetroResponse {
-
-        val uuid = RETRO_UUID
-        val retroRef = db.collection(TABLE_RETROS)
-            .document(RETRO_UUID)
+    suspend fun loadRetro(): RetroRemote {
 
         val title = suspendCoroutine<String> { continuation ->
-            retroRef
+            db.collection(TABLE_RETROS)
+                .document(RETRO_UUID)
                 .get()
                 .addOnSuccessListener {
                     continuation.resume(it.getString("title").orEmpty())
                 }
         }
 
-        val positivePoints = suspendCoroutine<List<StatementResponse>> { continuation ->
-            retroRef.collection("positive_points")
-                .get()
-                .addOnSuccessListener {
-                    val positives = mutableListOf<StatementResponse>()
-                    for (doc in it) {
-                        positives.add(
-                            StatementResponse(
-                                uuid = doc.id,
-                                userEmail = doc.getString("user_email").orEmpty(),
-                                description = doc.getString("description").orEmpty()
-                            )
-                        )
-                    }
-                    continuation.resume(positives.toList())
-                }
-        }
-
-        val negativePoints = suspendCoroutine<List<StatementResponse>> { continuation ->
-            retroRef.collection("negative_points")
-                .get()
-                .addOnSuccessListener {
-                    val positives = mutableListOf<StatementResponse>()
-                    for (doc in it) {
-                        positives.add(
-                            StatementResponse(
-                                uuid = doc.id,
-                                userEmail = doc.getString("user_email").orEmpty(),
-                                description = doc.getString("description").orEmpty()
-                            )
-                        )
-                    }
-                    continuation.resume(positives.toList())
-                }
-        }
-
-        val actionPoints = suspendCoroutine<List<StatementResponse>> { continuation ->
-            retroRef.collection("action_points")
-                .get()
-                .addOnSuccessListener {
-                    val positives = mutableListOf<StatementResponse>()
-                    for (doc in it) {
-                        positives.add(
-                            StatementResponse(
-                                uuid = doc.id,
-                                userEmail = doc.getString("user_email").orEmpty(),
-                                description = doc.getString("description").orEmpty()
-                            )
-                        )
-                    }
-                    continuation.resume(positives.toList())
-                }
-        }
-
-        return RetroResponse(
-            uuid = uuid,
-            title = title,
-            positivePoints = positivePoints.toList(),
-            negativePoints = negativePoints.toList(),
-            actionPoints = actionPoints.toList()
+        return RetroRemote(
+            uuid = RETRO_UUID,
+            title = title
         )
     }
 
-    suspend fun addStatementToBoard(statementType: StatementType, description: String) {
+    /*suspend fun loadStatements(): List<StatementRemote> {
+
+        val retroRef = db.collection(TABLE_RETROS)
+            .document(RETRO_UUID)
+
+        return suspendCoroutine { continuation ->
+            retroRef.collection("statements")
+                .get()
+                .addOnSuccessListener {
+                    val positives = mutableListOf<StatementRemote>()
+                    for (doc in it) {
+                        positives.add(
+                            StatementRemote(
+                                uuid = doc.id,
+                                userEmail = doc.getString("user_email").orEmpty(),
+                                description = doc.getString("description").orEmpty(),
+                                retroUuid = RETRO_UUID,
+                                statementType = doc.getString("type").orEmpty()
+                            )
+                        )
+                    }
+                    continuation.resume(positives.toList())
+                }
+        }
+    }*/
+
+    fun observeStatements(onUpdate: (StatementRemote) -> Unit) {
+        db.collection(TABLE_RETROS)
+            .document(RETRO_UUID)
+            .collection("statements")
+            .addSnapshotListener { snapshot, _ ->
+                snapshot?.documents?.forEach { doc ->
+                    val statement = StatementRemote(
+                        uuid = doc.id,
+                        retroUuid = RETRO_UUID,
+                        userEmail = doc.getString("user_email").orEmpty(),
+                        statementType = doc.getString("type").orEmpty(),
+                        description = doc.getString("description").orEmpty()
+                    )
+                    Timber.d("Update: $statement")
+                    onUpdate(statement)
+                }
+            }
+    }
+
+    fun addStatementToBoard(statementRemote: StatementRemote) {
         val item = hashMapOf(
-            FIELD_USER_ID to "imanol",
-            FIELD_ITEM_DESCRIPTION to description
+            "user_email" to statementRemote.userEmail,
+            "type" to statementRemote.statementType,
+            "description" to statementRemote.description
         )
 
-        when (statementType) {
-            POSITIVE -> addItemToBoard(BOARD_WENT_WELL, item)
-            NEGATIVE -> addItemToBoard(BOARD_WENT_BADLY, item)
-            ACTION_POINT -> addItemToBoard(BOARD_ACTION_POINTS, item)
-        }
+        addItemToBoard(item)
     }
 
-    private fun createUser() {
-        // email, first_name, last_name
-    }
-
-    private suspend fun addItemToBoard(board: String, item: HashMap<String, String>) {
-        suspendCoroutine { continuation: Continuation<Unit> ->
-            db.collection(TABLE_RETROS)
-                .document(RETRO_UUID)
-                .collection(board)
-                .add(item).addOnSuccessListener {
-                    continuation.resume(Unit)
-                }
-                .addOnFailureListener {
-                    continuation.resumeWithException(it)
-                }
-        }
+    private fun addItemToBoard(item: HashMap<String, String>) {
+        db.collection(TABLE_RETROS)
+            .document(RETRO_UUID)
+            .collection("statements")
+            .add(item)
     }
 }

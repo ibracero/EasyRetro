@@ -4,23 +4,24 @@ import androidx.lifecycle.LiveData
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.Statement
-import com.ibracero.retrum.data.mapper.RetroMapper
-import com.ibracero.retrum.data.mapper.StatementMapper
+import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
+import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.Companion.RETRO_UUID
+import com.ibracero.retrum.data.remote.cloudstore.StatementRemote
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.domain.StatementType.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
+import kotlin.random.Random
 
 class RepositoryImpl(
     val localDataStore: LocalDataStore,
     val firebaseDataStore: FirebaseDataStore,
-    val retroMapper: RetroMapper,
-    val statementMapper: StatementMapper,
+    val retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
+    val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
     dispatchers: CoroutineDispatcherProvider
 ) : Repository {
 
@@ -28,16 +29,20 @@ class RepositoryImpl(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
+    init {
+        firebaseDataStore.observeStatements {
+            scope.launch {
+                localDataStore.save(statement = statementRemoteToDomainMapper.map(it))
+            }
+        }
+    }
+
     override fun loadRetro() {
         scope.launch {
             val retroResponse = firebaseDataStore.loadRetro()
-            localDataStore.createOrUpdateRetro(retroMapper.map(retroResponse))
-            localDataStore.createOrUpdateStatements(
-                retroResponse.positivePoints
-                    .plus(retroResponse.negativePoints)
-                    .plus(retroResponse.actionPoints)
-                    .map(statementMapper::map)
-            )
+//            val statementsResponse = firebaseDataStore.loadStatements()
+            localDataStore.save(retro = retroRemoteToDomainMapper.map(retroResponse))
+//            localDataStore.save(statements = statementsResponse.map(statementRemoteToDomainMapper::map))
         }
     }
 
@@ -53,8 +58,14 @@ class RepositoryImpl(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun addStatement(statementType: StatementType, description: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun addStatement(statement: Statement?) {
+        firebaseDataStore.addStatementToBoard(
+            StatementRemote(
+                userEmail = "yo@yo.com",
+                description = Random.nextInt(100).toString(),
+                statementType = POSITIVE.toString()
+            )
+        )
     }
 
     override fun removeItem() {

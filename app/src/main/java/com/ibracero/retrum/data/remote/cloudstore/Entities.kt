@@ -1,15 +1,14 @@
 package com.ibracero.retrum.data.remote.cloudstore
 
-data class RetroResponse(
+data class RetroRemote(
     val uuid: String,
-    val title: String,
-    val positivePoints: List<StatementResponse>,
-    val negativePoints: List<StatementResponse>,
-    val actionPoints: List<StatementResponse>
+    val title: String
 )
 
-data class StatementResponse(
-    val uuid:String,
+data class StatementRemote(
+    val uuid: String? = null,
+    val retroUuid: String? = null,
     val userEmail: String,
-    val description: String
+    val description: String,
+    val statementType: String
 )

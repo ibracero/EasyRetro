@@ -11,7 +11,7 @@ interface Repository {
 
     fun getStatements(statementType: StatementType): LiveData<List<Statement>>
 
-    fun addStatement(statementType: StatementType, description: String)
+    fun addStatement(statement: Statement? = null)
 
     fun removeItem()
 }
