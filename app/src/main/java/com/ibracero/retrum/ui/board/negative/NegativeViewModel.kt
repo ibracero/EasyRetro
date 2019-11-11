@@ -1,4 +1,4 @@
-package com.ibracero.retrum.ui.negative
+package com.ibracero.retrum.ui.board.negative
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

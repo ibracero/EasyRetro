@@ -1,4 +1,4 @@
-package com.ibracero.retrum.ui.negative
+package com.ibracero.retrum.ui.board.negative
 
 import android.os.Bundle
 import android.view.LayoutInflater

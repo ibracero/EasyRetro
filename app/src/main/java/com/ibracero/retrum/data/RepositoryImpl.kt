@@ -3,6 +3,7 @@ package com.ibracero.retrum.data
 import androidx.lifecycle.LiveData
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
+import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
@@ -35,7 +36,15 @@ class RepositoryImpl(
                 localDataStore.save(statement = statementRemoteToDomainMapper.map(it))
             }
         }
+
+        firebaseDataStore.observeUserRetros {
+            scope.launch {
+                localDataStore.save(retroRemoteToDomainMapper.map(it))
+            }
+        }
     }
+
+    override fun getRetros(): LiveData<List<Retro>> = localDataStore.getRetros()
 
     override fun loadRetro() {
         scope.launch {

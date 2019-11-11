@@ -1,4 +1,4 @@
-package com.ibracero.retrum.ui.actions
+package com.ibracero.retrum.ui.board.action
 
 import android.os.Bundle
 import android.view.LayoutInflater

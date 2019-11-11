@@ -1,7 +1,9 @@
 package com.ibracero.retrum.data.remote.cloudstore
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.ibracero.retrum.data.local.TABLE_USER
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.TABLE_RETROS
+import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.TABLE_USERS
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -10,6 +12,7 @@ class FirebaseDataStore {
 
     companion object {
         const val RETRO_UUID = "EZBGkeRIaYnftxblLXFu"
+        const val USER_UUID = "W2KCUn3Dz4Wy35CzQZmc"
     }
 
     private object DatabaseInfo {
@@ -75,8 +78,22 @@ class FirebaseDataStore {
                         statementType = doc.getString("type").orEmpty(),
                         description = doc.getString("description").orEmpty()
                     )
-                    Timber.d("Update: $statement")
+                    Timber.d("Update statement: $statement")
                     onUpdate(statement)
+                }
+            }
+    }
+
+
+    fun observeUserRetros(onUpdate: (RetroRemote) -> Unit) {
+        db.collection(TABLE_USERS)
+            .document(USER_UUID)
+            .collection("retros")
+            .addSnapshotListener { snapshot, _ ->
+                snapshot?.documents?.forEach { doc ->
+                    val retro = RetroRemote(doc.id, doc.getString("title").orEmpty())
+                    Timber.d("Update retro: $retro")
+                    onUpdate(retro)
                 }
             }
     }

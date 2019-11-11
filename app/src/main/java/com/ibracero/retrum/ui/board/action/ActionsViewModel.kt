@@ -1,4 +1,4 @@
-package com.ibracero.retrum.ui.actions
+package com.ibracero.retrum.ui.board.action
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

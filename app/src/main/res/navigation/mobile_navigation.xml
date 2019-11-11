@@ -1,25 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_positive">
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/mobile_navigation"
+	app:startDestination="@+id/navigation_retro_list">
 
-    <fragment
-        android:id="@+id/navigation_positive"
-        android:name="com.ibracero.retrum.ui.positive.PositiveFragment"
-        android:label="@string/title_positive"
-        tools:layout="@layout/fragment_positive" />
+	<fragment
+		android:id="@+id/navigation_retro_list"
+		android:name="com.ibracero.retrum.ui.retros.RetroListFragment"
+		tools:layout="@layout/fragment_retro_list" />
 
-    <fragment
-        android:id="@+id/navigation_negative"
-        android:name="com.ibracero.retrum.ui.negative.NegativeFragment"
-        android:label="@string/title_negative"
-        tools:layout="@layout/fragment_negative" />
+	<fragment
+		android:id="@+id/navigation_positive"
+		android:name="com.ibracero.retrum.ui.board.positive.PositiveFragment"
+		android:label="@string/title_positive"
+		tools:layout="@layout/fragment_positive" />
 
-    <fragment
-        android:id="@+id/navigation_actions"
-        android:name="com.ibracero.retrum.ui.actions.ActionsFragment"
-        android:label="@string/title_actions"
-        tools:layout="@layout/fragment_actions" />
+	<fragment
+		android:id="@+id/navigation_negative"
+		android:name="com.ibracero.retrum.ui.board.negative.NegativeFragment"
+		android:label="@string/title_negative"
+		tools:layout="@layout/fragment_negative" />
+
+	<fragment
+		android:id="@+id/navigation_actions"
+		android:name="com.ibracero.retrum.ui.board.action.ActionsFragment"
+		android:label="@string/title_actions"
+		tools:layout="@layout/fragment_actions" />
 </navigation>

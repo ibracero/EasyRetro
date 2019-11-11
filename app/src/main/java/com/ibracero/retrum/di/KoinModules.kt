@@ -8,12 +8,17 @@ import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
 import com.ibracero.retrum.domain.Repository
-import com.ibracero.retrum.ui.positive.PositiveViewModel
+import com.ibracero.retrum.ui.board.positive.PositiveViewModel
+import com.ibracero.retrum.ui.retros.RetroListFragment
+import com.ibracero.retrum.ui.retros.RetroListViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
+
+    viewModel { RetroListViewModel(get()) }
+
     viewModel { PositiveViewModel(get()) }
 
     single<Repository> {
