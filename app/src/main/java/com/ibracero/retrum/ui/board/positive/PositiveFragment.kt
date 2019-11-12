@@ -27,9 +27,9 @@ class PositiveFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initUi()
-        
+
         positiveViewModel
-            .getPositivePoints(getRetroArgument().uuid)
+            .getPositivePoints(getRetroArgument()?.uuid.orEmpty())
             .observe(this, Observer { processPositivePoints(it) })
     }
 
@@ -41,5 +41,5 @@ class PositiveFragment : Fragment() {
         adapter.submitList(positivePoints)
     }
 
-    private fun getRetroArgument(): Retro = arguments?.getSerializable(RETRO_ATTR) as Retro
+    private fun getRetroArgument(): Retro? = arguments?.getSerializable(RETRO_ATTR) as Retro?
 }

@@ -11,11 +11,7 @@
 		tools:layout="@layout/fragment_retro_list">
 		<action
 			android:id="@+id/action_navigation_retro_list_to_navigation_container"
-			app:destination="@id/navigation_container">
-			<argument
-				android:name="RETRO_ATTR"
-				app:argType="com.ibracero.retrum.data.local.Retro" />
-		</action>
+			app:destination="@id/navigation_container" />
 	</fragment>
 
 	<fragment

@@ -18,7 +18,7 @@ import timber.log.Timber
 class RetroListFragment : Fragment() {
 
     private val retroListViewModel: RetroListViewModel by viewModel()
-    private val retroListAdapter = RetroListAdapter(::onRetroClicked)
+    private val retroListAdapter = RetroListAdapter(::onRetroClicked, ::onAddClicked)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,9 +29,11 @@ class RetroListFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         initUi()
-        retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer {
-            retroListAdapter.submitList(it)
-        })
+        retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer { showRetros(it) })
+    }
+
+    private fun showRetros(it: List<Retro>?) {
+        retroListAdapter.submitList(it)
     }
 
     private fun initUi() {
@@ -39,6 +41,16 @@ class RetroListFragment : Fragment() {
     }
 
     private fun onRetroClicked(retro: Retro) {
+        navigateToRetroBoard(retro)
+    }
+
+    private fun onAddClicked(retroTitle: String) {
+        retroListViewModel.createRetro(retroTitle).observe(this@RetroListFragment, Observer {
+            navigateToRetroBoard(retro = it)
+        })
+    }
+
+    private fun navigateToRetroBoard(retro: Retro) {
         val args = Bundle().apply { putSerializable(RETRO_ATTR, retro) }
         findNavController().navigate(R.id.action_navigation_retro_list_to_navigation_container, args)
     }

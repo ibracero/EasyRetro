@@ -18,7 +18,7 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    single<Repository> {
+    factory<Repository> {
         RepositoryImpl(
             localDataStore = get(),
             firebaseDataStore = get(),

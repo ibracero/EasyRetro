@@ -6,6 +6,8 @@ import com.ibracero.retrum.data.local.Statement
 
 interface Repository {
 
+    fun createRetro(title: String): LiveData<Retro>
+
     fun getRetros(): LiveData<List<Retro>>
 
     fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>>

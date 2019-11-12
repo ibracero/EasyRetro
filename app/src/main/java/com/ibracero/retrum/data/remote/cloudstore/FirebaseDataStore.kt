@@ -21,23 +21,6 @@ class FirebaseDataStore {
     private val db = FirebaseFirestore.getInstance()
     private var userRemote: UserRemote = UserRemote()
 
-    suspend fun loadRetro(): RetroRemote {
-
-        val title = suspendCoroutine<String> { continuation ->
-            db.collection(TABLE_RETROS)
-                .document(RETRO_UUID)
-                .get()
-                .addOnSuccessListener {
-                    continuation.resume(it.getString("title").orEmpty())
-                }
-        }
-
-        return RetroRemote(
-            uuid = RETRO_UUID,
-            title = title
-        )
-    }
-
     fun observeUser(onUpdate: (UserRemote) -> Unit) {
         db.collection(TABLE_USERS)
             .document(USER_UUID)
@@ -105,5 +88,30 @@ class FirebaseDataStore {
             .document(RETRO_UUID)
             .collection("statements")
             .add(item)
+    }
+
+    suspend fun createRetro(retroTitle: String): RetroRemote {
+        val retroUuid = suspendCoroutine<String> { continuation ->
+            db.collection(TABLE_RETROS)
+                .document()
+                .get()
+                .addOnSuccessListener {
+                    continuation.resume(it.id)
+                }
+        }
+
+        return suspendCoroutine { continuation ->
+
+            val item = hashMapOf("title" to retroTitle)
+
+            db.collection(TABLE_USERS)
+                .document(USER_UUID)
+                .collection("retros")
+                .document(retroUuid)
+                .set(item)
+                .addOnSuccessListener {
+                    continuation.resume(RetroRemote(uuid = retroUuid, title = retroTitle))
+                }
+        }
     }
 }

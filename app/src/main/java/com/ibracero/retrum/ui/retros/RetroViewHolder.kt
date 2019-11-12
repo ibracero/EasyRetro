@@ -8,9 +8,12 @@ import com.ibracero.retrum.common.inflate
 import com.ibracero.retrum.data.local.Retro
 import kotlinx.android.synthetic.main.item_retro.view.*
 
-class RetroViewHolder(parent: ViewGroup) : CachedRecyclerViewHolder(parent.inflate(R.layout.item_retro)) {
+class RetroViewHolder(
+    parent: ViewGroup,
+    val onClick: (Retro) -> Unit
+) : CachedRecyclerViewHolder(parent.inflate(R.layout.item_retro)) {
 
-    fun bindTo(retro: Retro, onClick: (Retro) -> Unit) {
+    fun bindTo(retro: Retro) {
         containerView.retro_title.text = retro.title
         containerView.setOnClickListener { onClick(retro) }
     }

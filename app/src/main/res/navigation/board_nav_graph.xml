@@ -9,11 +9,7 @@
 		android:id="@+id/navigation_positive"
 		android:name="com.ibracero.retrum.ui.board.positive.PositiveFragment"
 		android:label="@string/title_positive"
-		tools:layout="@layout/fragment_positive">
-		<argument
-			android:name="RETRO_ATTR"
-			app:argType="com.ibracero.retrum.data.local.Retro" />
-	</fragment>
+		tools:layout="@layout/fragment_positive" />
 
 	<fragment
 		android:id="@+id/navigation_negative"
