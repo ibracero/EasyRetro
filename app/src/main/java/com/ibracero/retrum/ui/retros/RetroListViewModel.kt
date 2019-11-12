@@ -10,5 +10,4 @@ class RetroListViewModel(
 ) : ViewModel() {
 
     val retroLiveData : LiveData<List<Retro>> = repository.getRetros()
-
 }

@@ -15,6 +15,10 @@ import kotlinx.android.synthetic.main.fragment_nav_container.*
 
 class BottomNavFragment : Fragment() {
 
+    companion object {
+        const val RETRO_ATTR = "RETRO_ATTR"
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_nav_container, container, false)
     }
@@ -22,7 +26,9 @@ class BottomNavFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val navController = findNavController(requireActivity(), R.id.bottom_nav_host_fragment)
+        val navController =
+            findNavController(requireActivity(), R.id.bottom_nav_host_fragment)
+                .apply { setGraph(R.navigation.board_nav_graph, arguments) }
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(

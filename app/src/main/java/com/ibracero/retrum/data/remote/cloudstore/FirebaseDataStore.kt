@@ -38,32 +38,6 @@ class FirebaseDataStore {
         )
     }
 
-    /*suspend fun loadStatements(): List<StatementRemote> {
-
-        val retroRef = db.collection(TABLE_RETROS)
-            .document(RETRO_UUID)
-
-        return suspendCoroutine { continuation ->
-            retroRef.collection("statements")
-                .get()
-                .addOnSuccessListener {
-                    val positives = mutableListOf<StatementRemote>()
-                    for (doc in it) {
-                        positives.add(
-                            StatementRemote(
-                                uuid = doc.id,
-                                userEmail = doc.getString("user_email").orEmpty(),
-                                description = doc.getString("description").orEmpty(),
-                                retroUuid = RETRO_UUID,
-                                statementType = doc.getString("type").orEmpty()
-                            )
-                        )
-                    }
-                    continuation.resume(positives.toList())
-                }
-        }
-    }*/
-
     fun observeUser(onUpdate: (UserRemote) -> Unit) {
         db.collection(TABLE_USERS)
             .document(USER_UUID)
@@ -85,9 +59,9 @@ class FirebaseDataStore {
             }
     }
 
-    fun observeStatements(onUpdate: (List<StatementRemote>) -> Unit) {
+    fun observeStatements(retroUuid: String, onUpdate: (List<StatementRemote>) -> Unit) {
         db.collection(TABLE_RETROS)
-            .document(RETRO_UUID)
+            .document(retroUuid)
             .collection("statements")
             .addSnapshotListener { snapshot, _ ->
                 val statements = snapshot?.documents?.map { doc ->

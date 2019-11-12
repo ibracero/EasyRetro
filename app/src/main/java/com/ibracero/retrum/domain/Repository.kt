@@ -8,12 +8,11 @@ interface Repository {
 
     fun getRetros(): LiveData<List<Retro>>
 
-    fun loadRetro()
-
-    fun createUser()
-
-    fun getStatements(statementType: StatementType): LiveData<List<Statement>>
+    fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>>
 
     fun addStatement(statement: Statement? = null)
+
     fun removeItem()
+
+    fun dispose()
 }

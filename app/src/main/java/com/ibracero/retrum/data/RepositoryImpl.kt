@@ -16,15 +16,16 @@ import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.domain.StatementType.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class RepositoryImpl(
     val localDataStore: LocalDataStore,
     val firebaseDataStore: FirebaseDataStore,
-    retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
-    statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
-    userRemoteToDomainMapper: UserRemoteToDomainMapper,
+    val retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
+    val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
+    val userRemoteToDomainMapper: UserRemoteToDomainMapper,
     dispatchers: CoroutineDispatcherProvider
 ) : Repository {
 
@@ -33,46 +34,18 @@ class RepositoryImpl(
     private val scope = CoroutineScope(coroutineContext)
 
     init {
-        firebaseDataStore.observeUser {
-            scope.launch {
-                if (!it.email.isNullOrEmpty()) localDataStore.saveUser(userRemoteToDomainMapper.map(it))
-            }
-        }
-
-        firebaseDataStore.observeStatements {
-            scope.launch {
-                localDataStore.saveStatements(it.map(statementRemoteToDomainMapper::map))
-            }
-        }
-
-        firebaseDataStore.observeUserRetros {
-            scope.launch {
-                localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map))
-            }
-        }
+        startObservingUserRetros()
     }
 
     override fun getRetros(): LiveData<List<Retro>> = localDataStore.getRetros()
 
-    override fun loadRetro() {
-        scope.launch {
-            val retroResponse = firebaseDataStore.loadRetro()
-//            val statementsResponse = firebaseDataStore.loadStatements()
-//            localDataStore.save(retro = retroRemoteToDomainMapper.map(retroResponse))
-//            localDataStore.save(statements = statementsResponse.map(statementRemoteToDomainMapper::map))
-        }
-    }
-
-    override fun getStatements(statementType: StatementType): LiveData<List<Statement>> {
+    override fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>> {
+        startObservingStatements(retroUuid)
         return when (statementType) {
-            POSITIVE -> localDataStore.getPositiveStatements(RETRO_UUID)
-            NEGATIVE -> localDataStore.getNegativeStatements(RETRO_UUID)
-            ACTION_POINT -> localDataStore.getActionPoints(RETRO_UUID)
+            POSITIVE -> localDataStore.getPositiveStatements(retroUuid)
+            NEGATIVE -> localDataStore.getNegativeStatements(retroUuid)
+            ACTION_POINT -> localDataStore.getActionPoints(retroUuid)
         }
-    }
-
-    override fun createUser() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun addStatement(statement: Statement?) {
@@ -89,4 +62,32 @@ class RepositoryImpl(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+
+    private fun startObservingStatements(retroUuid: String) {
+        firebaseDataStore.observeStatements(retroUuid) {
+            scope.launch {
+                localDataStore.saveStatements(it.map(statementRemoteToDomainMapper::map))
+            }
+        }
+    }
+
+    private fun startObservingUserRetros() {
+        firebaseDataStore.observeUserRetros {
+            scope.launch {
+                localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map))
+            }
+        }
+    }
+
+    private fun startObservingUser() {
+        firebaseDataStore.observeUser {
+            scope.launch {
+                if (!it.email.isNullOrEmpty()) localDataStore.saveUser(userRemoteToDomainMapper.map(it))
+            }
+        }
+    }
+
+    override fun dispose() {
+        scope.cancel()
+    }
 }

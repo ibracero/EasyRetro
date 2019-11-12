@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.ListAdapter
 import com.ibracero.retrum.data.local.Retro
 
 class RetroListAdapter(
-    private val onRetroClicked: () -> Unit
+    private val onRetroClicked: (Retro) -> Unit
 ) : ListAdapter<Retro, RetroViewHolder>(RetroDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RetroViewHolder =

@@ -2,14 +2,18 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
-	app:startDestination="@id/navigation_positive"
-	android:id="@+id/board_nav_graph">
+	android:id="@+id/board_nav_graph"
+	app:startDestination="@id/navigation_positive">
 
 	<fragment
 		android:id="@+id/navigation_positive"
 		android:name="com.ibracero.retrum.ui.board.positive.PositiveFragment"
 		android:label="@string/title_positive"
-		tools:layout="@layout/fragment_positive" />
+		tools:layout="@layout/fragment_positive">
+		<argument
+			android:name="RETRO_ATTR"
+			app:argType="com.ibracero.retrum.data.local.Retro" />
+	</fragment>
 
 	<fragment
 		android:id="@+id/navigation_negative"

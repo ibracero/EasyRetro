@@ -3,6 +3,7 @@ package com.ibracero.retrum.data.local
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ibracero.retrum.domain.StatementType
+import java.io.Serializable
 
 const val TABLE_USER = "user"
 const val TABLE_RETRO = "retro"
@@ -20,7 +21,7 @@ data class User(
 data class Retro(
     @PrimaryKey val uuid: String,
     val title: String
-)
+) : Serializable
 
 @Entity(tableName = TABLE_STATEMENT)
 data class Statement(

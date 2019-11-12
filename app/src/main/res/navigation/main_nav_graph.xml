@@ -8,10 +8,19 @@
 	<fragment
 		android:id="@+id/navigation_retro_list"
 		android:name="com.ibracero.retrum.ui.retros.RetroListFragment"
-		tools:layout="@layout/fragment_retro_list" />
+		tools:layout="@layout/fragment_retro_list">
+		<action
+			android:id="@+id/action_navigation_retro_list_to_navigation_container"
+			app:destination="@id/navigation_container">
+			<argument
+				android:name="RETRO_ATTR"
+				app:argType="com.ibracero.retrum.data.local.Retro" />
+		</action>
+	</fragment>
 
 	<fragment
 		android:id="@+id/navigation_container"
 		android:name="com.ibracero.retrum.ui.BottomNavFragment"
 		tools:layout="@layout/fragment_nav_container" />
+
 </navigation>

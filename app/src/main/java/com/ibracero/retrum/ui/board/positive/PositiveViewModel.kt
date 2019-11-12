@@ -8,17 +8,14 @@ class PositiveViewModel(
     private val repository: Repository
 ) : ViewModel() {
 
-    val positivePoints = repository.getStatements(StatementType.POSITIVE)
-
-    init {
-        openRetro()
-    }
-
-    fun openRetro() {
-        repository.loadRetro()
-    }
+    fun getPositivePoints(retroUuid: String) = repository.getStatements(retroUuid, StatementType.POSITIVE)
 
     fun addPositivePoint(positivePoint: String) {
         repository.addStatement()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.dispose()
     }
 }
