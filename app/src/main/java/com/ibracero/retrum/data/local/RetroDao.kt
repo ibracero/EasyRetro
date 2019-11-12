@@ -20,7 +20,7 @@ interface RetroDao {
     fun getActionPoints(retroUuid: String): LiveData<List<Statement>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun createOrUpdateRetro(retro: Retro)
+    fun insertRetros(retros: List<Retro>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertStatements(statements: List<Statement>)

@@ -10,7 +10,7 @@ const val TABLE_STATEMENT = "statement"
 
 @Entity(tableName = TABLE_USER)
 data class User(
-    @PrimaryKey val uuid: String,
+    @PrimaryKey val email: String,
     val firstName: String,
     val lastName: String,
     val retroUuids: List<String>

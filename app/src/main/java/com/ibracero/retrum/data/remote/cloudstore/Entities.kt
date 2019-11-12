@@ -12,3 +12,10 @@ data class StatementRemote(
     val description: String,
     val statementType: String
 )
+
+data class UserRemote(
+    val email: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val retroUuids: List<String>? = null
+)

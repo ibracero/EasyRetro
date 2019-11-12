@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import com.ibracero.retrum.R
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class RetroListFragment : Fragment() {
 
@@ -18,15 +19,14 @@ class RetroListFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val root = inflater.inflate(R.layout.fragment_retro_list, container, false)
-        initUi()
-        return root
-    }
+    ): View? = inflater.inflate(R.layout.fragment_retro_list, container, false)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        initUi()
         retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer {
+            Timber.d("Retro list: $it")
             retroListAdapter.submitList(it)
         })
     }

@@ -7,6 +7,7 @@ import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
+import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.Companion.RETRO_UUID
 import com.ibracero.retrum.data.remote.cloudstore.StatementRemote
@@ -21,8 +22,9 @@ import kotlin.random.Random
 class RepositoryImpl(
     val localDataStore: LocalDataStore,
     val firebaseDataStore: FirebaseDataStore,
-    val retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
-    val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
+    retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
+    statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
+    userRemoteToDomainMapper: UserRemoteToDomainMapper,
     dispatchers: CoroutineDispatcherProvider
 ) : Repository {
 
@@ -31,15 +33,21 @@ class RepositoryImpl(
     private val scope = CoroutineScope(coroutineContext)
 
     init {
+        firebaseDataStore.observeUser {
+            scope.launch {
+                if (!it.email.isNullOrEmpty()) localDataStore.saveUser(userRemoteToDomainMapper.map(it))
+            }
+        }
+
         firebaseDataStore.observeStatements {
             scope.launch {
-                localDataStore.save(statement = statementRemoteToDomainMapper.map(it))
+                localDataStore.saveStatements(it.map(statementRemoteToDomainMapper::map))
             }
         }
 
         firebaseDataStore.observeUserRetros {
             scope.launch {
-                localDataStore.save(retroRemoteToDomainMapper.map(it))
+                localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map))
             }
         }
     }
@@ -50,7 +58,7 @@ class RepositoryImpl(
         scope.launch {
             val retroResponse = firebaseDataStore.loadRetro()
 //            val statementsResponse = firebaseDataStore.loadStatements()
-            localDataStore.save(retro = retroRemoteToDomainMapper.map(retroResponse))
+//            localDataStore.save(retro = retroRemoteToDomainMapper.map(retroResponse))
 //            localDataStore.save(statements = statementsResponse.map(statementRemoteToDomainMapper::map))
         }
     }

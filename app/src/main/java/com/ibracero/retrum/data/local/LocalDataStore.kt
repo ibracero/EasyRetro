@@ -1,19 +1,20 @@
 package com.ibracero.retrum.data.local
 
-import timber.log.Timber
-
 class LocalDataStore(private val retroDao: RetroDao) {
 
     fun getRetros() = retroDao.getUserRetros(/*"W2KCUn3Dz4Wy35CzQZmc"*/)
 
-    fun save(retro: Retro) {
-        Timber.d("saving retro $retro")
-        retroDao.createOrUpdateRetro(retro)
+    fun saveRetros(retros: List<Retro>) {
+        retroDao.insertRetros(retros)
     }
 
-    fun save(statement: Statement) = retroDao.insertStatements(listOf(statement))
+    fun saveStatements(statements: List<Statement>) {
+        retroDao.insertStatements(statements)
+    }
 
-    fun save(statements: List<Statement>) = retroDao.insertStatements(statements)
+    fun saveUser(user: User) {
+        retroDao.insertUser(user)
+    }
 
     fun getPositiveStatements(retroUuid: String) = retroDao.getPositiveStatements(retroUuid)
 

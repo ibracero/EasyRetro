@@ -6,6 +6,7 @@ import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.RetrumDatabase
 import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
+import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.ui.board.positive.PositiveViewModel
@@ -17,17 +18,14 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    viewModel { RetroListViewModel(get()) }
-
-    viewModel { PositiveViewModel(get()) }
-
     single<Repository> {
         RepositoryImpl(
             localDataStore = get(),
             firebaseDataStore = get(),
             dispatchers = get(),
             retroRemoteToDomainMapper = get(),
-            statementRemoteToDomainMapper = get()
+            statementRemoteToDomainMapper = get(),
+            userRemoteToDomainMapper = get()
         )
     }
 
@@ -38,8 +36,19 @@ val appModule = module {
     single { RetrumDatabase.getDatabase(androidApplication()).retroDao() }
 
     single { CoroutineDispatcherProvider() }
+}
 
+val viewModelModule = module {
+
+    viewModel { RetroListViewModel(get()) }
+
+    viewModel { PositiveViewModel(get()) }
+}
+
+val mapperModule = module {
     factory { RetroRemoteToDomainMapper() }
 
     factory { StatementRemoteToDomainMapper() }
+
+    factory { UserRemoteToDomainMapper() }
 }
