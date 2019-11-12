@@ -2,13 +2,8 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/mobile_navigation"
-	app:startDestination="@+id/navigation_retro_list">
-
-	<fragment
-		android:id="@+id/navigation_retro_list"
-		android:name="com.ibracero.retrum.ui.retros.RetroListFragment"
-		tools:layout="@layout/fragment_retro_list" />
+	app:startDestination="@id/navigation_positive"
+	android:id="@+id/board_nav_graph">
 
 	<fragment
 		android:id="@+id/navigation_positive"

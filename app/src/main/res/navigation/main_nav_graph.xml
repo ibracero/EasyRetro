@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/main_nav_graph"
+	app:startDestination="@+id/navigation_retro_list">
+
+	<fragment
+		android:id="@+id/navigation_retro_list"
+		android:name="com.ibracero.retrum.ui.retros.RetroListFragment"
+		tools:layout="@layout/fragment_retro_list" />
+
+	<fragment
+		android:id="@+id/navigation_container"
+		android:name="com.ibracero.retrum.ui.BottomNavFragment"
+		tools:layout="@layout/fragment_nav_container" />
+</navigation>

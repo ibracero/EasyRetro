@@ -10,7 +10,8 @@ import kotlinx.android.synthetic.main.item_retro.view.*
 
 class RetroViewHolder(parent: ViewGroup) : CachedRecyclerViewHolder(parent.inflate(R.layout.item_retro)) {
 
-    fun bind(retro: Retro) {
+    fun bindTo(retro: Retro, onClick: () -> Unit) {
         containerView.retro_title.text = retro.title
+        containerView.setOnClickListener { onClick() }
     }
 }

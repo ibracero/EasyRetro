@@ -5,13 +5,15 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.ibracero.retrum.data.local.Retro
 
-class RetroListAdapter : ListAdapter<Retro, RetroViewHolder>(RetroDiffCallback()) {
+class RetroListAdapter(
+    private val onRetroClicked: () -> Unit
+) : ListAdapter<Retro, RetroViewHolder>(RetroDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RetroViewHolder =
         RetroViewHolder(parent)
 
     override fun onBindViewHolder(holder: RetroViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bindTo(getItem(position), onRetroClicked)
     }
 }
 

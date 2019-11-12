@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.ibracero.retrum.R
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -14,7 +15,7 @@ import timber.log.Timber
 class RetroListFragment : Fragment() {
 
     private val retroListViewModel: RetroListViewModel by viewModel()
-    private val retroListAdapter = RetroListAdapter()
+    private val retroListAdapter = RetroListAdapter(::onRetroClicked)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,5 +34,9 @@ class RetroListFragment : Fragment() {
 
     private fun initUi() {
         retro_recycler_view?.adapter = retroListAdapter
+    }
+
+    private fun onRetroClicked() {
+        findNavController().navigate(R.id.navigation_container)
     }
 }
