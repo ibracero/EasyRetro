@@ -15,13 +15,12 @@ class RetroListAdapter(
     override fun onBindViewHolder(holder: RetroViewHolder, position: Int) {
         holder.bindTo(getItem(position), onRetroClicked)
     }
-}
 
-class RetroDiffCallback : DiffUtil.ItemCallback<Retro>() {
-    override fun areItemsTheSame(oldItem: Retro, newItem: Retro): Boolean =
-        oldItem.uuid == newItem.uuid
+    class RetroDiffCallback : DiffUtil.ItemCallback<Retro>() {
+        override fun areItemsTheSame(oldItem: Retro, newItem: Retro): Boolean =
+            oldItem.uuid == newItem.uuid
 
-    override fun areContentsTheSame(oldItem: Retro, newItem: Retro): Boolean =
-        oldItem == newItem
-
+        override fun areContentsTheSame(oldItem: Retro, newItem: Retro): Boolean =
+            oldItem == newItem
+    }
 }

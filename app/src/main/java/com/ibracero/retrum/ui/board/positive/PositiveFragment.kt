@@ -16,20 +16,23 @@ class PositiveFragment : Fragment() {
 
     private val positiveViewModel: PositiveViewModel by viewModel()
 
+    private val adapter = StatementListAdapter()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
-        val root = inflater.inflate(R.layout.fragment_positive, container, false)
+    ): View? = inflater.inflate(R.layout.fragment_positive, container, false)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initUi()
         positiveViewModel.positivePoints.observe(this, Observer { processPositivePoints(it) })
-        return root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        add_statement.setOnClickListener { positiveViewModel.addPositivePoint("") }
+    private fun initUi() {
+        positive_recycler_view.adapter = adapter
     }
 
     private fun processPositivePoints(positivePoints: List<Statement>) {
-        Timber.d("processing $positivePoints")
+        adapter.submitList(positivePoints)
     }
 }

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginStart="8dp"
+	android:layout_marginTop="8dp"
+	android:layout_marginEnd="8dp"
+	android:elevation="8dp"
+	app:cardBackgroundColor="@color/colorPrimary">
+
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:padding="8dp">
+
+		<TextView
+			android:id="@+id/user_email"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:lines="1"
+			android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+			android:textColor="@android:color/white"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintHorizontal_bias="0"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			tools:text="walter.white@bb.com" />
+
+		<TextView
+			android:id="@+id/description"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:paddingTop="4dp"
+			android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+			android:textColor="@android:color/white"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintHorizontal_bias="0"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toBottomOf="@id/user_email"
+			tools:text="This is a description about a positive point that could be written as part of a retrospective session. The length of it could depend so it should have a flexible design." />
+
+	</androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
