@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_nav_container.*
 class BottomNavFragment : Fragment() {
 
     companion object {
-        const val RETRO_ATTR = "RETRO_ATTR"
+        const val ARGUMENT_RETRO = "arg_retro"
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -25,12 +25,14 @@ class BottomNavFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupNavigation()
+    }
 
+    private fun setupNavigation() {
         val navController =
             findNavController(requireActivity(), R.id.bottom_nav_host_fragment)
                 .apply { setGraph(R.navigation.board_nav_graph, arguments) }
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
         val appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_positive,
@@ -40,5 +42,20 @@ class BottomNavFragment : Fragment() {
         )
         setupActionBarWithNavController(requireActivity() as AppCompatActivity, navController, appBarConfiguration)
         nav_view.setupWithNavController(navController)
+        nav_view.setOnNavigationItemSelectedListener { menuItem ->
+
+            val destinationId = when (menuItem.itemId) {
+                R.id.navigation_positive -> R.id.navigation_positive
+                R.id.navigation_negative -> R.id.navigation_negative
+                R.id.navigation_actions -> R.id.navigation_actions
+                else -> -1
+            }
+
+            if (destinationId != -1 && destinationId != navController.currentDestination?.id) {
+                navController.navigate(destinationId, arguments)
+            }
+
+            true
+        }
     }
 }

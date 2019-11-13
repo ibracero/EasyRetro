@@ -4,28 +4,47 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.ibracero.retrum.R
+import com.ibracero.retrum.data.local.Retro
+import com.ibracero.retrum.data.local.Statement
+import com.ibracero.retrum.ui.BottomNavFragment
+import com.ibracero.retrum.ui.board.StatementListAdapter
+import kotlinx.android.synthetic.main.statement_list.*
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class ActionsFragment : Fragment() {
 
-    private lateinit var actionsViewModel: ActionsViewModel
+    private val actionsViewModel: ActionsViewModel by viewModel()
+
+    private val adapter = StatementListAdapter()
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        actionsViewModel =
-            ViewModelProviders.of(this).get(ActionsViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_actions, container, false)
-        val textView: TextView = root.findViewById(R.id.text_notifications)
-        actionsViewModel.text.observe(this, Observer {
-            textView.text = it
-        })
-        return root
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.statement_list, container, false)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initUi()
+
+        actionsViewModel
+            .getActionPoints(getRetroArgument()?.uuid.orEmpty())
+            .observe(this, Observer { processStatements(it) })
+
+        getRetroArgument()?.title?.let {
+            (activity as AppCompatActivity?)?.supportActionBar?.title = it
+        }
     }
+
+    private fun initUi() {
+        statement_recycler_view.adapter = adapter
+    }
+
+    private fun processStatements(positivePoints: List<Statement>) {
+        adapter.submitList(positivePoints)
+    }
+
+    private fun getRetroArgument(): Retro? = arguments?.getSerializable(BottomNavFragment.ARGUMENT_RETRO) as Retro?
 }

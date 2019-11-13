@@ -9,6 +9,8 @@ import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
 import com.ibracero.retrum.domain.Repository
+import com.ibracero.retrum.ui.board.action.ActionsViewModel
+import com.ibracero.retrum.ui.board.negative.NegativeViewModel
 import com.ibracero.retrum.ui.board.positive.PositiveViewModel
 import com.ibracero.retrum.ui.retros.RetroListFragment
 import com.ibracero.retrum.ui.retros.RetroListViewModel
@@ -43,6 +45,10 @@ val viewModelModule = module {
     viewModel { RetroListViewModel(get()) }
 
     viewModel { PositiveViewModel(get()) }
+
+    viewModel { NegativeViewModel(get()) }
+
+    viewModel { ActionsViewModel(get()) }
 }
 
 val mapperModule = module {

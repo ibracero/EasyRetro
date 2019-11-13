@@ -21,16 +21,17 @@ object AndroidSdk {
     const val target = compile
 }
 
-object Project{
+object Project {
     const val versionCode = 1
     const val versionName = "1.0.0"
 }
 
-object Plugins{
+object Plugins {
     const val androidApplication = "com.android.application"
     const val kotlinAndroid = "kotlin-android"
     const val kotlinAndroidExtensions = "kotlin-android-extensions"
     const val googleServices = "com.google.gms.google-services"
+    const val navigationSafeArgs = "androidx.navigation.safeargs"
     const val kotlinKapt = "kotlin-kapt"
 }
 
@@ -56,7 +57,8 @@ object Libraries {
     const val androidx_core_ktx = "androidx.core:core-ktx:$androidx_core_version"
     const val androidx_material = "com.google.android.material:material:$google_material_version"
     const val androidx_lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:$androidx_lifecycle_version"
-    const val androidx_constraint_layout = "androidx.constraintlayout:constraintlayout:$androidx_constraint_layout_version"
+    const val androidx_constraint_layout =
+        "androidx.constraintlayout:constraintlayout:$androidx_constraint_layout_version"
     const val androidx_navigation_fragment = "androidx.navigation:navigation-fragment:$androidx_version"
     const val androidx_navigation_fragment_ktx = "androidx.navigation:navigation-fragment-ktx:$androidx_version"
     const val androidx_navigation_ui = "androidx.navigation:navigation-ui:$androidx_version"

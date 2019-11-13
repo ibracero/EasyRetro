@@ -1,13 +1,21 @@
 package com.ibracero.retrum.ui.board.negative
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.ibracero.retrum.domain.Repository
+import com.ibracero.retrum.domain.StatementType
 
-class NegativeViewModel : ViewModel() {
+class NegativeViewModel(
+    private val repository: Repository
+) : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is dashboard Fragment"
+    fun getNegativePoints(retroUuid: String) = repository.getStatements(retroUuid, StatementType.NEGATIVE)
+
+    fun addStatement(description: String) {
+        repository.addStatement()
     }
-    val text: LiveData<String> = _text
+
+    override fun onCleared() {
+        super.onCleared()
+        repository.dispose()
+    }
 }

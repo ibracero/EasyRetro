@@ -10,11 +10,9 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Retro
-import com.ibracero.retrum.ui.BottomNavFragment
-import com.ibracero.retrum.ui.BottomNavFragment.Companion.RETRO_ATTR
+import com.ibracero.retrum.ui.BottomNavFragment.Companion.ARGUMENT_RETRO
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class RetroListFragment : Fragment() {
 
@@ -54,7 +52,7 @@ class RetroListFragment : Fragment() {
     }
 
     private fun navigateToRetroBoard(retro: Retro) {
-        val args = Bundle().apply { putSerializable(RETRO_ATTR, retro) }
-        findNavController().navigate(R.id.action_navigation_retro_list_to_navigation_container, args)
+        val args = Bundle().apply { putSerializable(ARGUMENT_RETRO, retro) }
+        findNavController().navigate(R.id.action_retro_clicked, args)
     }
 }

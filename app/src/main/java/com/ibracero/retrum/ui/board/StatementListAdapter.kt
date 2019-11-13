@@ -1,4 +1,4 @@
-package com.ibracero.retrum.ui.board.positive
+package com.ibracero.retrum.ui.board
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil

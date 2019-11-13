@@ -11,7 +11,7 @@
 		android:label="@string/app_name"
 		tools:layout="@layout/fragment_retro_list">
 		<action
-			android:id="@+id/action_navigation_retro_list_to_navigation_container"
+			android:id="@+id/action_retro_clicked"
 			app:destination="@id/navigation_container"
 			app:enterAnim="@anim/nav_default_enter_anim"
 			app:exitAnim="@anim/nav_default_exit_anim"
@@ -22,6 +22,10 @@
 	<fragment
 		android:id="@+id/navigation_container"
 		android:name="com.ibracero.retrum.ui.BottomNavFragment"
-		tools:layout="@layout/fragment_nav_container" />
+		tools:layout="@layout/fragment_nav_container">
+		<argument
+			android:name="arg_retro"
+			app:argType="com.ibracero.retrum.data.local.Retro" />
+	</fragment>
 
 </navigation>
