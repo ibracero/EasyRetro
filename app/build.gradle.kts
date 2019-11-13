@@ -1,6 +1,5 @@
 import BuildTypes.DEBUG
 import BuildTypes.RELEASE
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
 
 plugins {
     id(Plugins.androidApplication)
@@ -35,6 +34,10 @@ android {
             )
         }
     }
+}
+
+androidExtensions {
+    isExperimental = true
 }
 
 dependencies {

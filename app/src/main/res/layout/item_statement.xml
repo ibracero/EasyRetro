@@ -2,13 +2,14 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/statement_card"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:layout_marginStart="8dp"
 	android:layout_marginTop="8dp"
 	android:layout_marginEnd="8dp"
 	android:elevation="8dp"
-	app:cardBackgroundColor="@color/colorPrimary">
+	tools:cardBackgroundColor="@color/actions_background_color">
 
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:layout_width="match_parent"
@@ -21,7 +22,7 @@
 			android:layout_height="wrap_content"
 			android:lines="1"
 			android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-			android:textColor="@android:color/white"
+			android:textColor="@color/primaryTextColor"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintHorizontal_bias="0"
 			app:layout_constraintStart_toStartOf="parent"
@@ -34,7 +35,7 @@
 			android:layout_height="wrap_content"
 			android:paddingTop="4dp"
 			android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-			android:textColor="@android:color/white"
+			android:textColor="@color/primaryTextColor"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintHorizontal_bias="0"
 			app:layout_constraintStart_toStartOf="parent"

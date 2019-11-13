@@ -3,4 +3,5 @@
 	<string name="title_positive">Went well</string>
 	<string name="title_negative">Not so well</string>
 	<string name="title_actions">Actions</string>
+	<string name="add_retro_hint">Put a name to your retro...</string>
 </resources>

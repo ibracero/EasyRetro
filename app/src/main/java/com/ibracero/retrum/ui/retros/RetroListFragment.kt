@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -25,8 +26,9 @@ class RetroListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_retro_list, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.app_name)
 
         initUi()
         retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer { showRetros(it) })
@@ -45,6 +47,7 @@ class RetroListFragment : Fragment() {
     }
 
     private fun onAddClicked(retroTitle: String) {
+        retroListViewModel.retroLiveData.removeObservers(this)
         retroListViewModel.createRetro(retroTitle).observe(this@RetroListFragment, Observer {
             navigateToRetroBoard(retro = it)
         })

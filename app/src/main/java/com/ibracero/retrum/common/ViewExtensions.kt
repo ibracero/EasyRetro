@@ -5,6 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
 import timber.log.Timber
 
 fun View.visible() {
@@ -29,6 +32,9 @@ fun View.visibleOrInvisible(visible: Boolean) {
 
 fun ViewGroup.inflate(layoutRes: Int): View =
     LayoutInflater.from(context).inflate(layoutRes, this, false)
+
+@ColorInt
+fun View.getColor(@ColorRes color: Int) = ContextCompat.getColor(this.context, color)
 
 fun View?.showKeyboard() {
     if (this == null) return

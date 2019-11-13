@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import com.ibracero.retrum.R
@@ -31,6 +32,10 @@ class PositiveFragment : Fragment() {
         positiveViewModel
             .getPositivePoints(getRetroArgument()?.uuid.orEmpty())
             .observe(this, Observer { processPositivePoints(it) })
+
+        getRetroArgument()?.title?.let {
+            (activity as AppCompatActivity?)?.supportActionBar?.title = it
+        }
     }
 
     private fun initUi() {

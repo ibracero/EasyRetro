@@ -8,10 +8,15 @@
 	<fragment
 		android:id="@+id/navigation_retro_list"
 		android:name="com.ibracero.retrum.ui.retros.RetroListFragment"
+		android:label="@string/app_name"
 		tools:layout="@layout/fragment_retro_list">
 		<action
 			android:id="@+id/action_navigation_retro_list_to_navigation_container"
-			app:destination="@id/navigation_container" />
+			app:destination="@id/navigation_container"
+			app:enterAnim="@anim/nav_default_enter_anim"
+			app:exitAnim="@anim/nav_default_exit_anim"
+			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
 	</fragment>
 
 	<fragment
