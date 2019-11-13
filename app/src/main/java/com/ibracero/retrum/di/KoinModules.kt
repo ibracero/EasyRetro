@@ -7,7 +7,7 @@ import com.ibracero.retrum.data.local.RetrumDatabase
 import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
+import com.ibracero.retrum.data.remote.RemoteDataStore
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.ui.board.StatementViewModel
 import com.ibracero.retrum.ui.retros.RetroListViewModel
@@ -20,7 +20,7 @@ val appModule = module {
     factory<Repository> {
         RepositoryImpl(
             localDataStore = get(),
-            firebaseDataStore = get(),
+            remoteDataStore = get(),
             dispatchers = get(),
             retroRemoteToDomainMapper = get(),
             statementRemoteToDomainMapper = get(),
@@ -28,7 +28,7 @@ val appModule = module {
         )
     }
 
-    single { FirebaseDataStore() }
+    single { RemoteDataStore() }
 
     single { LocalDataStore(get()) }
 

@@ -1,4 +1,4 @@
-package com.ibracero.retrum.data.remote.cloudstore
+package com.ibracero.retrum.data.remote.firestore
 
 data class RetroRemote(
     val uuid: String,

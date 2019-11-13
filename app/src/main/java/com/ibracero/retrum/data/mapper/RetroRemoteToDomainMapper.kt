@@ -2,7 +2,7 @@ package com.ibracero.retrum.data.mapper
 
 import com.ibracero.retrum.common.Mapper
 import com.ibracero.retrum.data.local.Retro
-import com.ibracero.retrum.data.remote.cloudstore.RetroRemote
+import com.ibracero.retrum.data.remote.firestore.RetroRemote
 
 class RetroRemoteToDomainMapper : Mapper<RetroRemote, Retro> {
 

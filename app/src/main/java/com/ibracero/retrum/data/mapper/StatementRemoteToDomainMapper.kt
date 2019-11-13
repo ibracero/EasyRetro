@@ -2,7 +2,7 @@ package com.ibracero.retrum.data.mapper
 
 import com.ibracero.retrum.common.Mapper
 import com.ibracero.retrum.data.local.Statement
-import com.ibracero.retrum.data.remote.cloudstore.StatementRemote
+import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.domain.StatementType
 import java.util.*
 

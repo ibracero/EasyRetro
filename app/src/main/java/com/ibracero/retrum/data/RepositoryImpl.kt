@@ -9,9 +9,8 @@ import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore
-import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.Companion.RETRO_UUID
-import com.ibracero.retrum.data.remote.cloudstore.StatementRemote
+import com.ibracero.retrum.data.remote.RemoteDataStore
+import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.domain.StatementType.*
@@ -20,11 +19,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.random.Random
 
 class RepositoryImpl(
     val localDataStore: LocalDataStore,
-    val firebaseDataStore: FirebaseDataStore,
+    val remoteDataStore: RemoteDataStore,
     val retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
     val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
     val userRemoteToDomainMapper: UserRemoteToDomainMapper,
@@ -42,7 +40,7 @@ class RepositoryImpl(
     override fun createRetro(title: String): LiveData<Retro> {
         val retroLiveData = MutableLiveData<Retro>()
         scope.launch {
-            val retroRemote = firebaseDataStore.createRetro(retroTitle = title)
+            val retroRemote = remoteDataStore.createRetro(retroTitle = title)
             retroLiveData.postValue(retroRemoteToDomainMapper.map(retroRemote))
         }
         return retroLiveData
@@ -61,7 +59,7 @@ class RepositoryImpl(
 
     override fun addStatement(retroUuid: String, description: String, statementType: StatementType) {
         scope.launch {
-            firebaseDataStore.addStatementToBoard(
+            remoteDataStore.addStatementToBoard(
                 retroUuid = retroUuid,
                 statementRemote = StatementRemote(
                     userEmail = "yo@yo.com",
@@ -73,7 +71,7 @@ class RepositoryImpl(
     }
 
     private fun startObservingStatements(retroUuid: String) {
-        firebaseDataStore.observeStatements(retroUuid) {
+        remoteDataStore.observeStatements(retroUuid) {
             scope.launch {
                 localDataStore.saveStatements(it.map(statementRemoteToDomainMapper::map))
             }
@@ -81,7 +79,7 @@ class RepositoryImpl(
     }
 
     private fun startObservingUserRetros() {
-        firebaseDataStore.observeUserRetros {
+        remoteDataStore.observeUserRetros {
             scope.launch {
                 localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map))
             }
@@ -89,7 +87,7 @@ class RepositoryImpl(
     }
 
     private fun startObservingUser() {
-        firebaseDataStore.observeUser {
+        remoteDataStore.observeUser {
             scope.launch {
                 if (!it.email.isNullOrEmpty()) localDataStore.saveUser(userRemoteToDomainMapper.map(it))
             }
