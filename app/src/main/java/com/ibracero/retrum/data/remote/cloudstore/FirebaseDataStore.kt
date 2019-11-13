@@ -3,6 +3,7 @@ package com.ibracero.retrum.data.remote.cloudstore
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.TABLE_RETROS
 import com.ibracero.retrum.data.remote.cloudstore.FirebaseDataStore.DatabaseInfo.TABLE_USERS
+import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -50,7 +51,7 @@ class FirebaseDataStore {
                 val statements = snapshot?.documents?.map { doc ->
                     StatementRemote(
                         uuid = doc.id,
-                        retroUuid = RETRO_UUID,
+                        retroUuid = retroUuid,
                         userEmail = doc.getString("user_email").orEmpty(),
                         statementType = doc.getString("type").orEmpty(),
                         description = doc.getString("description").orEmpty()
@@ -73,21 +74,14 @@ class FirebaseDataStore {
             }
     }
 
-    fun addStatementToBoard(statementRemote: StatementRemote) {
+    fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote) {
         val item = hashMapOf(
             "user_email" to statementRemote.userEmail,
             "type" to statementRemote.statementType,
             "description" to statementRemote.description
         )
 
-        addItemToBoard(item)
-    }
-
-    private fun addItemToBoard(item: HashMap<String, String>) {
-        db.collection(TABLE_RETROS)
-            .document(RETRO_UUID)
-            .collection("statements")
-            .add(item)
+        addItemToBoard(retroUuid, item)
     }
 
     suspend fun createRetro(retroTitle: String): RetroRemote {
@@ -113,5 +107,15 @@ class FirebaseDataStore {
                     continuation.resume(RetroRemote(uuid = retroUuid, title = retroTitle))
                 }
         }
+    }
+
+    private fun addItemToBoard(retroUuid: String, item: HashMap<String, String>) {
+        db.collection(TABLE_RETROS)
+            .document(retroUuid)
+            .collection("statements")
+            .add(item)
+            .addOnSuccessListener {
+                Timber.d("Item added $it.")
+            }
     }
 }

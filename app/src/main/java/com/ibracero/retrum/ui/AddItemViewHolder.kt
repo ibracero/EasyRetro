@@ -33,5 +33,6 @@ class AddItemViewHolder(
 
     private fun addItemIfFilled() {
         if (add_title.text.isNotEmpty()) onAddClicked(add_title.text.toString())
+        add_title.setText("")
     }
 }

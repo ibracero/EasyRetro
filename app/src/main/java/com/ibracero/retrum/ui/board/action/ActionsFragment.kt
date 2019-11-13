@@ -10,16 +10,18 @@ import androidx.lifecycle.Observer
 import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
+import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.ui.BottomNavFragment
 import com.ibracero.retrum.ui.board.StatementListAdapter
+import com.ibracero.retrum.ui.board.StatementViewModel
 import kotlinx.android.synthetic.main.statement_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class ActionsFragment : Fragment() {
 
-    private val actionsViewModel: ActionsViewModel by viewModel()
+    private val actionsViewModel: StatementViewModel by viewModel()
 
-    private val adapter = StatementListAdapter()
+    private val adapter = StatementListAdapter(::onAddClicked)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -30,7 +32,7 @@ class ActionsFragment : Fragment() {
         initUi()
 
         actionsViewModel
-            .getActionPoints(getRetroArgument()?.uuid.orEmpty())
+            .getStatements(getRetroArgument()?.uuid.orEmpty(), StatementType.ACTION_POINT)
             .observe(this, Observer { processStatements(it) })
 
         getRetroArgument()?.title?.let {
@@ -47,4 +49,8 @@ class ActionsFragment : Fragment() {
     }
 
     private fun getRetroArgument(): Retro? = arguments?.getSerializable(BottomNavFragment.ARGUMENT_RETRO) as Retro?
+
+    private fun onAddClicked(description: String) {
+        actionsViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.ACTION_POINT)
+    }
 }

@@ -10,16 +10,18 @@ import androidx.lifecycle.Observer
 import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
+import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.ui.BottomNavFragment.Companion.ARGUMENT_RETRO
 import com.ibracero.retrum.ui.board.StatementListAdapter
+import com.ibracero.retrum.ui.board.StatementViewModel
 import kotlinx.android.synthetic.main.statement_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class PositiveFragment : Fragment() {
 
-    private val positiveViewModel: PositiveViewModel by viewModel()
+    private val positiveViewModel: StatementViewModel by viewModel()
 
-    private val adapter = StatementListAdapter()
+    private val adapter = StatementListAdapter(::onAddClicked)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -30,7 +32,7 @@ class PositiveFragment : Fragment() {
         initUi()
 
         positiveViewModel
-            .getPositivePoints(getRetroArgument()?.uuid.orEmpty())
+            .getStatements(getRetroArgument()?.uuid.orEmpty(), StatementType.POSITIVE)
             .observe(this, Observer { processPositivePoints(it) })
 
         getRetroArgument()?.title?.let {
@@ -47,4 +49,8 @@ class PositiveFragment : Fragment() {
     }
 
     private fun getRetroArgument(): Retro? = arguments?.getSerializable(ARGUMENT_RETRO) as Retro?
+
+    private fun onAddClicked(description: String) {
+        positiveViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.POSITIVE)
+    }
 }

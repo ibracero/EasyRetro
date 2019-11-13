@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.util.*
 import kotlin.random.Random
 
 class RepositoryImpl(
@@ -58,18 +59,17 @@ class RepositoryImpl(
         }
     }
 
-    override fun addStatement(statement: Statement?) {
-        firebaseDataStore.addStatementToBoard(
-            StatementRemote(
-                userEmail = "yo@yo.com",
-                description = Random.nextInt(100).toString(),
-                statementType = POSITIVE.toString()
+    override fun addStatement(retroUuid: String, description: String, statementType: StatementType) {
+        scope.launch {
+            firebaseDataStore.addStatementToBoard(
+                retroUuid = retroUuid,
+                statementRemote = StatementRemote(
+                    userEmail = "yo@yo.com",
+                    description = description,
+                    statementType = statementType.toString().toLowerCase(Locale.getDefault())
+                )
             )
-        )
-    }
-
-    override fun removeItem() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
     }
 
     private fun startObservingStatements(retroUuid: String) {
@@ -94,6 +94,10 @@ class RepositoryImpl(
                 if (!it.email.isNullOrEmpty()) localDataStore.saveUser(userRemoteToDomainMapper.map(it))
             }
         }
+    }
+
+    override fun removeItem() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun dispose() {

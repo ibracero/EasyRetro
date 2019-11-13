@@ -12,7 +12,7 @@ interface Repository {
 
     fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>>
 
-    fun addStatement(statement: Statement? = null)
+    fun addStatement(retroUuid: String, description: String, statementType: StatementType)
 
     fun removeItem()
 

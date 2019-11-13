@@ -8,6 +8,7 @@ import Libraries.Versions.firebase_analytics_version
 import Libraries.Versions.firebase_firestore_version
 import Libraries.Versions.google_material_version
 import Libraries.Versions.koin_version
+import Libraries.Versions.room_debugger_version
 import Libraries.Versions.room_version
 import Libraries.Versions.timber_version
 import TestLibraries.Versions.espresso_version
@@ -31,7 +32,6 @@ object Plugins {
     const val kotlinAndroid = "kotlin-android"
     const val kotlinAndroidExtensions = "kotlin-android-extensions"
     const val googleServices = "com.google.gms.google-services"
-    const val navigationSafeArgs = "androidx.navigation.safeargs"
     const val kotlinKapt = "kotlin-kapt"
 }
 
@@ -49,6 +49,7 @@ object Libraries {
         const val koin_version = "2.0.1"
         const val timber_version = "4.7.1"
         const val room_version = "2.1.0"
+        const val room_debugger_version = "1.0.6"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -72,6 +73,7 @@ object Libraries {
     const val timber = "com.jakewharton.timber:timber:$timber_version"
     const val androidx_room = "androidx.room:room-runtime:$room_version"
     const val androidx_room_compiler = "androidx.room:room-compiler:$room_version"
+    const val room_debugger = "com.amitshekhar.android:debug-db:$room_debugger_version"
 }
 
 object TestLibraries {

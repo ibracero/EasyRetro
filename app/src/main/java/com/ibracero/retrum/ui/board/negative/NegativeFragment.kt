@@ -10,16 +10,18 @@ import androidx.lifecycle.Observer
 import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
+import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.ui.BottomNavFragment.Companion.ARGUMENT_RETRO
 import com.ibracero.retrum.ui.board.StatementListAdapter
+import com.ibracero.retrum.ui.board.StatementViewModel
 import kotlinx.android.synthetic.main.statement_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class NegativeFragment : Fragment() {
 
-    private val negativeViewModel: NegativeViewModel by viewModel()
+    private val negativeViewModel: StatementViewModel by viewModel()
 
-    private val adapter = StatementListAdapter()
+    private val adapter = StatementListAdapter(::onAddClicked)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -30,7 +32,7 @@ class NegativeFragment : Fragment() {
         initUi()
 
         negativeViewModel
-            .getNegativePoints(getRetroArgument()?.uuid.orEmpty())
+            .getStatements(getRetroArgument()?.uuid.orEmpty(), StatementType.NEGATIVE)
             .observe(this, Observer { processStatements(it) })
 
         (activity as AppCompatActivity?)?.supportActionBar?.title = getRetroArgument()?.title.orEmpty()
@@ -45,4 +47,8 @@ class NegativeFragment : Fragment() {
     }
 
     private fun getRetroArgument(): Retro? = arguments?.getSerializable(ARGUMENT_RETRO) as Retro?
+
+    private fun onAddClicked(description: String) {
+        negativeViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.NEGATIVE)
+    }
 }

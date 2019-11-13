@@ -29,8 +29,8 @@ android {
             isMinifyEnabled = true
             isDebuggable = false
             proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
     }
@@ -59,7 +59,7 @@ dependencies {
     implementation(Libraries.koin_android_viewmodel)
     implementation(Libraries.timber)
     implementation(Libraries.androidx_room)
-    implementation(Libraries.androidx_room)
+    debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
 
 
