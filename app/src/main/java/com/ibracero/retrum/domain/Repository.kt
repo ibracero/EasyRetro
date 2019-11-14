@@ -17,4 +17,12 @@ interface Repository {
     fun removeItem()
 
     fun dispose()
+
+    fun startObservingStatements(retroUuid: String)
+
+    fun startObservingUserRetros()
+
+    fun stopObservingStatements()
+
+    fun stopObservingUserRetros()
 }

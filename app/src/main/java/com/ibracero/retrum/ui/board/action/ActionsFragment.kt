@@ -11,7 +11,7 @@ import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.domain.StatementType
-import com.ibracero.retrum.ui.BottomNavFragment
+import com.ibracero.retrum.ui.board.BoardFragment
 import com.ibracero.retrum.ui.board.StatementListAdapter
 import com.ibracero.retrum.ui.board.StatementViewModel
 import kotlinx.android.synthetic.main.statement_list.*
@@ -48,7 +48,7 @@ class ActionsFragment : Fragment() {
         adapter.submitList(positivePoints)
     }
 
-    private fun getRetroArgument(): Retro? = arguments?.getSerializable(BottomNavFragment.ARGUMENT_RETRO) as Retro?
+    private fun getRetroArgument(): Retro? = arguments?.getSerializable(BoardFragment.ARGUMENT_RETRO) as Retro?
 
     private fun onAddClicked(description: String) {
         actionsViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.ACTION_POINT)

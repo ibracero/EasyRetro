@@ -13,8 +13,11 @@ class RetroListViewModel(
 
     fun createRetro(title: String) = repository.createRetro(title)
 
-    override fun onCleared() {
-        super.onCleared()
-        repository.dispose()
+    fun startObservingRetros() {
+        repository.startObservingUserRetros()
+    }
+
+    fun stopObservingRetros() {
+        repository.stopObservingUserRetros()
     }
 }

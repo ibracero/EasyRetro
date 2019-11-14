@@ -27,31 +27,25 @@ class RemoteDataStore {
     private var userObserver: ListenerRegistration? = null
 
 
-    private val listenerRegistrations = mutableListOf<ListenerRegistration?>()
-
     fun observeUser(onUpdate: (UserRemote) -> Unit) {
-        listenerRegistrations.add(
-            db.collection(FirestoreTable.TABLE_USERS)
-                .document(USER_UUID)
-                .collection(FirestoreCollection.COLLECTION_RETROS)
-                .addSnapshotListener { snapshot, _ ->
-                    userRemote = userRemote.copy(retroUuids = snapshot?.documents?.map { it.id } ?: emptyList())
-                    onUpdate(userRemote)
-                }
-        )
+        db.collection(FirestoreTable.TABLE_USERS)
+            .document(USER_UUID)
+            .collection(FirestoreCollection.COLLECTION_RETROS)
+            .addSnapshotListener { snapshot, _ ->
+                userRemote = userRemote.copy(retroUuids = snapshot?.documents?.map { it.id } ?: emptyList())
+                onUpdate(userRemote)
+            }
 
-        listenerRegistrations.add(
-            db.collection(FirestoreTable.TABLE_USERS)
-                .document(USER_UUID)
-                .addSnapshotListener { snapshot, _ ->
-                    userRemote = userRemote.copy(
-                        email = snapshot?.getString(FirestoreField.USER_EMAIL).orEmpty(),
-                        firstName = snapshot?.getString(FirestoreField.USER_FIRST_NAME).orEmpty(),
-                        lastName = snapshot?.getString(FirestoreField.USER_LAST_NAME).orEmpty()
-                    )
-                    onUpdate(userRemote)
-                }
-        )
+        db.collection(FirestoreTable.TABLE_USERS)
+            .document(USER_UUID)
+            .addSnapshotListener { snapshot, _ ->
+                userRemote = userRemote.copy(
+                    email = snapshot?.getString(FirestoreField.USER_EMAIL).orEmpty(),
+                    firstName = snapshot?.getString(FirestoreField.USER_FIRST_NAME).orEmpty(),
+                    lastName = snapshot?.getString(FirestoreField.USER_LAST_NAME).orEmpty()
+                )
+                onUpdate(userRemote)
+            }
     }
 
     fun observeStatements(retroUuid: String, onUpdate: (List<StatementRemote>) -> Unit) {
@@ -74,7 +68,6 @@ class RemoteDataStore {
                 if (!statements.isNullOrEmpty() && !snapshot.metadata.hasPendingWrites())
                     onUpdate(statements.toList())
             }
-        listenerRegistrations.add(statementObserver)
     }
 
 
@@ -93,7 +86,6 @@ class RemoteDataStore {
                 }
                 onUpdate(retros?.toList() ?: emptyList())
             }
-        listenerRegistrations.add(retrosObserver)
     }
 
     fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote) {
@@ -140,8 +132,12 @@ class RemoteDataStore {
         }
     }
 
-    fun stopObserving() {
-        listenerRegistrations.filterNotNull().map { it.remove() }
+    fun stopObservingStatements() {
+        statementObserver?.remove()
+    }
+
+    fun stopObservingRetros() {
+        retrosObserver?.remove()
     }
 
     private fun addItemToBoard(retroUuid: String, item: HashMap<String, Any>) {

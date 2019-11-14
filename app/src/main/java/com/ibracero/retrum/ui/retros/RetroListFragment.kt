@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Retro
-import com.ibracero.retrum.ui.BottomNavFragment.Companion.ARGUMENT_RETRO
+import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -30,6 +30,16 @@ class RetroListFragment : Fragment() {
 
         initUi()
         retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer { showRetros(it) })
+    }
+
+    override fun onStart() {
+        super.onStart()
+        retroListViewModel.startObservingRetros()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        retroListViewModel.stopObservingRetros()
     }
 
     private fun showRetros(it: List<Retro>?) {

@@ -11,7 +11,7 @@ import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.domain.StatementType
-import com.ibracero.retrum.ui.BottomNavFragment.Companion.ARGUMENT_RETRO
+import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO
 import com.ibracero.retrum.ui.board.StatementListAdapter
 import com.ibracero.retrum.ui.board.StatementViewModel
 import kotlinx.android.synthetic.main.statement_list.*

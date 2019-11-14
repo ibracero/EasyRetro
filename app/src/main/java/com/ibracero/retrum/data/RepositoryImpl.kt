@@ -30,10 +30,6 @@ class RepositoryImpl(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    init {
-        startObservingUserRetros()
-    }
-
     override fun createRetro(title: String): LiveData<Retro> {
         val retroLiveData = MutableLiveData<Retro>()
         scope.launch {
@@ -46,7 +42,6 @@ class RepositoryImpl(
     override fun getRetros(): LiveData<List<Retro>> = localDataStore.getRetros()
 
     override fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>> {
-        startObservingStatements(retroUuid)
         return when (statementType) {
             POSITIVE -> localDataStore.getPositiveStatements(retroUuid)
             NEGATIVE -> localDataStore.getNegativeStatements(retroUuid)
@@ -67,7 +62,7 @@ class RepositoryImpl(
         }
     }
 
-    private fun startObservingStatements(retroUuid: String) {
+    override fun startObservingStatements(retroUuid: String) {
         remoteDataStore.observeStatements(retroUuid) {
             scope.launch {
                 localDataStore.saveStatements(it.map(statementRemoteToDomainMapper::map))
@@ -75,12 +70,20 @@ class RepositoryImpl(
         }
     }
 
-    private fun startObservingUserRetros() {
+    override fun stopObservingStatements() {
+        remoteDataStore.stopObservingStatements()
+    }
+
+    override fun startObservingUserRetros() {
         remoteDataStore.observeUserRetros {
             scope.launch {
                 localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map))
             }
         }
+    }
+
+    override fun stopObservingUserRetros() {
+        remoteDataStore.stopObservingRetros()
     }
 
     private fun startObservingUser() {
@@ -98,7 +101,6 @@ class RepositoryImpl(
     }
 
     override fun dispose() {
-        remoteDataStore.stopObserving()
         scope.cancel()
     }
 }
