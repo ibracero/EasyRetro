@@ -2,7 +2,8 @@ package com.ibracero.retrum.data.remote.firestore
 
 data class RetroRemote(
     val uuid: String,
-    val title: String
+    val title: String,
+    val timestamp: Long? = null
 )
 
 data class StatementRemote(
@@ -10,7 +11,8 @@ data class StatementRemote(
     val retroUuid: String? = null,
     val userEmail: String,
     val description: String,
-    val statementType: String
+    val statementType: String,
+    val timestamp: Long? = null
 )
 
 data class UserRemote(

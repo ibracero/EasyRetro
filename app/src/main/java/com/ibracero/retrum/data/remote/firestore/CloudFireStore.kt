@@ -13,11 +13,13 @@ object CloudFireStore {
     }
 
     object FirestoreField {
+        const val RETRO_TITLE = "title"
+        const val RETRO_CREATED = "created"
         const val USER_EMAIL = "user_email"
         const val USER_FIRST_NAME = "first_name"
         const val USER_LAST_NAME = "last_name"
         const val STATEMENT_TYPE = "type"
         const val STATEMENT_DESCRIPTION = "description"
-        const val RETRO_TITLE = "title"
+        const val STATEMENT_CREATED = "created"
     }
 }

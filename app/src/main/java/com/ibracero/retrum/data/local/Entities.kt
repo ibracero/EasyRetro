@@ -20,7 +20,8 @@ data class User(
 @Entity(tableName = TABLE_RETRO)
 data class Retro(
     @PrimaryKey val uuid: String,
-    val title: String
+    val title: String,
+    val timestamp: Long
 ) : Serializable
 
 @Entity(tableName = TABLE_STATEMENT)
@@ -29,5 +30,6 @@ data class Statement(
     val retroUuid: String,
     val type: StatementType,
     val userEmail: String,
-    val description: String
+    val description: String,
+    val timestamp: Long
 )

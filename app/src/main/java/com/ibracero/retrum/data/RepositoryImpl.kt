@@ -14,10 +14,7 @@ import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.domain.StatementType.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 
 class RepositoryImpl(
@@ -88,8 +85,10 @@ class RepositoryImpl(
 
     private fun startObservingUser() {
         remoteDataStore.observeUser {
-            scope.launch {
-                if (!it.email.isNullOrEmpty()) localDataStore.saveUser(userRemoteToDomainMapper.map(it))
+            if (!it.email.isNullOrEmpty()) {
+                scope.launch {
+                    localDataStore.saveUser(userRemoteToDomainMapper.map(it))
+                }
             }
         }
     }
@@ -99,6 +98,7 @@ class RepositoryImpl(
     }
 
     override fun dispose() {
+        remoteDataStore.stopObserving()
         scope.cancel()
     }
 }

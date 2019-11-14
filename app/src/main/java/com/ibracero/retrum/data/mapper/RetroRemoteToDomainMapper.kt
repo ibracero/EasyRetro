@@ -9,6 +9,7 @@ class RetroRemoteToDomainMapper : Mapper<RetroRemote, Retro> {
     override fun map(from: RetroRemote): Retro =
         Retro(
             uuid = from.uuid,
-            title = from.title
+            title = from.title,
+            timestamp = from.timestamp ?: 0
         )
 }
