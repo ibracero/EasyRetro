@@ -41,11 +41,28 @@ class StatementListAdapter(
         }
     }
 
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty()) onBindViewHolder(holder, position)
+
+        payloads.forEach {
+            when (it) {
+                is Payload.DescriptionPayload -> (holder as StatementViewHolder).onDescriptionChanged(it.description)
+            }
+        }
+    }
+
     class StatementDiffCallback : DiffUtil.ItemCallback<Statement>() {
-        override fun areContentsTheSame(oldItem: Statement, newItem: Statement): Boolean =
+        override fun areItemsTheSame(oldItem: Statement, newItem: Statement): Boolean =
             oldItem.uuid == newItem.uuid
 
-        override fun areItemsTheSame(oldItem: Statement, newItem: Statement): Boolean =
-            oldItem == newItem
+        override fun areContentsTheSame(oldItem: Statement, newItem: Statement): Boolean =
+            oldItem.hashCode() == newItem.hashCode()
+
+        override fun getChangePayload(oldItem: Statement, newItem: Statement): Payload? =
+            Payload.DescriptionPayload(description = newItem.description)
+    }
+
+    sealed class Payload {
+        data class DescriptionPayload(val description: String) : Payload()
     }
 }

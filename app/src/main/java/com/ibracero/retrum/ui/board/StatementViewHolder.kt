@@ -14,6 +14,7 @@ class StatementViewHolder(
     parent: ViewGroup,
     val onRemoveClicked: (Statement) -> Unit
 ) : CachedRecyclerViewHolder(parent.inflate(R.layout.item_statement)) {
+
     fun bindTo(statement: Statement) {
         user_email.text = statement.userEmail
         description.text = statement.description
@@ -24,5 +25,9 @@ class StatementViewHolder(
             StatementType.NEGATIVE -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.negative_background_color))
             StatementType.ACTION_POINT -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.actions_background_color))
         }
+    }
+
+    fun onDescriptionChanged(descriptionText: String) {
+        description.text = descriptionText
     }
 }
