@@ -1,7 +1,11 @@
 <resources>
-	<string name="app_name">Retrum</string>
+	<string name="app_name" translatable="false">Retrum</string>
 	<string name="title_positive">Went well</string>
 	<string name="title_negative">Not so well</string>
 	<string name="title_actions">Actions</string>
-	<string name="add_retro_hint">Put a name to your retro...</string>
+	<string name="add_retro_hint">Put a name to your retro…</string>
+	<string name="add_statement_hint">What would you like to point out?</string>
+	<string name="remove_confirmation_title">Remove item?</string>
+	<string name="action_yes">Yes</string>
+	<string name="action_no">No</string>
 </resources>

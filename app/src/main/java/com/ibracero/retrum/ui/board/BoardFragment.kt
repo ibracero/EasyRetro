@@ -46,6 +46,7 @@ class BoardFragment : Fragment() {
     }
 
     private fun setupNavigation() {
+
         val navController =
             findNavController(requireActivity(), R.id.bottom_nav_host_fragment)
                 .apply { setGraph(R.navigation.board_nav_graph, arguments) }
