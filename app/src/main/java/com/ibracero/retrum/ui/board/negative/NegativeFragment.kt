@@ -19,9 +19,9 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class NegativeFragment : Fragment() {
 
-    private val negativeViewModel: StatementViewModel by viewModel()
+    private val statementViewModel: StatementViewModel by viewModel()
 
-    private val adapter = StatementListAdapter(::onAddClicked)
+    private val adapter = StatementListAdapter(::onAddClicked, ::onRemoveClicked)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -31,7 +31,7 @@ class NegativeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initUi()
 
-        negativeViewModel
+        statementViewModel
             .getStatements(getRetroArgument()?.uuid.orEmpty(), StatementType.NEGATIVE)
             .observe(this, Observer { processStatements(it) })
 
@@ -49,6 +49,10 @@ class NegativeFragment : Fragment() {
     private fun getRetroArgument(): Retro? = arguments?.getSerializable(ARGUMENT_RETRO) as Retro?
 
     private fun onAddClicked(description: String) {
-        negativeViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.NEGATIVE)
+        statementViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.NEGATIVE)
+    }
+
+    private fun onRemoveClicked(statement: Statement) {
+        statementViewModel.removeStatement(statement)
     }
 }

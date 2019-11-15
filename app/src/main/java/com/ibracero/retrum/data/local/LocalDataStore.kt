@@ -9,7 +9,7 @@ class LocalDataStore(private val retroDao: RetroDao) {
     }
 
     fun saveStatements(statements: List<Statement>) {
-        retroDao.insertStatements(statements)
+        retroDao.dropStatementsAndInsert(statements)
     }
 
     fun saveUser(user: User) {

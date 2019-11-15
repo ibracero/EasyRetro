@@ -27,4 +27,13 @@ interface RetroDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUser(user: User)
+
+    @Query("DELETE FROM $TABLE_STATEMENT")
+    fun deleteAllStatements()
+
+    @Transaction
+    fun dropStatementsAndInsert(statements: List<Statement>) {
+        deleteAllStatements()
+        insertStatements(statements)
+    }
 }

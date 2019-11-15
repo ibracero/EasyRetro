@@ -13,17 +13,19 @@
 
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:padding="8dp">
+		android:layout_height="wrap_content">
 
 		<TextView
 			android:id="@+id/user_email"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
 			android:lines="1"
+			android:paddingTop="8dp"
+			android:paddingEnd="8dp"
 			android:textAppearance="@style/TextAppearance.AppCompat.Caption"
 			android:textColor="@color/primaryTextColor"
-			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintEnd_toStartOf="@id/action_delete"
 			app:layout_constraintHorizontal_bias="0"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
@@ -31,16 +33,30 @@
 
 		<TextView
 			android:id="@+id/description"
-			android:layout_width="wrap_content"
+			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:paddingTop="4dp"
-			android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+			android:paddingBottom="8dp"
+			android:textAppearance="@style/TextAppearance.AppCompat.Medium"
 			android:textColor="@color/primaryTextColor"
-			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintEnd_toStartOf="@id/action_delete"
 			app:layout_constraintHorizontal_bias="0"
-			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintStart_toStartOf="@id/user_email"
 			app:layout_constraintTop_toBottomOf="@id/user_email"
 			tools:text="This is a description about a positive point that could be written as part of a retrospective session. The length of it could depend so it should have a flexible design." />
+
+		<ImageView
+			android:id="@+id/action_delete"
+			android:layout_width="wrap_content"
+			android:layout_height="0dp"
+			android:background="@color/colorPrimary"
+			android:padding="8dp"
+			android:visibility="gone"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:srcCompat="@drawable/ic_delete"
+			tools:visibility="visible" />
 
 	</androidx.constraintlayout.widget.ConstraintLayout>
 

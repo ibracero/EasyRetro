@@ -19,9 +19,9 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class ActionsFragment : Fragment() {
 
-    private val actionsViewModel: StatementViewModel by viewModel()
+    private val statementViewModel: StatementViewModel by viewModel()
 
-    private val adapter = StatementListAdapter(::onAddClicked)
+    private val adapter = StatementListAdapter(::onAddClicked, ::onRemoveClicked)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -31,7 +31,7 @@ class ActionsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initUi()
 
-        actionsViewModel
+        statementViewModel
             .getStatements(getRetroArgument()?.uuid.orEmpty(), StatementType.ACTION_POINT)
             .observe(this, Observer { processStatements(it) })
 
@@ -51,6 +51,10 @@ class ActionsFragment : Fragment() {
     private fun getRetroArgument(): Retro? = arguments?.getSerializable(BoardFragment.ARGUMENT_RETRO) as Retro?
 
     private fun onAddClicked(description: String) {
-        actionsViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.ACTION_POINT)
+        statementViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.ACTION_POINT)
+    }
+
+    private fun onRemoveClicked(statement: Statement) {
+        statementViewModel.removeStatement(statement)
     }
 }

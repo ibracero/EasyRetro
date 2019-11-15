@@ -12,7 +12,8 @@ data class StatementRemote(
     val userEmail: String,
     val description: String,
     val statementType: String,
-    val timestamp: Long? = null
+    val timestamp: Long? = null,
+    val isRemovable: Boolean? = false
 )
 
 data class UserRemote(

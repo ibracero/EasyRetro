@@ -96,8 +96,8 @@ class RepositoryImpl(
         }
     }
 
-    override fun removeItem() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun removeStatement(statement: Statement) {
+        remoteDataStore.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
     }
 
     override fun dispose() {

@@ -31,5 +31,6 @@ data class Statement(
     val type: StatementType,
     val userEmail: String,
     val description: String,
-    val timestamp: Long
+    val timestamp: Long,
+    val removable: Boolean
 )

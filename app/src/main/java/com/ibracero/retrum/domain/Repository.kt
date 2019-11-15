@@ -14,7 +14,7 @@ interface Repository {
 
     fun addStatement(retroUuid: String, description: String, statementType: StatementType)
 
-    fun removeItem()
+    fun removeStatement(statement: Statement)
 
     fun dispose()
 

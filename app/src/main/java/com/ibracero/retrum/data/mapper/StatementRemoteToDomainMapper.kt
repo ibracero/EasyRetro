@@ -15,6 +15,7 @@ class StatementRemoteToDomainMapper : Mapper<StatementRemote, Statement> {
             userEmail = from.userEmail,
             description = from.description,
             type = StatementType.valueOf(from.statementType.toUpperCase(Locale.getDefault())),
-            timestamp = from.timestamp ?: 0
+            timestamp = from.timestamp ?: 0,
+            removable = from.isRemovable ?: false
         )
 }

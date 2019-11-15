@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -19,9 +20,9 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class PositiveFragment : Fragment() {
 
-    private val positiveViewModel: StatementViewModel by viewModel()
+    private val statementViewModel: StatementViewModel by viewModel()
 
-    private val adapter = StatementListAdapter(::onAddClicked)
+    private val adapter = StatementListAdapter(::onAddClicked, ::onRemoveClicked)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -31,7 +32,7 @@ class PositiveFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initUi()
 
-        positiveViewModel
+        statementViewModel
             .getStatements(getRetroArgument()?.uuid.orEmpty(), StatementType.POSITIVE)
             .observe(this, Observer { processPositivePoints(it) })
 
@@ -51,6 +52,18 @@ class PositiveFragment : Fragment() {
     private fun getRetroArgument(): Retro? = arguments?.getSerializable(ARGUMENT_RETRO) as Retro?
 
     private fun onAddClicked(description: String) {
-        positiveViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.POSITIVE)
+        statementViewModel.addStatement(getRetroArgument()?.uuid.orEmpty(), description, StatementType.POSITIVE)
+    }
+
+    private fun onRemoveClicked(statement: Statement) {
+        val safeContext = context ?: return
+        AlertDialog.Builder(safeContext)
+            .setCancelable(true)
+            .setTitle("Remove item?")
+            .setMessage(statement.description)
+            .setPositiveButton("Yes") { _, _ -> statementViewModel.removeStatement(statement) }
+            .setNegativeButton("No") { dialogInterface, _ -> dialogInterface.dismiss() }
+            .create()
+            .show()
     }
 }

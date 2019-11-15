@@ -1,6 +1,7 @@
 package com.ibracero.retrum.ui.board
 
 import androidx.lifecycle.ViewModel
+import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.domain.StatementType
 
@@ -17,5 +18,9 @@ class StatementViewModel(
     override fun onCleared() {
         super.onCleared()
         repository.dispose()
+    }
+
+    fun removeStatement(statement: Statement) {
+        repository.removeStatement(statement)
     }
 }

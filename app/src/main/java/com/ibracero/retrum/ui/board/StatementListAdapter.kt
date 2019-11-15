@@ -11,7 +11,8 @@ import com.ibracero.retrum.ui.retros.RetroListAdapter
 import com.ibracero.retrum.ui.retros.RetroViewHolder
 
 class StatementListAdapter(
-    private val onAddClicked: (String) -> Unit
+    private val onAddClicked: (String) -> Unit,
+    private val onRemoveClick: (Statement) -> Unit
 ) : OffsetListAdapter<Statement, RecyclerView.ViewHolder>(StatementDiffCallback()) {
 
     companion object {
@@ -29,7 +30,7 @@ class StatementListAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             VIEW_TYPE_ADD -> AddItemViewHolder(parent, onAddClicked)
-            else -> StatementViewHolder(parent)
+            else -> StatementViewHolder(parent, onRemoveClick)
         }
     }
 
