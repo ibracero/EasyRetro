@@ -22,7 +22,7 @@
 	<fragment
 		android:id="@+id/navigation_container"
 		android:name="com.ibracero.retrum.ui.board.BoardFragment"
-		tools:layout="@layout/fragment_nav_container">
+		tools:layout="@layout/fragment_board">
 		<argument
 			android:name="arg_retro"
 			app:argType="com.ibracero.retrum.data.local.Retro" />

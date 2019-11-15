@@ -1,5 +1,6 @@
 package com.ibracero.retrum.ui.board
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +14,12 @@ import androidx.navigation.ui.setupWithNavController
 import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.domain.Repository
-import kotlinx.android.synthetic.main.fragment_nav_container.*
+import com.ibracero.retrum.ui.board.action.ActionsFragment
+import com.ibracero.retrum.ui.board.negative.NegativeFragment
+import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.ext.android.inject
+import com.ibracero.retrum.ui.board.positive.PositiveFragment
+
 
 class BoardFragment : Fragment() {
 
@@ -25,12 +30,14 @@ class BoardFragment : Fragment() {
     private val repository: Repository by inject()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_nav_container, container, false)
+        return inflater.inflate(R.layout.fragment_board, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupNavigation()
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) initPortraitUi()
+        else initLandscapeUi()
     }
 
     override fun onStart() {
@@ -45,8 +52,7 @@ class BoardFragment : Fragment() {
         repository.stopObservingStatements()
     }
 
-    private fun setupNavigation() {
-
+    private fun initPortraitUi() {
         val navController =
             findNavController(requireActivity(), R.id.bottom_nav_host_fragment)
                 .apply { setGraph(R.navigation.board_nav_graph, arguments) }
@@ -59,8 +65,8 @@ class BoardFragment : Fragment() {
             )
         )
         setupActionBarWithNavController(requireActivity() as AppCompatActivity, navController, appBarConfiguration)
-        nav_view.setupWithNavController(navController)
-        nav_view.setOnNavigationItemSelectedListener { menuItem ->
+        nav_view?.setupWithNavController(navController)
+        nav_view?.setOnNavigationItemSelectedListener { menuItem ->
 
             val destinationId = when (menuItem.itemId) {
                 R.id.navigation_positive -> R.id.navigation_positive
@@ -75,6 +81,23 @@ class BoardFragment : Fragment() {
 
             true
         }
+    }
+
+    private fun initLandscapeUi() {
+
+        val fragmentTransaction = childFragmentManager.beginTransaction()
+
+        fragmentTransaction.add(
+            R.id.positive_container,
+            PositiveFragment().apply { this.arguments = this@BoardFragment.arguments })
+        fragmentTransaction.add(
+            R.id.negative_container,
+            NegativeFragment().apply { this.arguments = this@BoardFragment.arguments })
+        fragmentTransaction.add(
+            R.id.actions_container,
+            ActionsFragment().apply { this.arguments = this@BoardFragment.arguments })
+
+        fragmentTransaction.commit()
     }
 
     private fun getRetroArgument() = arguments?.getSerializable(ARGUMENT_RETRO) as Retro?

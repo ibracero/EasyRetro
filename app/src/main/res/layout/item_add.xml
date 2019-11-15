@@ -8,9 +8,9 @@
 	android:layout_marginTop="8dp"
 	android:layout_marginEnd="8dp"
 	android:clickable="true"
-	android:elevation="8dp"
 	android:focusable="true"
-	app:cardBackgroundColor="@color/colorPrimaryDark">
+	app:cardBackgroundColor="@color/colorPrimary"
+	app:cardElevation="4dp">
 
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:layout_width="match_parent"
@@ -28,7 +28,7 @@
 			android:imeOptions="actionDone"
 			android:padding="8dp"
 			android:textColor="@color/primaryTextColor"
-			android:textColorHint="#99ffffff"
+			android:textColorHint="@color/primaryTextColorTranslucent"
 			android:textCursorDrawable="@null"
 			android:visibility="gone"
 			app:layout_constraintBottom_toBottomOf="parent"

@@ -7,8 +7,8 @@
 	android:layout_marginStart="8dp"
 	android:layout_marginTop="8dp"
 	android:layout_marginEnd="8dp"
-	android:elevation="8dp"
-	app:cardBackgroundColor="@color/colorPrimary">
+	app:cardBackgroundColor="@color/colorPrimary"
+	app:cardElevation="4dp">
 
 	<TextView
 		android:id="@+id/retro_title"
@@ -16,7 +16,7 @@
 		android:layout_height="wrap_content"
 		android:gravity="center"
 		android:padding="16dp"
-		android:textAppearance="@style/TextAppearance.AppCompat.Large"
+		android:textAppearance="@style/TextAppearance.AppCompat.Medium"
 		android:textColor="@color/primaryTextColor"
 		tools:text="Retro title" />
 

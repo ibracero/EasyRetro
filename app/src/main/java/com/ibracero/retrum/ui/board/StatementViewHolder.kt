@@ -21,9 +21,9 @@ class StatementViewHolder(
         action_delete.visibleOrGone(statement.removable)
         action_delete.setOnClickListener { onRemoveClicked(statement) }
         when (statement.type) {
-            StatementType.POSITIVE -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.positive_background_color))
-            StatementType.NEGATIVE -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.negative_background_color))
-            StatementType.ACTION_POINT -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.actions_background_color))
+            StatementType.POSITIVE -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.positiveBackgroundColor))
+            StatementType.NEGATIVE -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.negativeBackgroundColor))
+            StatementType.ACTION_POINT -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.actionsBackgroundColor))
         }
     }
 
