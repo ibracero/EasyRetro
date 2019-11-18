@@ -9,10 +9,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
+import com.ibracero.retrum.common.NetworkStatus
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.domain.StatementType
+import kotlinx.android.synthetic.main.fragment_retro_list.*
 import kotlinx.android.synthetic.main.statement_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 

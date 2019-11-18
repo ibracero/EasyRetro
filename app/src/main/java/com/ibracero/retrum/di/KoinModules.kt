@@ -1,6 +1,9 @@
 package com.ibracero.retrum.di
 
+import android.content.Context
+import android.net.ConnectivityManager
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
+import com.ibracero.retrum.common.RetrumConnectionManager
 import com.ibracero.retrum.data.RepositoryImpl
 import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.RetrumDatabase
@@ -30,6 +33,8 @@ val appModule = module {
 
     single { RemoteDataStore() }
 
+    single { RetrumConnectionManager(androidApplication().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) }
+
     single { LocalDataStore(get()) }
 
     single { RetrumDatabase.getDatabase(androidApplication()).retroDao() }
@@ -39,7 +44,7 @@ val appModule = module {
 
 val viewModelModule = module {
 
-    viewModel { RetroListViewModel(get()) }
+    viewModel { RetroListViewModel(get(), get()) }
 
     viewModel { StatementViewModel(get()) }
 }

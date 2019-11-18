@@ -1,12 +1,14 @@
 package com.ibracero.retrum.domain
 
 import androidx.lifecycle.LiveData
+import arrow.core.Either
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
+import com.ibracero.retrum.data.remote.ServerError
 
 interface Repository {
 
-    fun createRetro(title: String): LiveData<Retro>
+    fun createRetro(title: String): LiveData<Either<ServerError, Retro>>
 
     fun getRetros(): LiveData<List<Retro>>
 

@@ -7,11 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
+import com.ibracero.retrum.common.NetworkStatus
+import com.ibracero.retrum.common.RetrumConnectionManager
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.ui.board.action.ActionsFragment
@@ -19,6 +23,7 @@ import com.ibracero.retrum.ui.board.negative.NegativeFragment
 import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.ext.android.inject
 import com.ibracero.retrum.ui.board.positive.PositiveFragment
+import kotlinx.android.synthetic.main.fragment_retro_list.*
 
 
 class BoardFragment : Fragment() {
@@ -28,6 +33,17 @@ class BoardFragment : Fragment() {
     }
 
     private val repository: Repository by inject()
+    private val connectionManager: RetrumConnectionManager by inject()
+
+    private val offlineSnackbar by lazy {
+        Snackbar.make(
+            board_root,
+            R.string.offline_message,
+            Snackbar.LENGTH_INDEFINITE
+        ).apply {
+            view.setBackgroundResource(R.color.colorAccent)
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_board, container, false)
@@ -45,6 +61,13 @@ class BoardFragment : Fragment() {
         getRetroArgument()?.let {
             repository.startObservingStatements(it.uuid)
         }
+
+        connectionManager.connectionLiveData.observe(this@BoardFragment, Observer {
+            when (it) {
+                NetworkStatus.ONLINE -> offlineSnackbar.dismiss()
+                else -> offlineSnackbar.show()
+            }
+        })
     }
 
     override fun onStop() {

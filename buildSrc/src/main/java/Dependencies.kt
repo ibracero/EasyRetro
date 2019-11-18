@@ -3,6 +3,7 @@ import Libraries.Versions.androidx_constraint_layout_version
 import Libraries.Versions.androidx_core_version
 import Libraries.Versions.androidx_lifecycle_version
 import Libraries.Versions.androidx_version
+import Libraries.Versions.arrow_version
 import Libraries.Versions.coroutines_version
 import Libraries.Versions.firebase_analytics_version
 import Libraries.Versions.firebase_firestore_version
@@ -50,6 +51,7 @@ object Libraries {
         const val timber_version = "4.7.1"
         const val room_version = "2.1.0"
         const val room_debugger_version = "1.0.6"
+        const val arrow_version = "0.10.3"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -74,6 +76,7 @@ object Libraries {
     const val androidx_room = "androidx.room:room-runtime:$room_version"
     const val androidx_room_compiler = "androidx.room:room-compiler:$room_version"
     const val room_debugger = "com.amitshekhar.android:debug-db:$room_debugger_version"
+    const val arrow = "io.arrow-kt:arrow-core:$arrow_version"
 }
 
 object TestLibraries {

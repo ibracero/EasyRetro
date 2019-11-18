@@ -2,6 +2,7 @@ package com.ibracero.retrum.data
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import arrow.core.Either
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.Retro
@@ -10,6 +11,7 @@ import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.RemoteDataStore
+import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.domain.Repository
 import com.ibracero.retrum.domain.StatementType
@@ -30,11 +32,12 @@ class RepositoryImpl(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    override fun createRetro(title: String): LiveData<Retro> {
-        val retroLiveData = MutableLiveData<Retro>()
+    override fun createRetro(title: String): LiveData<Either<ServerError, Retro>> {
+        val retroLiveData = MutableLiveData<Either<ServerError, Retro>>()
         scope.launch {
-            val retroRemote = remoteDataStore.createRetro(retroTitle = title)
-            retroLiveData.postValue(retroRemoteToDomainMapper.map(retroRemote))
+            val retroEither = remoteDataStore.createRetro(retroTitle = title)
+                .map { retroRemoteToDomainMapper.map(it) }
+            retroLiveData.postValue(retroEither)
         }
         return retroLiveData
     }

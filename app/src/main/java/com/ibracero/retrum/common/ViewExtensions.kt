@@ -1,13 +1,17 @@
 package com.ibracero.retrum.common
 
 import android.content.Context
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 import timber.log.Timber
 
 fun View.visible() {

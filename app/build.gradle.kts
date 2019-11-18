@@ -59,6 +59,7 @@ dependencies {
     implementation(Libraries.koin_android_viewmodel)
     implementation(Libraries.timber)
     implementation(Libraries.androidx_room)
+    implementation(Libraries.arrow)
     debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
 

@@ -1,5 +1,6 @@
 package com.ibracero.retrum.data.remote
 
+import arrow.core.Either
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -112,7 +113,7 @@ class RemoteDataStore {
             }
     }
 
-    suspend fun createRetro(retroTitle: String): RetroRemote {
+    suspend fun createRetro(retroTitle: String): Either<ServerError, RetroRemote> {
         val retroUuid = suspendCoroutine<String> { continuation ->
             db.collection(FirestoreTable.TABLE_RETROS)
                 .document()
@@ -137,7 +138,10 @@ class RemoteDataStore {
                 .addOnSuccessListener {
                     val retro = RetroRemote(uuid = retroUuid, title = retroTitle)
                     Timber.d("Retro added $retro")
-                    continuation.resume(retro)
+                    continuation.resume(Either.right(retro))
+                }
+                .addOnFailureListener {
+                    continuation.resume(Either.left(ServerError.CreateRetroError))
                 }
         }
     }
