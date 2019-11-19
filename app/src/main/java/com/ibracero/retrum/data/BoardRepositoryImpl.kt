@@ -13,36 +13,23 @@ import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.RemoteDataStore
 import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.data.remote.firestore.StatementRemote
-import com.ibracero.retrum.domain.Repository
+import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.domain.StatementType.*
 import kotlinx.coroutines.*
 import java.util.*
 
-class RepositoryImpl(
+class BoardRepositoryImpl(
     val localDataStore: LocalDataStore,
     val remoteDataStore: RemoteDataStore,
-    val retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
     val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
     val userRemoteToDomainMapper: UserRemoteToDomainMapper,
     dispatchers: CoroutineDispatcherProvider
-) : Repository {
+) : BoardRepository {
 
     private val job = Job()
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
-
-    override fun createRetro(title: String): LiveData<Either<ServerError, Retro>> {
-        val retroLiveData = MutableLiveData<Either<ServerError, Retro>>()
-        scope.launch {
-            val retroEither = remoteDataStore.createRetro(retroTitle = title)
-                .map { retroRemoteToDomainMapper.map(it) }
-            retroLiveData.postValue(retroEither)
-        }
-        return retroLiveData
-    }
-
-    override fun getRetros(): LiveData<List<Retro>> = localDataStore.getRetros()
 
     override fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>> {
         return when (statementType) {
@@ -75,18 +62,6 @@ class RepositoryImpl(
 
     override fun stopObservingStatements() {
         remoteDataStore.stopObservingStatements()
-    }
-
-    override fun startObservingUserRetros() {
-        remoteDataStore.observeUserRetros {
-            scope.launch {
-                localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map))
-            }
-        }
-    }
-
-    override fun stopObservingUserRetros() {
-        remoteDataStore.stopObservingRetros()
     }
 
     private fun startObservingUser() {

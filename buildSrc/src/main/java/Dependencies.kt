@@ -6,9 +6,11 @@ import Libraries.Versions.androidx_version
 import Libraries.Versions.arrow_version
 import Libraries.Versions.coroutines_version
 import Libraries.Versions.firebase_analytics_version
+import Libraries.Versions.firebase_auth_version
 import Libraries.Versions.firebase_firestore_version
 import Libraries.Versions.google_material_version
 import Libraries.Versions.koin_version
+import Libraries.Versions.play_services_auth_version
 import Libraries.Versions.room_debugger_version
 import Libraries.Versions.room_version
 import Libraries.Versions.timber_version
@@ -52,6 +54,8 @@ object Libraries {
         const val room_version = "2.1.0"
         const val room_debugger_version = "1.0.6"
         const val arrow_version = "0.10.3"
+        const val firebase_auth_version = "19.1.0"
+        const val play_services_auth_version = "17.0.0"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -77,6 +81,8 @@ object Libraries {
     const val androidx_room_compiler = "androidx.room:room-compiler:$room_version"
     const val room_debugger = "com.amitshekhar.android:debug-db:$room_debugger_version"
     const val arrow = "io.arrow-kt:arrow-core:$arrow_version"
+    const val firebase_auth = "com.google.firebase:firebase-auth:$firebase_auth_version"
+    const val play_services_auth = "com.google.android.gms:play-services-auth:$play_services_auth_version"
 }
 
 object TestLibraries {

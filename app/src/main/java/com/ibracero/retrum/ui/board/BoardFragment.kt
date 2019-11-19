@@ -17,13 +17,12 @@ import com.ibracero.retrum.R
 import com.ibracero.retrum.common.NetworkStatus
 import com.ibracero.retrum.common.RetrumConnectionManager
 import com.ibracero.retrum.data.local.Retro
-import com.ibracero.retrum.domain.Repository
+import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.ui.board.action.ActionsFragment
 import com.ibracero.retrum.ui.board.negative.NegativeFragment
 import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.ext.android.inject
 import com.ibracero.retrum.ui.board.positive.PositiveFragment
-import kotlinx.android.synthetic.main.fragment_retro_list.*
 
 
 class BoardFragment : Fragment() {
@@ -32,7 +31,7 @@ class BoardFragment : Fragment() {
         const val ARGUMENT_RETRO = "arg_retro"
     }
 
-    private val repository: Repository by inject()
+    private val boardRepository: BoardRepository by inject()
     private val connectionManager: RetrumConnectionManager by inject()
 
     private val offlineSnackbar by lazy {
@@ -59,7 +58,7 @@ class BoardFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         getRetroArgument()?.let {
-            repository.startObservingStatements(it.uuid)
+            boardRepository.startObservingStatements(it.uuid)
         }
 
         connectionManager.connectionLiveData.observe(this@BoardFragment, Observer {
@@ -72,7 +71,7 @@ class BoardFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        repository.stopObservingStatements()
+        boardRepository.stopObservingStatements()
     }
 
     private fun initPortraitUi() {

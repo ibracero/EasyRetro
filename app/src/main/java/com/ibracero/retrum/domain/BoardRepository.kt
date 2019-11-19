@@ -6,11 +6,7 @@ import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.data.remote.ServerError
 
-interface Repository {
-
-    fun createRetro(title: String): LiveData<Either<ServerError, Retro>>
-
-    fun getRetros(): LiveData<List<Retro>>
+interface BoardRepository {
 
     fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>>
 
@@ -18,13 +14,9 @@ interface Repository {
 
     fun removeStatement(statement: Statement)
 
-    fun dispose()
-
     fun startObservingStatements(retroUuid: String)
-
-    fun startObservingUserRetros()
 
     fun stopObservingStatements()
 
-    fun stopObservingUserRetros()
+    fun dispose()
 }

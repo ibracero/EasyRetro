@@ -114,36 +114,40 @@ class RemoteDataStore {
     }
 
     suspend fun createRetro(retroTitle: String): Either<ServerError, RetroRemote> {
-        val retroUuid = suspendCoroutine<String> { continuation ->
+        val retroUuid = suspendCoroutine<String?> { continuation ->
             db.collection(FirestoreTable.TABLE_RETROS)
                 .document()
                 .get()
                 .addOnSuccessListener {
                     continuation.resume(it.id)
                 }
-        }
-
-        return suspendCoroutine { continuation ->
-
-            val item = hashMapOf(
-                FirestoreField.RETRO_TITLE to retroTitle,
-                FirestoreField.RETRO_CREATED to FieldValue.serverTimestamp()
-            )
-
-            db.collection(FirestoreTable.TABLE_USERS)
-                .document(USER_UUID)
-                .collection(FirestoreCollection.COLLECTION_RETROS)
-                .document(retroUuid)
-                .set(item)
-                .addOnSuccessListener {
-                    val retro = RetroRemote(uuid = retroUuid, title = retroTitle)
-                    Timber.d("Retro added $retro")
-                    continuation.resume(Either.right(retro))
-                }
                 .addOnFailureListener {
-                    continuation.resume(Either.left(ServerError.CreateRetroError))
+                    continuation.resume(null)
                 }
         }
+
+        return retroUuid?.let { uuid ->
+            suspendCoroutine<Either<ServerError, RetroRemote>> { continuation ->
+                val item = hashMapOf(
+                    FirestoreField.RETRO_TITLE to retroTitle,
+                    FirestoreField.RETRO_CREATED to FieldValue.serverTimestamp()
+                )
+
+                db.collection(FirestoreTable.TABLE_USERS)
+                    .document(USER_UUID)
+                    .collection(FirestoreCollection.COLLECTION_RETROS)
+                    .document(uuid)
+                    .set(item)
+                    .addOnSuccessListener {
+                        val retro = RetroRemote(uuid = uuid, title = retroTitle)
+                        Timber.d("Retro added $retro")
+                        continuation.resume(Either.right(retro))
+                    }
+                    .addOnFailureListener {
+                        continuation.resume(Either.left(ServerError.CreateRetroError))
+                    }
+            }
+        } ?: Either.left(ServerError.CreateRetroError)
     }
 
     fun removeRetro(retroUuid: String) {
