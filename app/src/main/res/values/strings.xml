@@ -9,4 +9,8 @@
 	<string name="action_yes">Yes</string>
 	<string name="action_no">No</string>
 	<string name="offline_message">Your connection seems unavailable. Some features might be disabled</string>
+	<string name="sign_in_with_email">Sign in with email</string>
+	<string name="sign_in_with_google">Sign in with Google</string>
+	<string name="create_account">Create account</string>
+	<string name="or">or</string>
 </resources>

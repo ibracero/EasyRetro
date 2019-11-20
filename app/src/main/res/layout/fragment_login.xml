@@ -6,37 +6,100 @@
 	android:animateLayoutChanges="true"
 	android:background="@color/colorPrimary">
 
+	<ImageView
+		android:id="@+id/post_it_image"
+		android:layout_width="172dp"
+		android:layout_height="172dp"
+		app:layout_constraintBottom_toTopOf="@id/email_sign_in"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintVertical_chainStyle="packed"
+		app:srcCompat="@drawable/ic_post_it" />
+
 	<TextView
 		android:id="@+id/welcome_label"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginTop="92dp"
-		android:text="Welcome to Retrum!"
-		android:textAppearance="@style/TextAppearance.AppCompat.Large"
-		android:textColor="@color/primaryTextColor"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
+		android:gravity="center"
+		android:paddingStart="24dp"
+		android:paddingTop="20dp"
+		android:rotation="-7"
+		android:text="@string/app_name"
+		android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+		android:textColor="@color/colorPrimaryDark"
+		android:textStyle="bold"
+		app:layout_constraintBottom_toBottomOf="@id/post_it_image"
+		app:layout_constraintEnd_toEndOf="@id/post_it_image"
+		app:layout_constraintStart_toStartOf="@id/post_it_image"
+		app:layout_constraintTop_toTopOf="@id/post_it_image" />
 
 	<Button
 		android:id="@+id/email_sign_in"
-		android:layout_width="192dp"
-		android:layout_height="wrap_content"
-		android:text="Sign in with email"
+		android:layout_width="232dp"
+		android:layout_height="56dp"
+		android:layout_marginTop="132dp"
+		android:background="@color/colorPrimaryDark"
+		android:drawableStart="@drawable/ic_email"
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp"
+		android:text="@string/sign_in_with_email"
+		android:textAllCaps="false"
+		android:textColor="@color/primaryTextColor"
+		android:textStyle="bold"
 		app:layout_constraintBottom_toTopOf="@id/google_sign_in"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/welcome_label"
+		app:layout_constraintTop_toBottomOf="@id/post_it_image"
 		app:layout_constraintVertical_chainStyle="packed" />
 
 	<Button
 		android:id="@+id/google_sign_in"
-		android:layout_width="192dp"
-		android:layout_height="wrap_content"
-		android:text="Sign in with google"
-		app:layout_constraintBottom_toBottomOf="parent"
+		android:layout_width="232dp"
+		android:layout_height="56dp"
+		android:layout_marginTop="8dp"
+		android:background="@color/colorPrimaryDark"
+		android:drawableStart="@drawable/googleg_standard_color_18"
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp"
+		android:text="@string/sign_in_with_google"
+		android:textAllCaps="false"
+		android:textColor="@color/primaryTextColor"
+		android:textStyle="bold"
+		app:layout_constraintBottom_toTopOf="@id/or_label"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/email_sign_in" />
+
+	<TextView
+		android:id="@+id/or_label"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="16dp"
+		android:layout_marginBottom="16dp"
+		android:text="@string/or"
+		android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+		android:textColor="@color/primaryTextColor"
+		app:layout_constraintBottom_toTopOf="@id/email_create_account"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/google_sign_in" />
+
+	<Button
+		android:id="@+id/email_create_account"
+		android:layout_width="232dp"
+		android:layout_height="56dp"
+		android:background="@color/colorPrimaryDark"
+		android:drawableStart="@drawable/ic_add_circle"
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp"
+		android:text="@string/create_account"
+		android:textAllCaps="false"
+		android:textColor="@color/primaryTextColor"
+		android:textStyle="bold"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/or_label" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
