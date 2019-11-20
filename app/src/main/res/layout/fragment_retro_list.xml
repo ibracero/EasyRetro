@@ -4,7 +4,19 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/retro_list_root"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+	android:layout_height="match_parent"
+	android:background="@color/lightGreyColor">
+
+	<androidx.appcompat.widget.Toolbar
+		android:id="@+id/retro_list_toolbar"
+		android:layout_width="0dp"
+		android:layout_height="?android:actionBarSize"
+		android:background="@color/colorPrimaryDark"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		app:title="@string/app_name"
+		app:titleTextColor="@color/primaryTextColor" />
 
 	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/retro_recycler_view"
@@ -14,7 +26,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/retro_list_toolbar"
 		tools:listitem="@layout/item_retro" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

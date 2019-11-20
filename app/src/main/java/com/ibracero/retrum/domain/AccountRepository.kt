@@ -1,8 +1,10 @@
 package com.ibracero.retrum.domain
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+
 interface AccountRepository {
 
-    fun loginGoogleUser()
+    fun firebaseAuthWithGoogle(account: GoogleSignInAccount, callback: GoogleSignInCallback)
 
     fun loginUser(email: String, password: String)
 

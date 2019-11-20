@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:animateLayoutChanges="true"
@@ -18,7 +19,7 @@
 		app:srcCompat="@drawable/ic_post_it" />
 
 	<TextView
-		android:id="@+id/welcome_label"
+		android:id="@+id/app_name_label"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:gravity="center"
@@ -89,17 +90,29 @@
 		android:id="@+id/email_create_account"
 		android:layout_width="232dp"
 		android:layout_height="56dp"
-		android:background="@color/colorPrimaryDark"
 		android:drawableStart="@drawable/ic_add_circle"
 		android:paddingStart="16dp"
 		android:paddingEnd="16dp"
 		android:text="@string/create_account"
-		android:textAllCaps="false"
-		android:textColor="@color/primaryTextColor"
-		android:textStyle="bold"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/or_label" />
+
+	<androidx.constraintlayout.widget.Group
+		android:id="@+id/group_buttons"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:visibility="gone"
+		app:constraint_referenced_ids="email_sign_in,google_sign_in,or_label,email_create_account"
+		tools:visibility="visible" />
+
+	<androidx.constraintlayout.widget.Group
+		android:id="@+id/group_post_it"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:visibility="gone"
+		app:constraint_referenced_ids="post_it_image,app_name_label"
+		tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

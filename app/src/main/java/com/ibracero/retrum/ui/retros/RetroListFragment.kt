@@ -42,7 +42,6 @@ class RetroListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (activity as AppCompatActivity).supportActionBar?.setTitle(R.string.app_name)
 
         initUi()
         retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer { showRetros(it) })

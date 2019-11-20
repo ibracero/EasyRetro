@@ -3,21 +3,35 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/main_nav_graph"
-	app:startDestination="@+id/navigation_login">
+	app:startDestination="@+id/navigation_welcome">
 
 	<fragment
-		android:id="@+id/navigation_login"
-		android:name="com.ibracero.retrum.ui.login.LoginFragment"
+		android:id="@+id/navigation_welcome"
+		android:name="com.ibracero.retrum.ui.account.welcome.WelcomeFragment"
 		android:label="@string/app_name"
-		tools:layout="@layout/fragment_login">
+		tools:layout="@layout/fragment_welcome">
 		<action
-			android:id="@+id/action_sign_in"
+			android:id="@+id/action_sign_in_with_email"
+			app:destination="@id/navigation_login_with_email"
+			app:enterAnim="@anim/nav_default_enter_anim"
+			app:exitAnim="@anim/nav_default_exit_anim"
+			app:launchSingleTop="true"
+			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+		<action
+			android:id="@+id/action_sign_in_success"
 			app:destination="@id/navigation_retro_list"
 			app:enterAnim="@anim/nav_default_enter_anim"
 			app:exitAnim="@anim/nav_default_exit_anim"
 			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
 			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
 	</fragment>
+
+	<fragment
+		android:id="@+id/navigation_login_with_email"
+		android:name="com.ibracero.retrum.ui.account.login.LoginFragment"
+		android:label="@string/app_name"
+		tools:layout="@layout/fragment_login_email" />
 
 	<fragment
 		android:id="@+id/navigation_retro_list"

@@ -86,6 +86,7 @@ class BoardFragment : Fragment() {
                 R.id.navigation_actions
             )
         )
+        (requireActivity() as AppCompatActivity).setSupportActionBar(board_toolbar)
         setupActionBarWithNavController(requireActivity() as AppCompatActivity, navController, appBarConfiguration)
         nav_view?.setupWithNavController(navController)
         nav_view?.setOnNavigationItemSelectedListener { menuItem ->

@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.common.RetrumConnectionManager
+import com.ibracero.retrum.data.AccountRepositoryImpl
 import com.ibracero.retrum.data.BoardRepositoryImpl
 import com.ibracero.retrum.data.RetroRepositoryImpl
 import com.ibracero.retrum.data.local.LocalDataStore
@@ -12,9 +13,11 @@ import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.RemoteDataStore
+import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.domain.RetroRepository
 import com.ibracero.retrum.ui.board.StatementViewModel
+import com.ibracero.retrum.ui.account.welcome.WelcomePresenter
 import com.ibracero.retrum.ui.retros.RetroListViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.viewmodel.dsl.viewModel
@@ -65,4 +68,11 @@ val mapperModule = module {
     factory { StatementRemoteToDomainMapper() }
 
     factory { UserRemoteToDomainMapper() }
+}
+
+val accountModule = module {
+
+    factory<AccountRepository> { AccountRepositoryImpl() }
+
+    factory { WelcomePresenter(get()) }
 }

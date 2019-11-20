@@ -1,6 +1,7 @@
 package com.ibracero.retrum
 
 import android.app.Application
+import com.ibracero.retrum.di.accountModule
 import com.ibracero.retrum.di.appModule
 import com.ibracero.retrum.di.mapperModule
 import com.ibracero.retrum.di.viewModelModule
@@ -17,7 +18,7 @@ class RetrumApp : Application() {
         startKoin {
             androidLogger()
             androidContext(this@RetrumApp)
-            modules(listOf(appModule, viewModelModule, mapperModule))
+            modules(listOf(appModule, viewModelModule, mapperModule, accountModule))
 
             Timber.plant(Timber.DebugTree())
         }
