@@ -12,7 +12,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.visible
-import com.ibracero.retrum.domain.GoogleSignInCallback
+import com.ibracero.retrum.domain.SignInCallback
 import kotlinx.android.synthetic.main.fragment_welcome.*
 import org.koin.android.ext.android.inject
 
@@ -37,20 +37,17 @@ class WelcomeFragment : Fragment() {
         group_post_it.visible()
 
         google_sign_in.setOnClickListener { launchGoogleSignIn(it) }
-
-        email_sign_in.setOnClickListener { findNavController().navigate(R.id.action_sign_in_with_email) }
+//        email_sign_in.setOnClickListener { findNavController().navigate(R.id.action_sign_in_with_email) }
 
         buttonsLayoutHandler.postDelayed({
-            group_buttons.visible()
+            if (!welcomePresenter.isSessionOpen()) google_sign_in.visible()
+            else navigateToRetroList()
         }, BUTTONS_SHOW_DELAY)
     }
 
     private fun launchGoogleSignIn(it: View) {
         val signInIntent = GoogleSignIn.getClient(it.context, getSignInOptions()).signInIntent
-        startActivityForResult(
-            signInIntent,
-            GOOGLE_SIGN_IN_REQUEST_CODE
-        )
+        startActivityForResult(signInIntent, GOOGLE_SIGN_IN_REQUEST_CODE)
     }
 
     override fun onDestroyView() {
@@ -62,9 +59,9 @@ class WelcomeFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            welcomePresenter.handleSignInResult(task, object : GoogleSignInCallback {
+            welcomePresenter.handleSignInResult(task, object : SignInCallback {
                 override fun onSignedIn() {
-                    findNavController().navigate(R.id.action_sign_in_success)
+                    navigateToRetroList()
                 }
 
                 override fun onError(throwable: Throwable) {
@@ -72,6 +69,10 @@ class WelcomeFragment : Fragment() {
                 }
             })
         }
+    }
+
+    private fun navigateToRetroList() {
+        findNavController().navigate(R.id.action_sign_in_success)
     }
 
     private fun getSignInOptions() =

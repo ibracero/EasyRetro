@@ -48,6 +48,7 @@
 		android:textAllCaps="false"
 		android:textColor="@color/primaryTextColor"
 		android:textStyle="bold"
+		android:visibility="gone"
 		app:layout_constraintBottom_toTopOf="@id/google_sign_in"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
@@ -58,7 +59,7 @@
 		android:id="@+id/google_sign_in"
 		android:layout_width="232dp"
 		android:layout_height="56dp"
-		android:layout_marginTop="8dp"
+		android:layout_marginTop="132dp"
 		android:background="@color/colorPrimaryDark"
 		android:drawableStart="@drawable/googleg_standard_color_18"
 		android:paddingStart="16dp"
@@ -67,10 +68,12 @@
 		android:textAllCaps="false"
 		android:textColor="@color/primaryTextColor"
 		android:textStyle="bold"
+		android:visibility="gone"
 		app:layout_constraintBottom_toTopOf="@id/or_label"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/email_sign_in" />
+		app:layout_constraintTop_toBottomOf="@id/email_sign_in"
+		tools:visibility="visible" />
 
 	<TextView
 		android:id="@+id/or_label"
@@ -81,6 +84,7 @@
 		android:text="@string/or"
 		android:textAppearance="@style/TextAppearance.AppCompat.Medium"
 		android:textColor="@color/primaryTextColor"
+		android:visibility="gone"
 		app:layout_constraintBottom_toTopOf="@id/email_create_account"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
@@ -94,18 +98,21 @@
 		android:paddingStart="16dp"
 		android:paddingEnd="16dp"
 		android:text="@string/create_account"
+		android:visibility="gone"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/or_label" />
 
-	<androidx.constraintlayout.widget.Group
-		android:id="@+id/group_buttons"
-		android:layout_width="0dp"
-		android:layout_height="0dp"
-		android:visibility="gone"
-		app:constraint_referenced_ids="email_sign_in,google_sign_in,or_label,email_create_account"
-		tools:visibility="visible" />
+	<!--
+		<androidx.constraintlayout.widget.Group
+			android:id="@+id/group_buttons"
+			android:layout_width="0dp"
+			android:layout_height="0dp"
+			android:visibility="gone"
+			app:constraint_referenced_ids="email_sign_in,google_sign_in,or_label,email_create_account"
+			tools:visibility="visible" />
+	-->
 
 	<androidx.constraintlayout.widget.Group
 		android:id="@+id/group_post_it"

@@ -43,13 +43,10 @@ androidExtensions {
 dependencies {
     implementation(Libraries.kotlin_std)
     implementation(Libraries.androidx_appcompat)
-    implementation(Libraries.androidx_core_ktx)
     implementation(Libraries.androidx_material)
     implementation(Libraries.androidx_constraint_layout)
     implementation(Libraries.androidx_lifecycle_extensions)
-    implementation(Libraries.androidx_navigation_fragment)
     implementation(Libraries.androidx_navigation_fragment_ktx)
-    implementation(Libraries.androidx_navigation_ui)
     implementation(Libraries.androidx_navigation_ui_ktx)
     implementation(Libraries.firebase_firestore)
     implementation(Libraries.firebase_analytics)

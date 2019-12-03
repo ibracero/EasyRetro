@@ -1,8 +1,7 @@
 import Libraries.Versions.androidx_compat_version
 import Libraries.Versions.androidx_constraint_layout_version
-import Libraries.Versions.androidx_core_version
 import Libraries.Versions.androidx_lifecycle_version
-import Libraries.Versions.androidx_version
+import Libraries.Versions.androidx_navigation_version
 import Libraries.Versions.arrow_version
 import Libraries.Versions.coroutines_version
 import Libraries.Versions.firebase_analytics_version
@@ -40,9 +39,8 @@ object Plugins {
 
 object Libraries {
     object Versions {
-        const val androidx_version = "2.0.0"
-        const val androidx_compat_version = "1.0.2"
-        const val androidx_core_version = "1.0.2"
+        const val androidx_navigation_version = "2.0.0"
+        const val androidx_compat_version = "1.1.0"
         const val androidx_constraint_layout_version = "1.1.3"
         const val androidx_lifecycle_version = "2.0.0"
         const val google_material_version = "1.0.0"
@@ -61,15 +59,12 @@ object Libraries {
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     const val androidx_appcompat = "androidx.appcompat:appcompat:$androidx_compat_version"
-    const val androidx_core_ktx = "androidx.core:core-ktx:$androidx_core_version"
     const val androidx_material = "com.google.android.material:material:$google_material_version"
     const val androidx_lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:$androidx_lifecycle_version"
     const val androidx_constraint_layout =
         "androidx.constraintlayout:constraintlayout:$androidx_constraint_layout_version"
-    const val androidx_navigation_fragment = "androidx.navigation:navigation-fragment:$androidx_version"
-    const val androidx_navigation_fragment_ktx = "androidx.navigation:navigation-fragment-ktx:$androidx_version"
-    const val androidx_navigation_ui = "androidx.navigation:navigation-ui:$androidx_version"
-    const val androidx_navigation_ui_ktx = "androidx.navigation:navigation-ui-ktx:$androidx_version"
+    const val androidx_navigation_fragment_ktx = "androidx.navigation:navigation-fragment-ktx:$androidx_navigation_version"
+    const val androidx_navigation_ui_ktx = "androidx.navigation:navigation-ui-ktx:$androidx_navigation_version"
     const val firebase_firestore = "com.google.firebase:firebase-firestore:$firebase_firestore_version"
     const val firebase_analytics = "com.google.firebase:firebase-analytics:$firebase_analytics_version"
     const val coroutines_core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"

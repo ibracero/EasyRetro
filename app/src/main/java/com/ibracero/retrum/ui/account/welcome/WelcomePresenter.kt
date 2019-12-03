@@ -4,7 +4,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.ibracero.retrum.domain.AccountRepository
-import com.ibracero.retrum.domain.GoogleSignInCallback
+import com.ibracero.retrum.domain.SignInCallback
 import timber.log.Timber
 
 class WelcomePresenter(
@@ -12,10 +12,10 @@ class WelcomePresenter(
 ) {
 
     fun isSessionOpen(): Boolean {
-        return false
+        return repository.isSessionOpen()
     }
 
-    fun handleSignInResult(task: Task<GoogleSignInAccount>?, callback: GoogleSignInCallback) {
+    fun handleSignInResult(task: Task<GoogleSignInAccount>?, callback: SignInCallback) {
         try {
             val account = task?.getResult(ApiException::class.java)
             account?.let { firebaseAuthWithGoogle(it, callback) }
@@ -24,7 +24,7 @@ class WelcomePresenter(
         }
     }
 
-    private fun firebaseAuthWithGoogle(account: GoogleSignInAccount, callback: GoogleSignInCallback) {
+    private fun firebaseAuthWithGoogle(account: GoogleSignInAccount, callback: SignInCallback) {
         repository.firebaseAuthWithGoogle(account, callback)
     }
 }

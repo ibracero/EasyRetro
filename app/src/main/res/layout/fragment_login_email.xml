@@ -47,6 +47,7 @@
 		android:id="@+id/password_input_layout"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
+		android:layout_marginTop="16dp"
 		android:hint="@string/password"
 		android:textColorHint="@color/primaryTextColorTranslucent"
 		app:errorEnabled="true"

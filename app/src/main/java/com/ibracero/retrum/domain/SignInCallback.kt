@@ -1,6 +1,6 @@
 package com.ibracero.retrum.domain
 
-interface GoogleSignInCallback {
+interface SignInCallback {
 
     fun onSignedIn()
 

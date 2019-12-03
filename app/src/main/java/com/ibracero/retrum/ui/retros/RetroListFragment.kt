@@ -5,22 +5,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
-import com.ibracero.retrum.common.NetworkStatus
-import com.ibracero.retrum.common.NetworkStatus.*
+import com.ibracero.retrum.common.NetworkStatus.ONLINE
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.remote.ServerError
-import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO
+import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_TITLE
+import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class RetroListFragment : Fragment() {
+
+    private val backPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            requireActivity().finish()
+        }
+    }
 
     private val retroListViewModel: RetroListViewModel by viewModel()
     private val retroListAdapter = RetroListAdapter(::onRetroClicked, ::onAddClicked)
@@ -42,6 +49,8 @@ class RetroListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (requireActivity() as ComponentActivity).onBackPressedDispatcher.addCallback(backPressedCallback)
 
         initUi()
         retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer { showRetros(it) })
@@ -96,7 +105,10 @@ class RetroListFragment : Fragment() {
     }
 
     private fun navigateToRetroBoard(retro: Retro) {
-        val args = Bundle().apply { putSerializable(ARGUMENT_RETRO, retro) }
+        val args = Bundle().apply {
+            putString(ARGUMENT_RETRO_TITLE, retro.title)
+            putString(ARGUMENT_RETRO_UUID, retro.uuid)
+        }
         findNavController().navigate(R.id.action_retro_clicked, args)
     }
 }

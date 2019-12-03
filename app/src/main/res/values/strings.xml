@@ -15,4 +15,7 @@
 	<string name="or">or</string>
 	<string name="email">Email</string>
 	<string name="password">Password</string>
+	<string name="invite">Invite</string>
+	<string name="retro_invitation_message">"Hey there! You are invited to join my retro \"%1$s\". Just tap on the link: %2$s"</string>
+	<string name="retro_join_link_format" translatable="false">https://retrum.app/join/%1$s</string>
 </resources>

@@ -16,6 +16,7 @@ import com.ibracero.retrum.data.remote.RemoteDataStore
 import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.domain.RetroRepository
+import com.ibracero.retrum.ui.account.login.LoginPresenter
 import com.ibracero.retrum.ui.board.StatementViewModel
 import com.ibracero.retrum.ui.account.welcome.WelcomePresenter
 import com.ibracero.retrum.ui.retros.RetroListViewModel
@@ -75,4 +76,6 @@ val accountModule = module {
     factory<AccountRepository> { AccountRepositoryImpl() }
 
     factory { WelcomePresenter(get()) }
+
+    factory { LoginPresenter(get()) }
 }
