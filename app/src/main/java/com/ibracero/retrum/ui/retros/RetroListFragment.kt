@@ -16,7 +16,6 @@ import com.ibracero.retrum.R
 import com.ibracero.retrum.common.NetworkStatus.ONLINE
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.remote.ServerError
-import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_TITLE
 import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -106,7 +105,6 @@ class RetroListFragment : Fragment() {
 
     private fun navigateToRetroBoard(retro: Retro) {
         val args = Bundle().apply {
-            putString(ARGUMENT_RETRO_TITLE, retro.title)
             putString(ARGUMENT_RETRO_UUID, retro.uuid)
         }
         findNavController().navigate(R.id.action_retro_clicked, args)

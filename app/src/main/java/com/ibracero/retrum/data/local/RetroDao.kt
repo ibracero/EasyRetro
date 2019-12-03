@@ -10,6 +10,9 @@ interface RetroDao {
     @Query("SELECT * FROM $TABLE_RETRO ORDER BY timestamp DESC")// AS r WHERE r.uuid IN (SELECT retroUuids FROM $TABLE_USER AS u WHERE u.uuid == :userUuid)
     fun getUserRetros(/*userUuid: String*/): LiveData<List<Retro>>
 
+    @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
+    fun gerRetroInfo(retroUuid: String): LiveData<Retro>
+
     @Query("SELECT * FROM $TABLE_STATEMENT WHERE retroUuid == :retroUuid AND type == 'POSITIVE' ORDER BY timestamp DESC")
     fun getPositiveStatements(retroUuid: String): LiveData<List<Statement>>
 

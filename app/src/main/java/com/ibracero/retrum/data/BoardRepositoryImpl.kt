@@ -1,17 +1,13 @@
 package com.ibracero.retrum.data
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import arrow.core.Either
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
-import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.RemoteDataStore
-import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.domain.StatementType
@@ -30,6 +26,8 @@ class BoardRepositoryImpl(
     private val job = Job()
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
+
+    override fun getRetroInfo(retroUuid: String): LiveData<Retro> = localDataStore.getRetroInfo(retroUuid)
 
     override fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>> {
         return when (statementType) {

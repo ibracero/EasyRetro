@@ -19,6 +19,7 @@ import com.ibracero.retrum.domain.RetroRepository
 import com.ibracero.retrum.ui.account.login.LoginPresenter
 import com.ibracero.retrum.ui.board.StatementViewModel
 import com.ibracero.retrum.ui.account.welcome.WelcomePresenter
+import com.ibracero.retrum.ui.board.BoardViewModel
 import com.ibracero.retrum.ui.retros.RetroListViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.viewmodel.dsl.viewModel
@@ -61,6 +62,8 @@ val viewModelModule = module {
     viewModel { RetroListViewModel(get(), get()) }
 
     viewModel { StatementViewModel(get()) }
+
+    viewModel { BoardViewModel(get()) }
 }
 
 val mapperModule = module {

@@ -52,9 +52,6 @@
 		android:name="com.ibracero.retrum.ui.board.BoardFragment"
 		tools:layout="@layout/fragment_board">
 		<argument
-			android:name="arg_retro_title"
-			app:argType="string" />
-		<argument
 			android:name="arg_retro_uuid"
 			app:argType="string" />
 		<deepLink

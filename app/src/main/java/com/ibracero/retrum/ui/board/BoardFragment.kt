@@ -21,12 +21,12 @@ import com.ibracero.retrum.ui.board.negative.NegativeFragment
 import com.ibracero.retrum.ui.board.positive.PositiveFragment
 import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.ext.android.inject
+import org.koin.android.viewmodel.ext.android.viewModel
 
 
 class BoardFragment : Fragment() {
 
     companion object {
-        const val ARGUMENT_RETRO_TITLE = "arg_retro_title"
         const val ARGUMENT_RETRO_UUID = "arg_retro_uuid"
     }
 
@@ -35,6 +35,7 @@ class BoardFragment : Fragment() {
             navigateToRetroList()
         }
     }
+    private val boardViewModel: BoardViewModel by viewModel()
     private val boardRepository: BoardRepository by inject()
     private val connectionManager: RetrumConnectionManager by inject()
 
@@ -57,10 +58,18 @@ class BoardFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_board, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        getRetroUuidArgument()?.let { uuid ->
+            boardViewModel.getRetroInfo(uuid).observe(this@BoardFragment, Observer {
+                initToolbar(it.title)
+            })
+        }
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        initToolbar()
 
         if (isPortraitMode()) initPortraitUi()
         else initLandscapeUi()
@@ -104,8 +113,8 @@ class BoardFragment : Fragment() {
         backPressedCallback.remove()
     }
 
-    private fun initToolbar() {
-        board_toolbar.title = getRetroTitleArgument() ?: getString(R.string.app_name)
+    private fun initToolbar(title: String?) {
+        board_toolbar.title = title ?: getString(R.string.app_name)
         (requireActivity() as AppCompatActivity).setSupportActionBar(board_toolbar)
     }
 
@@ -146,11 +155,15 @@ class BoardFragment : Fragment() {
 
     private fun displayShareSheet() {
         val link = getString(R.string.retro_join_link_format, getRetroUuidArgument().orEmpty())
+        val retroTitle = getRetroUuidArgument()?.let {
+            boardViewModel.getRetroInfo(it).value?.title
+        }.orEmpty()
+
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(
                 Intent.EXTRA_TEXT,
-                getString(R.string.retro_invitation_message, getRetroTitleArgument().orEmpty(), link)
+                getString(R.string.retro_invitation_message, retroTitle, link)
             )
             type = "text/plain"
         }
@@ -158,8 +171,6 @@ class BoardFragment : Fragment() {
         val shareIntent = Intent.createChooser(sendIntent, null)
         startActivity(shareIntent)
     }
-
-    private fun getRetroTitleArgument() = arguments?.getString(ARGUMENT_RETRO_TITLE)
 
     private fun getRetroUuidArgument() = arguments?.getString(ARGUMENT_RETRO_UUID)
 

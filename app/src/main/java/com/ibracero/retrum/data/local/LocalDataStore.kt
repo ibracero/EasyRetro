@@ -21,4 +21,6 @@ class LocalDataStore(private val retroDao: RetroDao) {
     fun getNegativeStatements(retroUuid: String) = retroDao.getNegativeStatements(retroUuid)
 
     fun getActionPoints(retroUuid: String) = retroDao.getActionPoints(retroUuid)
+
+    fun getRetroInfo(retroUuid: String) = retroDao.gerRetroInfo(retroUuid)
 }
