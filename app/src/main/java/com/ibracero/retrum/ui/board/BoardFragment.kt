@@ -19,6 +19,7 @@ import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.ui.board.action.ActionsFragment
 import com.ibracero.retrum.ui.board.negative.NegativeFragment
 import com.ibracero.retrum.ui.board.positive.PositiveFragment
+import com.ibracero.retrum.ui.board.users.UserListAdapter
 import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -38,6 +39,8 @@ class BoardFragment : Fragment() {
     private val boardViewModel: BoardViewModel by viewModel()
     private val boardRepository: BoardRepository by inject()
     private val connectionManager: RetrumConnectionManager by inject()
+
+    private val userListAdapter = UserListAdapter()
 
     private val offlineSnackbar by lazy {
         Snackbar.make(
@@ -61,9 +64,13 @@ class BoardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        users_recyclerview.adapter = userListAdapter
+
         getRetroUuidArgument()?.let { uuid ->
             boardViewModel.getRetroInfo(uuid).observe(this@BoardFragment, Observer {
                 initToolbar(it.title)
+                val validUsers = it.users.filter { it.isNotEmpty() }
+                userListAdapter.submitList(validUsers)
             })
         }
     }
@@ -96,6 +103,7 @@ class BoardFragment : Fragment() {
 
         getRetroUuidArgument()?.let {
             boardRepository.startObservingStatements(it)
+            boardRepository.startObservingRetroUsers(it)
         }
 
         connectionManager.connectionLiveData.observe(this@BoardFragment, Observer {

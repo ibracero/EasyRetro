@@ -4,6 +4,7 @@ import arrow.core.Either
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.ibracero.retrum.data.local.User
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreCollection
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreField
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreTable
@@ -92,6 +93,22 @@ class RemoteDataStore {
                 if (!statements.isNullOrEmpty() && !snapshot.metadata.hasPendingWrites()) {
                     Timber.d("Statements update $statements")
                     onUpdate(statements.toList())
+                }
+            }
+    }
+
+    fun observeRetroUsers(retroUuid: String, onUpdate: (List<String>) -> Unit) {
+        db.collection(FirestoreTable.TABLE_RETROS)
+            .document(retroUuid)
+            .collection(FirestoreCollection.COLLECTION_USERS)
+            .addSnapshotListener { snapshot, _ ->
+                val usersEmail = snapshot?.documents?.map { doc ->
+                    doc.getString(FirestoreField.USER_EMAIL).orEmpty()
+                }
+
+                if (!usersEmail.isNullOrEmpty() && !snapshot.metadata.hasPendingWrites()) {
+                    Timber.d("Users update")
+                    onUpdate(usersEmail)
                 }
             }
     }

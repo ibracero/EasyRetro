@@ -18,6 +18,22 @@
 		app:titleTextColor="@color/primaryTextColor"
 		tools:title="Retro title" />
 
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/users_recyclerview"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:background="@color/colorPrimaryDark"
+		android:orientation="horizontal"
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="8dp"
+		app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+		app:layout_constraintBottom_toTopOf="@id/board_root"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/board_toolbar"
+		tools:listitem="@layout/item_user" />
+
 	<androidx.coordinatorlayout.widget.CoordinatorLayout
 		android:id="@+id/board_root"
 		android:layout_width="0dp"
@@ -25,7 +41,7 @@
 		app:layout_constraintBottom_toTopOf="@id/nav_view"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/board_toolbar" />
+		app:layout_constraintTop_toBottomOf="@id/users_recyclerview" />
 
 	<fragment
 		android:id="@+id/bottom_nav_host_fragment"
@@ -36,7 +52,7 @@
 		app:layout_constraintBottom_toTopOf="@id/nav_view"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/board_toolbar"
+		app:layout_constraintTop_toBottomOf="@id/users_recyclerview"
 		app:navGraph="@navigation/board_nav_graph" />
 
 	<com.google.android.material.bottomnavigation.BottomNavigationView

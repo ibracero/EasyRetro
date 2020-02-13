@@ -3,7 +3,8 @@ package com.ibracero.retrum.data.remote.firestore
 data class RetroRemote(
     val uuid: String,
     val title: String,
-    val timestamp: Long? = null
+    val timestamp: Long? = null,
+    val users: List<String>? = emptyList()
 )
 
 data class StatementRemote(

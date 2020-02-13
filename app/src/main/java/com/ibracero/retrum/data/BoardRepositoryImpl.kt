@@ -58,6 +58,14 @@ class BoardRepositoryImpl(
         }
     }
 
+    override fun startObservingRetroUsers(retroUuid: String) {
+        remoteDataStore.observeRetroUsers(retroUuid) {
+            scope.launch {
+                localDataStore.updateRetroUsers(retroUuid, it)
+            }
+        }
+    }
+
     override fun stopObservingStatements() {
         remoteDataStore.stopObservingStatements()
     }

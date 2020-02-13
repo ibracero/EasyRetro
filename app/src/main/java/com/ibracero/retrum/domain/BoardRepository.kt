@@ -20,5 +20,7 @@ interface BoardRepository {
 
     fun stopObservingStatements()
 
+    fun startObservingRetroUsers(retroUuid: String)
+
     fun dispose()
 }

@@ -21,7 +21,8 @@ data class User(
 data class Retro(
     @PrimaryKey val uuid: String,
     val title: String,
-    val timestamp: Long
+    val timestamp: Long,
+    val users: List<String>
 ) : Serializable
 
 @Entity(tableName = TABLE_STATEMENT)

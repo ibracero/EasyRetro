@@ -10,6 +10,7 @@ class RetroRemoteToDomainMapper : Mapper<RetroRemote, Retro> {
         Retro(
             uuid = from.uuid,
             title = from.title,
-            timestamp = from.timestamp ?: 0
+            timestamp = from.timestamp ?: 0,
+            users = from.users ?: emptyList()
         )
 }

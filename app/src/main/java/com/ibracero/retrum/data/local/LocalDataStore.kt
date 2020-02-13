@@ -1,5 +1,7 @@
 package com.ibracero.retrum.data.local
 
+import arrow.core.valid
+
 class LocalDataStore(private val retroDao: RetroDao) {
 
     fun getRetros() = retroDao.getUserRetros(/*"W2KCUn3Dz4Wy35CzQZmc"*/)
@@ -22,5 +24,13 @@ class LocalDataStore(private val retroDao: RetroDao) {
 
     fun getActionPoints(retroUuid: String) = retroDao.getActionPoints(retroUuid)
 
-    fun getRetroInfo(retroUuid: String) = retroDao.gerRetroInfo(retroUuid)
+    fun getRetroInfo(retroUuid: String) = retroDao.getRetroInfo(retroUuid)
+
+    fun updateRetroUsers(retroUuid: String, users: List<String>) {
+        val validUsers = users.filter { it.isNotEmpty() }
+        if (validUsers.isEmpty()) return
+
+        val retro = retroDao.getRetro(retroUuid)
+        retroDao.updateRetro(retro.copy(users = validUsers))
+    }
 }

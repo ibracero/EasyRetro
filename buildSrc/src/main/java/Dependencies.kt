@@ -49,7 +49,7 @@ object Libraries {
         const val coroutines_version = "1.3.2"
         const val koin_version = "2.0.1"
         const val timber_version = "4.7.1"
-        const val room_version = "2.1.0"
+        const val room_version = "2.2.2"
         const val room_debugger_version = "1.0.6"
         const val arrow_version = "0.10.3"
         const val firebase_auth_version = "19.1.0"

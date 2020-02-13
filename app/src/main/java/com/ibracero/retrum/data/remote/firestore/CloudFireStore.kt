@@ -10,6 +10,7 @@ object CloudFireStore {
     object FirestoreCollection {
         const val COLLECTION_RETROS = "retros"
         const val COLLECTION_STATEMENTS = "statements"
+        const val COLLECTION_USERS = "users"
     }
 
     object FirestoreField {
