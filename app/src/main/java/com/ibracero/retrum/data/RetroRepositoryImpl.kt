@@ -44,10 +44,9 @@ class RetroRepositoryImpl(
     override fun getRetros(): LiveData<List<Retro>> = localDataStore.getRetros()
 
     override fun startObservingUserRetros() {
-        remoteDataStore.observeUserRetros(userEmail) {
-            scope.launch {
-                localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map))
-            }
+        scope.launch {
+            remoteDataStore.observeUserRetros(userEmail)
+                .map { localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map)) }
         }
     }
 
