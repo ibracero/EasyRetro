@@ -1,6 +1,8 @@
 package com.ibracero.retrum.data
 
 import androidx.lifecycle.LiveData
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.Retro
@@ -23,6 +25,9 @@ class BoardRepositoryImpl(
     dispatchers: CoroutineDispatcherProvider
 ) : BoardRepository {
 
+    private val userEmail: String
+        get() = FirebaseAuth.getInstance().currentUser?.email.orEmpty()
+
     private val job = Job()
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
@@ -42,7 +47,7 @@ class BoardRepositoryImpl(
             remoteDataStore.addStatementToBoard(
                 retroUuid = retroUuid,
                 statementRemote = StatementRemote(
-                    userEmail = "yo@yo.com",
+                    userEmail = userEmail,
                     description = description,
                     statementType = statementType.toString().toLowerCase(Locale.getDefault())
                 )
@@ -71,7 +76,7 @@ class BoardRepositoryImpl(
     }
 
     private fun startObservingUser() {
-        remoteDataStore.observeUser {
+        remoteDataStore.observeUser(userEmail) {
             if (!it.email.isNullOrEmpty()) {
                 scope.launch {
                     localDataStore.saveUser(userRemoteToDomainMapper.map(it))

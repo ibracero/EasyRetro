@@ -78,6 +78,7 @@ class WelcomeFragment : Fragment() {
     private fun getSignInOptions() =
         GoogleSignInOptions.Builder()
             .requestEmail()
+            .requestProfile()
             .requestIdToken(getString(R.string.default_web_client_id))
             .build()
 }

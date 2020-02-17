@@ -4,7 +4,7 @@ import arrow.core.Either
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.ibracero.retrum.data.local.User
+import com.google.firebase.firestore.SetOptions
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreCollection
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreField
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreTable
@@ -17,10 +17,6 @@ import kotlin.coroutines.suspendCoroutine
 
 class RemoteDataStore {
 
-    companion object {
-        const val USER_UUID = "W2KCUn3Dz4Wy35CzQZmc"
-    }
-
     private val db = FirebaseFirestore.getInstance()
     private var userRemote: UserRemote = UserRemote()
 
@@ -29,9 +25,9 @@ class RemoteDataStore {
     private var userObserver: ListenerRegistration? = null
 
 
-    fun observeUser(onUpdate: (UserRemote) -> Unit) {
+    fun observeUser(userEmail: String, onUpdate: (UserRemote) -> Unit) {
         db.collection(FirestoreTable.TABLE_USERS)
-            .document(USER_UUID)
+            .document(userEmail)
             .collection(FirestoreCollection.COLLECTION_RETROS)
             .addSnapshotListener { snapshot, _ ->
                 userRemote = userRemote.copy(retroUuids = snapshot?.documents?.map { it.id } ?: emptyList())
@@ -39,21 +35,22 @@ class RemoteDataStore {
             }
 
         db.collection(FirestoreTable.TABLE_USERS)
-            .document(USER_UUID)
+            .document(userEmail)
             .addSnapshotListener { snapshot, _ ->
                 userRemote = userRemote.copy(
-                    email = snapshot?.getString(FirestoreField.USER_EMAIL).orEmpty(),
+                    email = userEmail,
                     firstName = snapshot?.getString(FirestoreField.USER_FIRST_NAME).orEmpty(),
-                    lastName = snapshot?.getString(FirestoreField.USER_LAST_NAME).orEmpty()
+                    lastName = snapshot?.getString(FirestoreField.USER_LAST_NAME).orEmpty(),
+                    photoUrl = snapshot?.getString(FirestoreField.USER_PHOTO_URL).orEmpty()
                 )
                 onUpdate(userRemote)
             }
     }
 
-    fun observeUserRetros(onUpdate: (List<RetroRemote>) -> Unit) {
+    fun observeUserRetros(userEmail: String, onUpdate: (List<RetroRemote>) -> Unit) {
         retrosObserver?.remove()
         retrosObserver = db.collection(FirestoreTable.TABLE_USERS)
-            .document(USER_UUID)
+            .document(userEmail)
             .collection(FirestoreCollection.COLLECTION_RETROS)
             .addSnapshotListener { snapshot, _ ->
                 val retros = snapshot?.documents?.map { doc ->
@@ -71,22 +68,28 @@ class RemoteDataStore {
     }
 
 
-    fun observeStatements(retroUuid: String, onUpdate: (List<StatementRemote>) -> Unit) {
+    fun observeStatements(userEmail: String, retroUuid: String, onUpdate: (List<StatementRemote>) -> Unit) {
+
+        db.collection(FirestoreTable.TABLE_USERS)
+            .document(userEmail)
+            .collection(FirestoreCollection.COLLECTION_RETROS)
+            .document(retroUuid)
+
         statementObserver?.remove()
         statementObserver = db.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
             .collection(FirestoreCollection.COLLECTION_STATEMENTS)
             .addSnapshotListener { snapshot, _ ->
                 val statements = snapshot?.documents?.map { doc ->
-                    val userEmail = doc.getString(FirestoreField.USER_EMAIL).orEmpty()
+                    val author = doc.getString(FirestoreField.STATEMENT_AUTHOR).orEmpty()
                     StatementRemote(
                         uuid = doc.id,
                         retroUuid = retroUuid,
-                        userEmail = userEmail,
+                        userEmail = author,
                         statementType = doc.getString(FirestoreField.STATEMENT_TYPE).orEmpty(),
                         description = doc.getString(FirestoreField.STATEMENT_DESCRIPTION).orEmpty(),
                         timestamp = (doc.getTimestamp(FirestoreField.STATEMENT_CREATED)?.seconds ?: 0) * 1000,
-                        isRemovable = userEmail == "yo@yo.com"
+                        isRemovable = author == userEmail
                     )
                 }
 
@@ -115,7 +118,7 @@ class RemoteDataStore {
 
     fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote) {
         val item = hashMapOf(
-            FirestoreField.USER_EMAIL to statementRemote.userEmail,
+            FirestoreField.STATEMENT_AUTHOR to statementRemote.userEmail,
             FirestoreField.STATEMENT_TYPE to statementRemote.statementType,
             FirestoreField.STATEMENT_DESCRIPTION to statementRemote.description,
             FirestoreField.STATEMENT_CREATED to FieldValue.serverTimestamp()
@@ -130,7 +133,7 @@ class RemoteDataStore {
             }
     }
 
-    suspend fun createRetro(retroTitle: String): Either<ServerError, RetroRemote> {
+    suspend fun createRetro(userEmail: String, retroTitle: String): Either<ServerError, RetroRemote> {
         val retroUuid = suspendCoroutine<String?> { continuation ->
             db.collection(FirestoreTable.TABLE_RETROS)
                 .document()
@@ -151,7 +154,7 @@ class RemoteDataStore {
                 )
 
                 db.collection(FirestoreTable.TABLE_USERS)
-                    .document(USER_UUID)
+                    .document(userEmail)
                     .collection(FirestoreCollection.COLLECTION_RETROS)
                     .document(uuid)
                     .set(item)
@@ -167,13 +170,13 @@ class RemoteDataStore {
         } ?: Either.left(ServerError.CreateRetroError)
     }
 
-    fun removeRetro(retroUuid: String) {
+    fun removeRetro(userEmail: String, retroUuid: String) {
         db.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
             .delete()
 
         db.collection(FirestoreTable.TABLE_USERS)
-            .document(USER_UUID)
+            .document(userEmail)
             .collection(FirestoreCollection.COLLECTION_RETROS)
             .document(retroUuid)
             .delete()
@@ -193,5 +196,18 @@ class RemoteDataStore {
 
     fun stopObservingRetros() {
         retrosObserver?.remove()
+    }
+
+    fun bindUser(email: String, firstName: String, lastName: String, photoUrl: String) {
+        val data = hashMapOf(
+            FirestoreField.USER_FIRST_NAME to firstName,
+            FirestoreField.USER_LAST_NAME to lastName,
+            FirestoreField.USER_PHOTO_URL to photoUrl
+        )
+
+        //try to find user on Firebase. If it doesn't exist, create one
+        db.collection(FirestoreTable.TABLE_USERS)
+            .document(email)
+            .set(data, SetOptions.merge())
     }
 }

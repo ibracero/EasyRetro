@@ -76,7 +76,7 @@ val mapperModule = module {
 
 val accountModule = module {
 
-    factory<AccountRepository> { AccountRepositoryImpl() }
+    factory<AccountRepository> { AccountRepositoryImpl(get()) }
 
     factory { WelcomePresenter(get()) }
 

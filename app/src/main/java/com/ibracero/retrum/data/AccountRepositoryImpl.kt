@@ -3,11 +3,14 @@ package com.ibracero.retrum.data
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.ibracero.retrum.data.remote.RemoteDataStore
 import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.domain.SignInCallback
 import timber.log.Timber
 
-class AccountRepositoryImpl : AccountRepository {
+class AccountRepositoryImpl(
+    private val remoteDataStore: RemoteDataStore
+) : AccountRepository {
 
     private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
@@ -20,6 +23,14 @@ class AccountRepositoryImpl : AccountRepository {
                 if (task.isSuccessful) {
                     Timber.d("signInWithCredential:success")
                     val user = firebaseAuth.currentUser
+                    user?.let {
+                        remoteDataStore.bindUser(
+                            email = account.email.orEmpty(),
+                            firstName = account.givenName.orEmpty(),
+                            lastName = account.familyName.orEmpty(),
+                            photoUrl = account.photoUrl?.toString().orEmpty()
+                        )
+                    }
                     callback.onSignedIn()
                 } else {
                     callback.onError(task.exception ?: Exception("Couldn't sign in on Firebase"))
