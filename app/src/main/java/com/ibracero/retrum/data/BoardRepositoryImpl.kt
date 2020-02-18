@@ -56,17 +56,21 @@ class BoardRepositoryImpl(
     }
 
     override fun startObservingStatements(retroUuid: String) {
-        scope.launch {
-            remoteDataStore.observeStatements(userEmail, retroUuid).map {
-                localDataStore.saveStatements(it.map(statementRemoteToDomainMapper::map))
+        remoteDataStore.observeStatements(userEmail, retroUuid) {
+            scope.launch {
+                it.map { statements ->
+                    localDataStore.saveStatements(statements.map(statementRemoteToDomainMapper::map))
+                }
             }
         }
     }
 
     override fun startObservingRetroUsers(retroUuid: String) {
-        scope.launch {
-            remoteDataStore.observeRetroUsers(retroUuid).map {
-                localDataStore.updateRetroUsers(retroUuid, it.map(userRemoteToDomainMapper::map))
+        remoteDataStore.observeRetroUsers(retroUuid) {
+            scope.launch {
+                it.map { users ->
+                    localDataStore.updateRetroUsers(retroUuid, users.map(userRemoteToDomainMapper::map))
+                }
             }
         }
     }

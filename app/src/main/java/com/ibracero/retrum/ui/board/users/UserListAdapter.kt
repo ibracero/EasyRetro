@@ -6,10 +6,16 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.ibracero.retrum.R
+import com.ibracero.retrum.common.gone
+import com.ibracero.retrum.common.visible
+import com.ibracero.retrum.data.local.User
 import kotlinx.android.synthetic.main.item_user.view.*
+import java.util.*
 
-class UserListAdapter : ListAdapter<String, UserViewHolder>(UserDiffCalback()) {
+class UserListAdapter : ListAdapter<User, UserViewHolder>(UserDiffCalback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder =
         UserViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_user, parent, false))
@@ -21,16 +27,33 @@ class UserListAdapter : ListAdapter<String, UserViewHolder>(UserDiffCalback()) {
 
 class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-    fun bind(userEmail: String) {
-        itemView.user_label.text = if (userEmail.isNotEmpty()) userEmail[0].toUpperCase().toString() else ""
+    fun bind(user: User) {
+
+        with(itemView) {
+            if (user.photoUrl.isNotEmpty()) {
+                user_label.gone()
+                user_image.visible()
+                Glide.with(context)
+                    .load(user.photoUrl)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(user_image)
+            } else {
+                user_label.text = getInitials(user).toUpperCase(Locale.getDefault())
+                user_image.gone()
+                user_label.visible()
+            }
+        }
     }
+
+    private fun getInitials(user: User) =
+        listOf(user.firstName, user.lastName).filter { it.isNotEmpty() }.map { it[0] }.joinToString("")
 }
 
-class UserDiffCalback : DiffUtil.ItemCallback<String>() {
+class UserDiffCalback : DiffUtil.ItemCallback<User>() {
 
-    override fun areItemsTheSame(oldItem: String, newItem: String): Boolean =
-        oldItem == newItem
+    override fun areItemsTheSame(oldItem: User, newItem: User): Boolean =
+        oldItem.email == newItem.email
 
-    override fun areContentsTheSame(oldItem: String, newItem: String): Boolean =
+    override fun areContentsTheSame(oldItem: User, newItem: User): Boolean =
         oldItem == newItem
 }

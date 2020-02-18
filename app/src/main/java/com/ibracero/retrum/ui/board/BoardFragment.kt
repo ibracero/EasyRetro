@@ -69,8 +69,7 @@ class BoardFragment : Fragment() {
         getRetroUuidArgument()?.let { uuid ->
             boardViewModel.getRetroInfo(uuid).observe(this@BoardFragment, Observer { retro ->
                 initToolbar(retro?.title)
-                val validUsers = retro?.users?.map { it.firstName } ?: emptyList()
-                userListAdapter.submitList(validUsers)
+                userListAdapter.submitList(retro?.users ?: emptyList())
             })
         }
     }

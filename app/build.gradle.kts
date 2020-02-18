@@ -59,6 +59,7 @@ dependencies {
     implementation(Libraries.arrow)
     implementation(Libraries.firebase_auth)
     implementation(Libraries.play_services_auth)
+    implementation(Libraries.glide)
     debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
 

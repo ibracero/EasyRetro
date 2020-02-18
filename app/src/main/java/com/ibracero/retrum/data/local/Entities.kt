@@ -13,7 +13,8 @@ const val TABLE_STATEMENT = "statement"
 data class User(
     @PrimaryKey val email: String,
     val firstName: String,
-    val lastName: String
+    val lastName: String,
+    val photoUrl: String
 )
 
 @Entity(tableName = TABLE_RETRO)

@@ -7,6 +7,7 @@ import Libraries.Versions.coroutines_version
 import Libraries.Versions.firebase_analytics_version
 import Libraries.Versions.firebase_auth_version
 import Libraries.Versions.firebase_firestore_version
+import Libraries.Versions.glide_version
 import Libraries.Versions.google_material_version
 import Libraries.Versions.koin_version
 import Libraries.Versions.play_services_auth_version
@@ -54,6 +55,7 @@ object Libraries {
         const val arrow_version = "0.10.3"
         const val firebase_auth_version = "19.1.0"
         const val play_services_auth_version = "17.0.0"
+        const val glide_version = "4.11.0"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -63,7 +65,8 @@ object Libraries {
     const val androidx_lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:$androidx_lifecycle_version"
     const val androidx_constraint_layout =
         "androidx.constraintlayout:constraintlayout:$androidx_constraint_layout_version"
-    const val androidx_navigation_fragment_ktx = "androidx.navigation:navigation-fragment-ktx:$androidx_navigation_version"
+    const val androidx_navigation_fragment_ktx =
+        "androidx.navigation:navigation-fragment-ktx:$androidx_navigation_version"
     const val androidx_navigation_ui_ktx = "androidx.navigation:navigation-ui-ktx:$androidx_navigation_version"
     const val firebase_firestore = "com.google.firebase:firebase-firestore:$firebase_firestore_version"
     const val firebase_analytics = "com.google.firebase:firebase-analytics:$firebase_analytics_version"
@@ -78,6 +81,7 @@ object Libraries {
     const val arrow = "io.arrow-kt:arrow-core:$arrow_version"
     const val firebase_auth = "com.google.firebase:firebase-auth:$firebase_auth_version"
     const val play_services_auth = "com.google.android.gms:play-services-auth:$play_services_auth_version"
+    const val glide = "com.github.bumptech.glide:glide:$glide_version"
 }
 
 object TestLibraries {
