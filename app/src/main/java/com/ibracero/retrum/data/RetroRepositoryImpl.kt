@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import arrow.core.Either
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.Retro
@@ -51,7 +50,7 @@ class RetroRepositoryImpl(
     }
 
     override fun stopObservingUserRetros() {
-        remoteDataStore.stopObservingRetros()
+        remoteDataStore.stopObservingUserRetros()
     }
 
     override fun dispose() {

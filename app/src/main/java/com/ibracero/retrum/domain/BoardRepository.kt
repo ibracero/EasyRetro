@@ -18,9 +18,11 @@ interface BoardRepository {
 
     fun startObservingStatements(retroUuid: String)
 
+    fun startObservingRetroUsers(retroUuid: String)
+
     fun stopObservingStatements()
 
-    fun startObservingRetroUsers(retroUuid: String)
+    fun stopObservingRetroUsers()
 
     fun dispose()
 }

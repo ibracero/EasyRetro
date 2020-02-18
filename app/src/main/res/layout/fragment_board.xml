@@ -26,7 +26,6 @@
 		android:orientation="horizontal"
 		android:paddingStart="16dp"
 		android:paddingEnd="16dp"
-		android:paddingBottom="8dp"
 		app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
 		app:layout_constraintBottom_toTopOf="@id/board_root"
 		app:layout_constraintEnd_toEndOf="parent"

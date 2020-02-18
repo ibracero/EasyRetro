@@ -4,7 +4,7 @@ data class RetroRemote(
     val uuid: String,
     val title: String,
     val timestamp: Long? = null,
-    val users: List<String>? = emptyList()
+    val users: List<UserRemote>? = emptyList()
 )
 
 data class StatementRemote(
@@ -22,5 +22,5 @@ data class UserRemote(
     val firstName: String? = null,
     val lastName: String? = null,
     val photoUrl: String? = null,
-    val retroUuids: List<String>? = null
+    val retroUuids: List<RetroRemote>? = null
 )

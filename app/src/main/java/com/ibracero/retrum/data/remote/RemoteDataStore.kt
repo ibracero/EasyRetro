@@ -1,10 +1,9 @@
 package com.ibracero.retrum.data.remote
 
 import arrow.core.Either
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.SetOptions
+import arrow.core.extensions.option.semiring.empty
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.*
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreCollection
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreField
 import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreTable
@@ -12,6 +11,7 @@ import com.ibracero.retrum.data.remote.firestore.RetroRemote
 import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.data.remote.firestore.UserRemote
 import timber.log.Timber
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -22,128 +22,119 @@ class RemoteDataStore {
 
     private var statementObserver: ListenerRegistration? = null
     private var retrosObserver: ListenerRegistration? = null
+    private var usersObserver: ListenerRegistration? = null
 
     suspend fun createRetro(userEmail: String, retroTitle: String): Either<ServerError, RetroRemote> {
-        val retroUuid = suspendCoroutine<String?> { continuation ->
-            val retro = hashMapOf(
-                FirestoreField.RETRO_TITLE to retroTitle,
-                FirestoreField.RETRO_CREATED to FieldValue.serverTimestamp()
-            )
+        val userRef = db.collection(FirestoreTable.TABLE_USERS).document(userEmail)
 
-            db.collection(FirestoreTable.TABLE_RETROS)
-                .add(retro)
+        val retroValues = hashMapOf(
+            FirestoreField.RETRO_TITLE to retroTitle,
+            FirestoreField.RETRO_CREATED to FieldValue.serverTimestamp(),
+            FirestoreField.RETRO_USERS to FieldValue.arrayUnion(userRef)
+        )
+
+        val retroUuid = UUID.randomUUID().toString()
+
+        val retroRef = db.collection(FirestoreTable.TABLE_RETROS)
+            .document(retroUuid)
+
+        //Create retro (retros table)
+        val retroCreated = suspendCoroutine<Boolean> { continuation ->
+            retroRef.set(retroValues)
                 .addOnSuccessListener {
-                    continuation.resume(it.id)
+                    Timber.d("Retro $retroUuid creaded with values: $retroValues")
+                    continuation.resume(true)
                 }
                 .addOnFailureListener {
-                    continuation.resume(null)
+                    Timber.e(it, "Couldn't create: $retroUuid")
+                    continuation.resume(false)
                 }
         }
 
-        return retroUuid?.let { uuid ->
-            suspendCoroutine<Either<ServerError, RetroRemote>> { continuation ->
-                db.collection(FirestoreTable.TABLE_USERS)
-                    .document(userEmail)
-                    .update(FirestoreField.USER_FIELD, FieldValue.arrayUnion(uuid))
-                    .addOnSuccessListener {
-                        val retro = RetroRemote(uuid = uuid, title = retroTitle)
-                        Timber.d("Retro added $retro")
-                        continuation.resume(Either.right(retro))
-                    }
-                    .addOnFailureListener {
-                        continuation.resume(Either.left(ServerError.CreateRetroError))
-                    }
-            }
-        } ?: Either.left(ServerError.CreateRetroError)
+        if (!retroCreated) return Either.left(ServerError.CreateRetroError)
+
+        //Add created retro to user retro list
+        return suspendCoroutine { continuation ->
+            userRef
+                .update(FirestoreField.USER_RETROS, FieldValue.arrayUnion(retroRef))
+                .addOnSuccessListener {
+                    Timber.d("Retro $retroUuid added to user: $userEmail ")
+                    continuation.resume(Either.right(RetroRemote(uuid = retroUuid, title = retroTitle)))
+                }
+                .addOnFailureListener {
+                    Timber.e(it, "Couldn't add $retroUuid to user: $userEmail")
+                    continuation.resume(Either.left(ServerError.CreateRetroError))
+                }
+        }
     }
 
     suspend fun observeUserRetros(userEmail: String): Either<ServerError, List<RetroRemote>> {
-        val retroUuids = suspendCoroutine<List<String>?> { continuation ->
-            db.collection(FirestoreTable.TABLE_USERS)
+        val retroDocs = suspendCoroutine<List<DocumentReference>> { continuation ->
+            retrosObserver?.remove()
+            retrosObserver = db.collection(FirestoreTable.TABLE_USERS)
                 .document(userEmail)
-                .get()
-                .addOnSuccessListener { doc ->
-                    if (doc != null) continuation.resume(doc.get(FirestoreField.USER_FIELD) as List<String>)
-                    else continuation.resume(null)
-                }
-                .addOnFailureListener { continuation.resume(null) }
-        }
-
-        return retroUuids?.let {
-            suspendCoroutine<Either<ServerError, List<RetroRemote>>> { continuation ->
-                retrosObserver?.remove()
-                retrosObserver = db.collection(FirestoreTable.TABLE_RETROS)
-                    .addSnapshotListener { snapshot, _ ->
-                        val retros = snapshot?.documents
-                            ?.filter { doc -> it.contains(doc.id) }
-                            ?.map { doc ->
-                                RetroRemote(
-                                    uuid = doc.id,
-                                    title = doc.getString(FirestoreField.RETRO_TITLE).orEmpty(),
-                                    timestamp = (doc.getTimestamp(FirestoreField.RETRO_CREATED)?.seconds ?: 0) * 1000
-                                )
-                            }
-
-                        if (!retros.isNullOrEmpty() && !snapshot.metadata.hasPendingWrites()) {
-                            Timber.d("Retros update $retros")
-                            continuation.resume(Either.right(retros.toList()))
-                        } else continuation.resume(Either.left(ServerError.GetRetrosError))
-                    }
-            }
-        } ?: Either.left(ServerError.GetRetrosError)
-    }
-
-    fun observeStatements(userEmail: String, retroUuid: String, onUpdate: (List<StatementRemote>) -> Unit) {
-        joinRetro(userEmail, retroUuid)
-
-        statementObserver?.remove()
-        statementObserver = db.collection(FirestoreTable.TABLE_RETROS)
-            .document(retroUuid)
-            .collection(FirestoreCollection.COLLECTION_STATEMENTS)
-            .addSnapshotListener { snapshot, _ ->
-                val statements = snapshot?.documents?.map { doc ->
-                    val author = doc.getString(FirestoreField.STATEMENT_AUTHOR).orEmpty()
-                    StatementRemote(
-                        uuid = doc.id,
-                        retroUuid = retroUuid,
-                        userEmail = author,
-                        statementType = doc.getString(FirestoreField.STATEMENT_TYPE).orEmpty(),
-                        description = doc.getString(FirestoreField.STATEMENT_DESCRIPTION).orEmpty(),
-                        timestamp = (doc.getTimestamp(FirestoreField.STATEMENT_CREATED)?.seconds ?: 0) * 1000,
-                        isRemovable = author == userEmail
+                .addSnapshotListener { snapshot, _ ->
+                    //                        val docs = snapshot?.get(FirestoreField.USER_RETROS) as List<DocumentReference>?
+//                        val retros = retroDocs?.mapNotNull { it.get().result?.toObject(RetroRemote::class.java) }
+                    continuation.resume(
+                        snapshot?.get(FirestoreField.USER_RETROS) as List<DocumentReference>? ?: emptyList()
                     )
                 }
+        }
 
-                if (!statements.isNullOrEmpty() && !snapshot.metadata.hasPendingWrites()) {
-                    Timber.d("Statements update $statements")
-                    onUpdate(statements.toList())
+        return suspendCoroutine { cont ->
+            Tasks.whenAllComplete(retroDocs.map { it.get() })
+                .addOnSuccessListener { tasks ->
+                    tasks.filter { it.isSuccessful }.map { (it.result as DocumentSnapshot).data }
+                    //TODO HANDLE THIS
                 }
-            }
+        }
     }
 
-    private fun joinRetro(userEmail: String, retroUuid: String) {
-        db.collection(FirestoreTable.TABLE_USERS)
-            .document(userEmail)
-            .update(FirestoreField.USER_FIELD, FieldValue.arrayUnion(retroUuid))
-            .addOnSuccessListener {
-                Timber.d("User $userEmail joined $retroUuid")
-            }
+    suspend fun observeStatements(userEmail: String, retroUuid: String): Either<ServerError, List<StatementRemote>> {
+        joinRetro(userEmail, retroUuid)
+
+        return suspendCoroutine { continuation ->
+            statementObserver?.remove()
+            statementObserver = db.collection(FirestoreTable.TABLE_RETROS)
+                .document(retroUuid)
+                .collection(FirestoreCollection.COLLECTION_STATEMENTS)
+                .addSnapshotListener { snapshot, _ ->
+                    val statements = snapshot?.documents?.map { doc ->
+                        val author = doc.getString(FirestoreField.STATEMENT_AUTHOR).orEmpty()
+                        StatementRemote(
+                            uuid = doc.id,
+                            retroUuid = retroUuid,
+                            userEmail = author,
+                            statementType = doc.getString(FirestoreField.STATEMENT_TYPE).orEmpty(),
+                            description = doc.getString(FirestoreField.STATEMENT_DESCRIPTION).orEmpty(),
+                            timestamp = (doc.getTimestamp(FirestoreField.STATEMENT_CREATED)?.seconds ?: 0) * 1000,
+                            isRemovable = author == userEmail
+                        )
+                    }
+
+                    if (!statements.isNullOrEmpty() && !snapshot.metadata.hasPendingWrites()) {
+                        Timber.d("Statements update $statements")
+                        continuation.resume(Either.right(statements.toList()))
+                    }
+                }
+        }
     }
 
-    fun observeRetroUsers(retroUuid: String, onUpdate: (List<String>) -> Unit) {
-        db.collection(FirestoreTable.TABLE_RETROS)
-            .document(retroUuid)
-            .collection(FirestoreCollection.COLLECTION_USERS)
-            .addSnapshotListener { snapshot, _ ->
-                val usersEmail = snapshot?.documents?.map { doc ->
-                    doc.getString(FirestoreField.USER_EMAIL).orEmpty()
+    suspend fun observeRetroUsers(retroUuid: String): Either<ServerError, List<UserRemote>> {
+        return suspendCoroutine { continuation ->
+            usersObserver?.remove()
+            usersObserver = db.collection(FirestoreTable.TABLE_RETROS)
+                .document(retroUuid)
+                .addSnapshotListener { snapshot, _ ->
+                    if (snapshot == null) continuation.resume(Either.left(ServerError.GetRetrosError))
+                    else {
+                        val userDocs = snapshot.get(FirestoreField.RETRO_USERS) as List<DocumentReference>
+                        val users = userDocs.mapNotNull { it.get().result?.toObject(UserRemote::class.java) }
+                        continuation.resume(Either.right(users))
+                    }
                 }
-
-                if (!usersEmail.isNullOrEmpty() && !snapshot.metadata.hasPendingWrites()) {
-                    Timber.d("Users update")
-                    onUpdate(usersEmail)
-                }
-            }
+        }
     }
 
     fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote) {
@@ -175,11 +166,15 @@ class RemoteDataStore {
         statementObserver?.remove()
     }
 
-    fun stopObservingRetros() {
+    fun stopObservingUserRetros() {
         retrosObserver?.remove()
     }
 
-    fun bindUser(email: String, firstName: String, lastName: String, photoUrl: String) {
+    fun stopObservingRetroUsers() {
+        usersObserver?.remove()
+    }
+
+    fun createUser(email: String, firstName: String, lastName: String, photoUrl: String) {
         val data = hashMapOf(
             FirestoreField.USER_FIRST_NAME to firstName,
             FirestoreField.USER_LAST_NAME to lastName,
@@ -189,5 +184,16 @@ class RemoteDataStore {
         db.collection(FirestoreTable.TABLE_USERS)
             .document(email)
             .set(data, SetOptions.merge())
+    }
+
+    private fun joinRetro(userEmail: String, retroUuid: String) {
+        val userRef = db.collection(FirestoreTable.TABLE_USERS)
+            .document(userEmail)
+
+        val retroRef = db.collection(FirestoreTable.TABLE_RETROS)
+            .document(retroUuid)
+
+        retroRef.update(FirestoreField.RETRO_USERS, FieldValue.arrayUnion(userRef))
+        userRef.update(FirestoreField.USER_RETROS, FieldValue.arrayUnion(retroRef))
     }
 }

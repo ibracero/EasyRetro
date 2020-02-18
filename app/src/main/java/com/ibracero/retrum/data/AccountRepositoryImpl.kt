@@ -24,7 +24,7 @@ class AccountRepositoryImpl(
                     Timber.d("signInWithCredential:success")
                     val user = firebaseAuth.currentUser
                     user?.let {
-                        remoteDataStore.bindUser(
+                        remoteDataStore.createUser(
                             email = account.email.orEmpty(),
                             firstName = account.givenName.orEmpty(),
                             lastName = account.familyName.orEmpty(),

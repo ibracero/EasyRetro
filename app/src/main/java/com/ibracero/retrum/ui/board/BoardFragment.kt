@@ -67,9 +67,9 @@ class BoardFragment : Fragment() {
         users_recyclerview.adapter = userListAdapter
 
         getRetroUuidArgument()?.let { uuid ->
-            boardViewModel.getRetroInfo(uuid).observe(this@BoardFragment, Observer {
-                initToolbar(it?.title)
-                val validUsers = it?.users?.filter { it.isNotEmpty() }
+            boardViewModel.getRetroInfo(uuid).observe(this@BoardFragment, Observer { retro ->
+                initToolbar(retro?.title)
+                val validUsers = retro?.users?.map { it.firstName } ?: emptyList()
                 userListAdapter.submitList(validUsers)
             })
         }
@@ -117,6 +117,7 @@ class BoardFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         boardRepository.stopObservingStatements()
+        boardRepository.stopObservingRetroUsers()
 
         backPressedCallback.remove()
     }

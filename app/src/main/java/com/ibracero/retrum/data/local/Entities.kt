@@ -13,8 +13,7 @@ const val TABLE_STATEMENT = "statement"
 data class User(
     @PrimaryKey val email: String,
     val firstName: String,
-    val lastName: String,
-    val retroUuids: List<String>
+    val lastName: String
 )
 
 @Entity(tableName = TABLE_RETRO)
@@ -22,7 +21,7 @@ data class Retro(
     @PrimaryKey val uuid: String,
     val title: String,
     val timestamp: Long,
-    val users: List<String>
+    val users: List<User>
 ) : Serializable
 
 @Entity(tableName = TABLE_STATEMENT)

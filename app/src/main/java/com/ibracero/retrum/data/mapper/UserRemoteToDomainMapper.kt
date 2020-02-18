@@ -10,7 +10,6 @@ class UserRemoteToDomainMapper : Mapper<UserRemote, User> {
         User(
             email = from.email.orEmpty(),
             firstName = from.firstName.orEmpty(),
-            lastName = from.lastName.orEmpty(),
-            retroUuids = from.retroUuids ?: emptyList()
+            lastName = from.lastName.orEmpty()
         )
 }

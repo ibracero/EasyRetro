@@ -56,27 +56,31 @@ class BoardRepositoryImpl(
     }
 
     override fun startObservingStatements(retroUuid: String) {
-        remoteDataStore.observeStatements(userEmail, retroUuid) {
-            scope.launch {
+        scope.launch {
+            remoteDataStore.observeStatements(userEmail, retroUuid).map {
                 localDataStore.saveStatements(it.map(statementRemoteToDomainMapper::map))
             }
         }
     }
 
     override fun startObservingRetroUsers(retroUuid: String) {
-        remoteDataStore.observeRetroUsers(retroUuid) {
-            scope.launch {
-                localDataStore.updateRetroUsers(retroUuid, it)
+        scope.launch {
+            remoteDataStore.observeRetroUsers(retroUuid).map {
+                localDataStore.updateRetroUsers(retroUuid, it.map(userRemoteToDomainMapper::map))
             }
         }
+    }
+
+    override fun removeStatement(statement: Statement) {
+        remoteDataStore.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
     }
 
     override fun stopObservingStatements() {
         remoteDataStore.stopObservingStatements()
     }
 
-    override fun removeStatement(statement: Statement) {
-        remoteDataStore.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
+    override fun stopObservingRetroUsers() {
+        remoteDataStore.stopObservingRetroUsers()
     }
 
     override fun dispose() {

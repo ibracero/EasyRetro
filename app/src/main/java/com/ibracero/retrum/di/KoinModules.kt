@@ -67,7 +67,7 @@ val viewModelModule = module {
 }
 
 val mapperModule = module {
-    factory { RetroRemoteToDomainMapper() }
+    factory { RetroRemoteToDomainMapper(get()) }
 
     factory { StatementRemoteToDomainMapper() }
 
