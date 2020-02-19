@@ -9,6 +9,8 @@ interface RetroRepository {
 
     fun createRetro(title: String): LiveData<Either<ServerError, Retro>>
 
+    fun getRetro(retroUuid: String): LiveData<Retro>
+
     fun getRetros(): LiveData<List<Retro>>
 
     fun startObservingUserRetros()

@@ -24,7 +24,6 @@
 			android:layout_height="wrap_content"
 			android:layout_marginStart="16dp"
 			android:background="@android:color/transparent"
-			android:hint="@string/add_retro_hint"
 			android:imeOptions="actionDone"
 			android:padding="8dp"
 			android:textColor="@color/primaryTextColor"
@@ -39,14 +38,25 @@
 
 		<ImageView
 			android:id="@+id/add_icon"
-			android:layout_width="32dp"
-			android:layout_height="32dp"
-			android:layout_margin="8dp"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:padding="8dp"
 			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toEndOf="@id/add_title"
 			app:layout_constraintTop_toTopOf="parent"
 			app:srcCompat="@drawable/ic_add_circle" />
+
+		<ProgressBar
+			android:id="@+id/loading"
+			android:layout_width="32dp"
+			android:layout_height="32dp"
+			android:layout_margin="8dp"
+			android:visibility="gone"
+			app:layout_constraintBottom_toBottomOf="@id/add_icon"
+			app:layout_constraintEnd_toEndOf="@id/add_icon"
+			app:layout_constraintStart_toStartOf="@id/add_icon"
+			app:layout_constraintTop_toTopOf="@id/add_icon" />
 
 	</androidx.constraintlayout.widget.ConstraintLayout>
 

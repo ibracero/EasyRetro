@@ -40,6 +40,8 @@ class RetroRepositoryImpl(
         return retroLiveData
     }
 
+    override fun getRetro(retroUuid: String) = localDataStore.getRetroInfo(retroUuid)
+
     override fun getRetros(): LiveData<List<Retro>> = localDataStore.getRetros()
 
     override fun startObservingUserRetros() {

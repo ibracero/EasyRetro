@@ -2,7 +2,7 @@ package com.ibracero.retrum.data.local
 
 class LocalDataStore(private val retroDao: RetroDao) {
 
-    fun getRetros() = retroDao.getUserRetros(/*"W2KCUn3Dz4Wy35CzQZmc"*/)
+    fun getRetros() = retroDao.getUserRetros()
 
     fun saveRetros(retros: List<Retro>) {
         retroDao.insertRetros(retros)

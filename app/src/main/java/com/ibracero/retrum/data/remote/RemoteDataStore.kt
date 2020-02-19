@@ -84,6 +84,7 @@ class RemoteDataStore {
                                         title = (values?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty()
                                     )
                                 }
+                        Timber.d("Retros update $retros")
                         onUpdate(Either.right(retros))
                     }
             }
@@ -110,7 +111,10 @@ class RemoteDataStore {
                                         photoUrl = (values?.get(FirestoreField.USER_PHOTO_URL) as String?).orEmpty()
                                     )
                                 }
-                        onUpdate(Either.right(users))
+                        if (!users.isNullOrEmpty() && snapshot?.metadata?.hasPendingWrites() == false) {
+                            Timber.d("Users update $users")
+                            onUpdate(Either.right(users))
+                        }
                     }
             }
     }
@@ -147,7 +151,7 @@ class RemoteDataStore {
             }
     }
 
-    fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote) {
+    suspend fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote): Either<ServerError, Unit> {
         val item = hashMapOf(
             FirestoreField.STATEMENT_AUTHOR to statementRemote.userEmail,
             FirestoreField.STATEMENT_TYPE to statementRemote.statementType,
@@ -155,13 +159,18 @@ class RemoteDataStore {
             FirestoreField.STATEMENT_CREATED to FieldValue.serverTimestamp()
         )
 
-        db.collection(FirestoreTable.TABLE_RETROS)
-            .document(retroUuid)
-            .collection(FirestoreCollection.COLLECTION_STATEMENTS)
-            .add(item)
-            .addOnSuccessListener {
-                Timber.d("Statement added $item")
-            }
+        return suspendCoroutine { continuation ->
+            db.collection(FirestoreTable.TABLE_RETROS)
+                .document(retroUuid)
+                .collection(FirestoreCollection.COLLECTION_STATEMENTS)
+                .add(item)
+                .addOnSuccessListener {
+                    continuation.resume(Either.right(Unit))
+                }
+                .addOnFailureListener {
+                    continuation.resume(Either.left(ServerError.CreateStatementError))
+                }
+        }
     }
 
     fun removeStatement(retroUuid: String, statementUuid: String) {

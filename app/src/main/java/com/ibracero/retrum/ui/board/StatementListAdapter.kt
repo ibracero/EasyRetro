@@ -2,13 +2,11 @@ package com.ibracero.retrum.ui.board
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.ibracero.retrum.common.OffsetListAdapter
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.ui.AddItemViewHolder
-import com.ibracero.retrum.ui.retros.RetroListAdapter
-import com.ibracero.retrum.ui.retros.RetroViewHolder
+import com.ibracero.retrum.ui.Payload
 
 class StatementListAdapter(
     private val onAddClicked: (String) -> Unit,
@@ -29,7 +27,7 @@ class StatementListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            VIEW_TYPE_ADD -> AddItemViewHolder(parent, onAddClicked)
+            VIEW_TYPE_ADD -> AddItemViewHolder(parent, onAddClicked, AddItemViewHolder.ItemType.STATEMENT)
             else -> StatementViewHolder(parent, onRemoveClick)
         }
     }
@@ -46,6 +44,7 @@ class StatementListAdapter(
 
         payloads.forEach {
             when (it) {
+                is Payload.CreateStatementPayload -> (holder as AddItemViewHolder).bindResult(success = it.success)
                 is Payload.DescriptionPayload -> (holder as StatementViewHolder).onDescriptionChanged(it.description)
             }
         }
@@ -60,9 +59,5 @@ class StatementListAdapter(
 
         override fun getChangePayload(oldItem: Statement, newItem: Statement): Payload? =
             Payload.DescriptionPayload(description = newItem.description)
-    }
-
-    sealed class Payload {
-        data class DescriptionPayload(val description: String) : Payload()
     }
 }

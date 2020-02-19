@@ -11,9 +11,8 @@ class StatementViewModel(
 
     fun getStatements(retroUuid: String, type: StatementType) = boardRepository.getStatements(retroUuid, type)
 
-    fun addStatement(retroUuid: String, description: String, type: StatementType) {
+    fun addStatement(retroUuid: String, description: String, type: StatementType) =
         boardRepository.addStatement(retroUuid = retroUuid, description = description, statementType = type)
-    }
 
     override fun onCleared() {
         super.onCleared()

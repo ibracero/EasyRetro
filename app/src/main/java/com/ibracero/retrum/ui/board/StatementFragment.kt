@@ -8,9 +8,12 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import arrow.core.Either
 import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Statement
+import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.domain.StatementType
+import com.ibracero.retrum.ui.Payload
 import kotlinx.android.synthetic.main.statement_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -47,6 +50,19 @@ abstract class StatementFragment : Fragment() {
 
     private fun onAddClicked(description: String) {
         statementViewModel.addStatement(getRetroUuidArgument().orEmpty(), description, statementType)
+            .observe(this, Observer { processStatementAdded(it) })
+    }
+
+    private fun processStatementAdded(result: Either<ServerError, Unit>) {
+        result.fold(
+            {
+                //showError
+                adapter.notifyItemChanged(0, Payload.CreateStatementPayload(success = false))
+            },
+            {
+                adapter.notifyItemChanged(0, Payload.CreateStatementPayload(success = true))
+            }
+        )
     }
 
     private fun onRemoveClicked(statement: Statement) {

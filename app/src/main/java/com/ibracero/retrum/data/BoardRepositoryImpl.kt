@@ -1,6 +1,8 @@
 package com.ibracero.retrum.data
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import arrow.core.Either
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
@@ -10,6 +12,7 @@ import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.RemoteDataStore
+import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.domain.StatementType
@@ -32,8 +35,6 @@ class BoardRepositoryImpl(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    override fun getRetroInfo(retroUuid: String): LiveData<Retro> = localDataStore.getRetroInfo(retroUuid)
-
     override fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>> {
         return when (statementType) {
             POSITIVE -> localDataStore.getPositiveStatements(retroUuid)
@@ -42,9 +43,14 @@ class BoardRepositoryImpl(
         }
     }
 
-    override fun addStatement(retroUuid: String, description: String, statementType: StatementType) {
+    override fun addStatement(
+        retroUuid: String,
+        description: String,
+        statementType: StatementType
+    ): LiveData<Either<ServerError, Unit>> {
+        val statementLiveData = MutableLiveData<Either<ServerError, Unit>>()
         scope.launch {
-            remoteDataStore.addStatementToBoard(
+            val eitherResult = remoteDataStore.addStatementToBoard(
                 retroUuid = retroUuid,
                 statementRemote = StatementRemote(
                     userEmail = userEmail,
@@ -52,7 +58,9 @@ class BoardRepositoryImpl(
                     statementType = statementType.toString().toLowerCase(Locale.getDefault())
                 )
             )
+            statementLiveData.postValue(eitherResult)
         }
+        return statementLiveData
     }
 
     override fun startObservingStatements(retroUuid: String) {

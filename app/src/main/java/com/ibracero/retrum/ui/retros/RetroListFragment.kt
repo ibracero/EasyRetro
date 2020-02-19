@@ -16,6 +16,7 @@ import com.ibracero.retrum.R
 import com.ibracero.retrum.common.NetworkStatus.ONLINE
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.ui.Payload
 import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -84,7 +85,6 @@ class RetroListFragment : Fragment() {
     }
 
     private fun onAddClicked(retroTitle: String) {
-        retroListViewModel.retroLiveData.removeObservers(this)
         retroListViewModel.createRetro(retroTitle).observe(this@RetroListFragment,
             Observer { retroEither ->
                 processCreateRetroResponse(retroEither)
@@ -93,8 +93,10 @@ class RetroListFragment : Fragment() {
 
     private fun processCreateRetroResponse(retroEither: Either<ServerError, Retro>) {
         retroEither.fold({
+            retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(false))
             showError()
         }, { retro ->
+            retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(true))
             navigateToRetroBoard(retro = retro)
         })
     }

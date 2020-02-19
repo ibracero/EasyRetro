@@ -8,11 +8,9 @@ import com.ibracero.retrum.data.remote.ServerError
 
 interface BoardRepository {
 
-    fun getRetroInfo(retroUuid: String): LiveData<Retro>
-
     fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>>
 
-    fun addStatement(retroUuid: String, description: String, statementType: StatementType)
+    fun addStatement(retroUuid: String, description: String, statementType: StatementType): LiveData<Either<ServerError, Unit>>
 
     fun removeStatement(statement: Statement)
 

@@ -7,8 +7,8 @@ import com.ibracero.retrum.domain.StatementType
 @Dao
 interface RetroDao {
 
-    @Query("SELECT * FROM $TABLE_RETRO ORDER BY timestamp DESC")// AS r WHERE r.uuid IN (SELECT retroUuids FROM $TABLE_USER AS u WHERE u.uuid == :userUuid)
-    fun getUserRetros(/*userUuid: String*/): LiveData<List<Retro>>
+    @Query("SELECT * FROM $TABLE_RETRO ORDER BY timestamp ASC")
+    fun getUserRetros(): LiveData<List<Retro>>
 
     @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
     fun getRetroInfo(retroUuid: String): LiveData<Retro>

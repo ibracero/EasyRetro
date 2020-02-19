@@ -9,9 +9,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ibracero.retrum.R
+import com.ibracero.retrum.common.CachedRecyclerViewHolder
 import com.ibracero.retrum.common.gone
 import com.ibracero.retrum.common.visible
 import com.ibracero.retrum.data.local.User
+import kotlinx.android.synthetic.main.item_user.*
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
 
@@ -25,23 +27,21 @@ class UserListAdapter : ListAdapter<User, UserViewHolder>(UserDiffCalback()) {
     }
 }
 
-class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class UserViewHolder(view: View) : CachedRecyclerViewHolder(view) {
 
     fun bind(user: User) {
+        if (user.photoUrl.isNotEmpty()) {
+            user_label.gone()
+            user_image.visible()
 
-        with(itemView) {
-            if (user.photoUrl.isNotEmpty()) {
-                user_label.gone()
-                user_image.visible()
-                Glide.with(context)
-                    .load(user.photoUrl)
-                    .apply(RequestOptions.circleCropTransform())
-                    .into(user_image)
-            } else {
-                user_label.text = getInitials(user).toUpperCase(Locale.getDefault())
-                user_image.gone()
-                user_label.visible()
-            }
+            Glide.with(containerView)
+                .load(user.photoUrl)
+                .apply(RequestOptions.circleCropTransform())
+                .into(user_image)
+        } else {
+            user_label.text = getInitials(user).toUpperCase(Locale.getDefault())
+            user_image.gone()
+            user_label.visible()
         }
     }
 
