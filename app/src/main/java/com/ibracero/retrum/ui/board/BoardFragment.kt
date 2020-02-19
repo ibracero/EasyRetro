@@ -3,6 +3,7 @@ package com.ibracero.retrum.ui.board
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +24,7 @@ import com.ibracero.retrum.ui.board.users.UserListAdapter
 import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
+import kotlin.math.min
 
 
 class BoardFragment : Fragment() {
@@ -77,8 +79,8 @@ class BoardFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (isPortraitMode()) initPortraitUi()
-        else initLandscapeUi()
+        if (!isPortraitMode() && isTablet()) initLandscapeUi()
+        else initPortraitUi()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -183,4 +185,11 @@ class BoardFragment : Fragment() {
     private fun getRetroUuidArgument() = arguments?.getString(ARGUMENT_RETRO_UUID)
 
     private fun isPortraitMode() = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
+    private fun isTablet(): Boolean {
+        val metrics = DisplayMetrics()
+        val widthDp = metrics.widthPixels / metrics.density
+        val heightDp = metrics.heightPixels / metrics.density
+        return min(widthDp, heightDp) > 720
+    }
 }
