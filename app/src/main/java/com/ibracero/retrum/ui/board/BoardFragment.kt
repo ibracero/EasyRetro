@@ -31,6 +31,7 @@ class BoardFragment : Fragment() {
 
     companion object {
         const val ARGUMENT_RETRO_UUID = "arg_retro_uuid"
+        const val ARGUMENT_LOGOUT = "arg_logout"
     }
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {

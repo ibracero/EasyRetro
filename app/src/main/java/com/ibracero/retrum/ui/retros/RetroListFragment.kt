@@ -5,6 +5,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -19,6 +20,7 @@ import com.ibracero.retrum.common.hideKeyboard
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.ui.Payload
+import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_LOGOUT
 import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -70,9 +72,7 @@ class RetroListFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem) =
         when (item.itemId) {
             R.id.action_logout -> {
-                retroListViewModel.logout()
-                navigateToLoginScreen()
-                logoutFromGoogle()
+                showLogoutConfirmationDialog()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -134,6 +134,26 @@ class RetroListFragment : Fragment() {
         Toast.makeText(context, "Couldn't create retro", Toast.LENGTH_SHORT).show()
     }
 
+    private fun showLogoutConfirmationDialog() {
+
+        val safeContext = context ?: return
+
+        AlertDialog.Builder(safeContext)
+            .setCancelable(true)
+            .setTitle(R.string.confirm_logout)
+            .setMessage(getString(R.string.confirm_logout_message))
+            .setPositiveButton(R.string.action_yes) { _, _ -> onLogoutConfirmed() }
+            .setNegativeButton(R.string.action_no) { dialogInterface, _ -> dialogInterface.dismiss() }
+            .create()
+            .show()
+    }
+
+    private fun onLogoutConfirmed() {
+        retroListViewModel.logout()
+        logoutFromGoogle()
+        navigateToLoginScreen()
+    }
+
     private fun navigateToRetroBoard(retro: Retro) {
         val args = Bundle().apply {
             putString(ARGUMENT_RETRO_UUID, retro.uuid)
@@ -142,6 +162,7 @@ class RetroListFragment : Fragment() {
     }
 
     private fun navigateToLoginScreen() {
-        findNavController().navigate(R.id.action_logout_clicked)
+        val args = Bundle().apply { putBoolean(ARGUMENT_LOGOUT, true) }
+        findNavController().navigate(R.id.action_logout_clicked, args)
     }
 }

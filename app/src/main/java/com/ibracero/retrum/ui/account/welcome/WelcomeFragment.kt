@@ -22,6 +22,8 @@ class WelcomeFragment : Fragment() {
     companion object {
         const val GOOGLE_SIGN_IN_REQUEST_CODE = 2901
         const val BUTTONS_SHOW_DELAY = 2000L
+
+        const val ARG_IS_LOGOUT = "arg_logout"
     }
 
     private val buttonsLayoutHandler = Handler()
@@ -35,14 +37,16 @@ class WelcomeFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         group_post_it.visible()
+        if (arguments?.getBoolean(ARG_IS_LOGOUT) == true) {
+            google_sign_in.visible()
+        } else {
+            buttonsLayoutHandler.postDelayed({
+                if (!welcomePresenter.isSessionOpen()) google_sign_in.visible()
+                else navigateToRetroList()
+            }, BUTTONS_SHOW_DELAY)
+        }
 
         google_sign_in.setOnClickListener { launchGoogleSignIn(it) }
-//        email_sign_in.setOnClickListener { findNavController().navigate(R.id.action_sign_in_with_email) }
-
-        buttonsLayoutHandler.postDelayed({
-            if (!welcomePresenter.isSessionOpen()) google_sign_in.visible()
-            else navigateToRetroList()
-        }, BUTTONS_SHOW_DELAY)
     }
 
     private fun launchGoogleSignIn(it: View) {

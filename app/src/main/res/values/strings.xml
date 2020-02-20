@@ -17,6 +17,8 @@
 	<string name="password">Password</string>
 	<string name="invite">Invite</string>
 	<string name="logout">Log out</string>
+	<string name="confirm_logout">Confirm exit</string>
+	<string name="confirm_logout_message">Do you really want to close your current session?</string>
 	<string name="retro_invitation_message">"Hey there! You are invited to join my retro \"%1$s\". Just tap on the link: %2$s"</string>
 	<string name="retro_join_link_format" translatable="false">https://retrum.app/join/%1$s</string>
 	<string name="review_old_retros">Check previous ones</string>

@@ -7,6 +7,7 @@
 		<item name="android:fontFamily">@font/font_raleway</item>
 		<item name="android:windowBackground">@color/colorPrimary</item>
 		<item name="buttonStyle">@style/DarkButton</item>
+		<item name="alertDialogTheme">@style/AlertDialogTheme</item>
 	</style>
 
 	<style name="DarkButton" parent="Widget.AppCompat.Button">
@@ -16,6 +17,15 @@
 		<item name="android:textStyle">bold</item>
 		<item name="android:textAlignment">textStart</item>
 		<item name="android:drawablePadding">16dp</item>
+	</style>
+
+	<style name="AlertDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+		<item name="buttonBarNegativeButtonStyle">@style/AlertDialogButtonStyle</item>
+		<item name="buttonBarPositiveButtonStyle">@style/AlertDialogButtonStyle</item>
+	</style>
+
+	<style name="AlertDialogButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+		<item name="android:textColor">@color/colorPrimary</item>
 	</style>
 
 </resources>
