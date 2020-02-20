@@ -45,6 +45,7 @@ class AddItemViewHolder(
         add_title.hint = hint
 
         create_label.visibleOrGone(type == ItemType.RETRO)
+        welcome_label.visibleOrGone(type == ItemType.RETRO)
         choose_label.visibleOrGone(type == ItemType.RETRO && hasMoreItems == true)
     }
 

@@ -59,7 +59,7 @@ val appModule = module {
 
 val viewModelModule = module {
 
-    viewModel { RetroListViewModel(get(), get()) }
+    viewModel { RetroListViewModel(get(), get(), get()) }
 
     viewModel { StatementViewModel(get()) }
 
@@ -76,7 +76,7 @@ val mapperModule = module {
 
 val accountModule = module {
 
-    factory<AccountRepository> { AccountRepositoryImpl(get()) }
+    factory<AccountRepository> { AccountRepositoryImpl(get(), get(), get()) }
 
     factory { WelcomePresenter(get()) }
 

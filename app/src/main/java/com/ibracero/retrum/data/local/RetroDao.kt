@@ -34,6 +34,12 @@ interface RetroDao {
     @Query("DELETE FROM $TABLE_STATEMENT")
     fun deleteAllStatements()
 
+    @Query("DELETE FROM $TABLE_USER")
+    fun deleteUserInfo()
+
+    @Query("DELETE FROM $TABLE_RETRO")
+    fun deleteAllRetros()
+
     @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
     fun getRetro(retroUuid: String): Retro
 
@@ -44,5 +50,12 @@ interface RetroDao {
     fun dropStatementsAndInsert(statements: List<Statement>) {
         deleteAllStatements()
         insertStatements(statements)
+    }
+
+    @Transaction
+    fun clearAll() {
+        deleteAllStatements()
+        deleteUserInfo()
+        deleteAllRetros()
     }
 }

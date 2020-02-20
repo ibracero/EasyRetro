@@ -15,6 +15,7 @@
 		app:layout_constraintBottom_toTopOf="@id/users_recyclerview"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
+		app:menu="@menu/board_menu"
 		app:layout_constraintTop_toTopOf="parent"
 		app:navigationIcon="@drawable/ic_arrow_back"
 		app:titleTextColor="@color/primaryTextColor"

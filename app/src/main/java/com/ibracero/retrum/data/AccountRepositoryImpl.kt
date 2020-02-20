@@ -3,14 +3,25 @@ package com.ibracero.retrum.data
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.ibracero.retrum.common.CoroutineDispatcherProvider
+import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.remote.RemoteDataStore
 import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.domain.SignInCallback
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class AccountRepositoryImpl(
-    private val remoteDataStore: RemoteDataStore
+    private val remoteDataStore: RemoteDataStore,
+    private val localDataStore: LocalDataStore,
+    dispatchers: CoroutineDispatcherProvider
 ) : AccountRepository {
+
+    private val job = Job()
+    private val coroutineContext = job + dispatchers.io
+    private val scope = CoroutineScope(coroutineContext)
 
     private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
@@ -56,6 +67,10 @@ class AccountRepositoryImpl(
     }
 
     override fun logOut() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        firebaseAuth.signOut()
+
+        scope.launch {
+            localDataStore.clearAll()
+        }
     }
 }

@@ -58,5 +58,6 @@ class RetroRepositoryImpl(
 
     override fun dispose() {
         scope.cancel()
+        remoteDataStore.stopObservingAll()
     }
 }

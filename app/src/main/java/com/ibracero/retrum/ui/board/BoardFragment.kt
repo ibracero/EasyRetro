@@ -3,7 +3,6 @@ package com.ibracero.retrum.ui.board
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +15,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.NetworkStatus
 import com.ibracero.retrum.common.RetrumConnectionManager
+import com.ibracero.retrum.common.hideKeyboard
 import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.ui.board.action.ActionsFragment
 import com.ibracero.retrum.ui.board.negative.NegativeFragment
@@ -85,17 +85,21 @@ class BoardFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.board_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
-            android.R.id.home -> navigateToRetroList()
-            R.id.action_invite -> displayShareSheet()
+            android.R.id.home -> {
+                navigateToRetroList()
+                true
+            }
+            R.id.action_invite -> {
+                displayShareSheet()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-
-        return true
-    }
 
     override fun onStart() {
         super.onStart()
@@ -121,6 +125,8 @@ class BoardFragment : Fragment() {
         boardRepository.stopObservingRetroUsers()
 
         backPressedCallback.remove()
+
+        view.hideKeyboard()
     }
 
     private fun initToolbar(title: String?) {

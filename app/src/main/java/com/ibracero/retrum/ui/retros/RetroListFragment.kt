@@ -1,19 +1,21 @@
 package com.ibracero.retrum.ui.retros
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.NetworkStatus.ONLINE
+import com.ibracero.retrum.common.hideKeyboard
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.ui.Payload
@@ -42,6 +44,11 @@ class RetroListFragment : Fragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -54,6 +61,25 @@ class RetroListFragment : Fragment() {
 
         initUi()
         retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer { showRetros(it) })
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.retro_list_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) =
+        when (item.itemId) {
+            R.id.action_logout -> {
+                retroListViewModel.logout()
+                navigateToLoginScreen()
+                logoutFromGoogle()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+
+    private fun logoutFromGoogle() {
+        GoogleSignIn.getClient(requireActivity(), GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()
     }
 
     override fun onStart() {
@@ -70,6 +96,7 @@ class RetroListFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         retroListViewModel.stopObservingRetros()
+        view.hideKeyboard()
     }
 
     private fun showRetros(it: List<Retro>?) {
@@ -77,6 +104,8 @@ class RetroListFragment : Fragment() {
     }
 
     private fun initUi() {
+        retro_list_toolbar.title = ""
+        (requireActivity() as AppCompatActivity).setSupportActionBar(retro_list_toolbar)
         retro_recycler_view?.adapter = retroListAdapter
     }
 
@@ -110,5 +139,9 @@ class RetroListFragment : Fragment() {
             putString(ARGUMENT_RETRO_UUID, retro.uuid)
         }
         findNavController().navigate(R.id.action_retro_clicked, args)
+    }
+
+    private fun navigateToLoginScreen() {
+        findNavController().navigate(R.id.action_logout_clicked)
     }
 }

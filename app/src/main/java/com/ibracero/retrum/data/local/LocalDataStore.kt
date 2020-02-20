@@ -28,4 +28,8 @@ class LocalDataStore(private val retroDao: RetroDao) {
         val retro = retroDao.getRetro(retroUuid)
         retroDao.updateRetro(retro.copy(users = users))
     }
+
+    fun clearAll() {
+        retroDao.clearAll()
+    }
 }

@@ -144,7 +144,7 @@ class RemoteDataStore {
                     )
                 }
 
-                if (!statements.isNullOrEmpty() && !snapshot.metadata.hasPendingWrites()) {
+                if (statements != null && !snapshot.metadata.hasPendingWrites()) {
                     Timber.d("Statements update $statements")
                     onUpdate(Either.right(statements.toList()))
                 }
@@ -191,6 +191,12 @@ class RemoteDataStore {
 
     fun stopObservingRetroUsers() {
         usersObserver?.remove()
+    }
+
+    fun stopObservingAll() {
+        stopObservingRetroUsers()
+        stopObservingStatements()
+        stopObservingRetroUsers()
     }
 
     fun createUser(email: String, firstName: String, lastName: String, photoUrl: String) {
