@@ -12,12 +12,28 @@
 		android:layout_width="0dp"
 		android:layout_height="?android:actionBarSize"
 		android:background="@color/colorPrimaryDark"
+		app:layout_constraintBottom_toTopOf="@id/users_recyclerview"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent"
 		app:navigationIcon="@drawable/ic_arrow_back"
 		app:titleTextColor="@color/primaryTextColor"
 		tools:title="Retro title" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/users_recyclerview"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:background="@color/colorPrimaryDark"
+		android:orientation="horizontal"
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp"
+		app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+		app:layout_constraintBottom_toTopOf="@id/board_root"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/board_toolbar"
+		tools:listitem="@layout/item_user" />
 
 	<fragment
 		android:id="@+id/positive_container"
@@ -27,7 +43,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toStartOf="@id/guideline_1"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/board_toolbar" />
+		app:layout_constraintTop_toBottomOf="@id/users_recyclerview" />
 
 	<fragment
 		android:id="@+id/negative_container"
@@ -37,7 +53,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toStartOf="@id/guideline_2"
 		app:layout_constraintStart_toStartOf="@id/guideline_1"
-		app:layout_constraintTop_toBottomOf="@id/board_toolbar" />
+		app:layout_constraintTop_toBottomOf="@id/users_recyclerview" />
 
 	<fragment
 		android:id="@+id/actions_container"
@@ -47,7 +63,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toEndOf="@id/guideline_2"
-		app:layout_constraintTop_toBottomOf="@id/board_toolbar" />
+		app:layout_constraintTop_toBottomOf="@id/users_recyclerview" />
 
 	<androidx.constraintlayout.widget.Guideline
 		android:id="@+id/guideline_1"

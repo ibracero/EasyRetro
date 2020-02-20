@@ -11,7 +11,8 @@ import kotlinx.android.synthetic.main.item_add.*
 class AddItemViewHolder(
     parent: ViewGroup,
     private val onAddClicked: (String) -> Unit,
-    type: ItemType
+    type: ItemType,
+    hasMoreItems: Boolean? = null
 ) : BaseViewHolder(parent.inflate(R.layout.item_add)) {
 
     enum class ItemType {
@@ -21,10 +22,6 @@ class AddItemViewHolder(
 
     init {
         containerView.setOnClickListener { showTitleInput() }
-        val hint = if (type == ItemType.RETRO) containerView.context.getString(R.string.add_retro_hint)
-        else containerView.context.getString(R.string.add_statement_hint)
-
-        add_title.hint = hint
 
         (add_title as EditText).setOnEditorActionListener { p0, actionId, keyEvent ->
             if (actionId == IME_ACTION_DONE && keyEvent.keyCode == KEYCODE_ENTER) {
@@ -32,12 +29,23 @@ class AddItemViewHolder(
                 true
             } else false
         }
+
+        setupVariant(type, hasMoreItems)
     }
 
     fun bindResult(success: Boolean) {
         loading.gone()
         add_icon.visible()
         if (success) add_title.setText("")
+    }
+
+    private fun setupVariant(type: ItemType, hasMoreItems: Boolean?) {
+        val hint = if (type == ItemType.RETRO) containerView.context.getString(R.string.add_retro_hint)
+        else containerView.context.getString(R.string.add_statement_hint)
+        add_title.hint = hint
+
+        create_label.visibleOrGone(type == ItemType.RETRO)
+        choose_label.visibleOrGone(type == ItemType.RETRO && hasMoreItems == true)
     }
 
     private fun showTitleInput() {

@@ -29,7 +29,7 @@ class RetroListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         return when (viewType) {
-            VIEW_TYPE_ADD -> AddItemViewHolder(parent, onAddClicked, AddItemViewHolder.ItemType.RETRO)
+            VIEW_TYPE_ADD -> AddItemViewHolder(parent, onAddClicked, AddItemViewHolder.ItemType.RETRO, itemCount > 0)
             else -> RetroViewHolder(parent, onRetroClicked)
         }
     }

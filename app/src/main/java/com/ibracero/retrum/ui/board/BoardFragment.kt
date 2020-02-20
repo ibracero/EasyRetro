@@ -187,9 +187,9 @@ class BoardFragment : Fragment() {
     private fun isPortraitMode() = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     private fun isTablet(): Boolean {
-        val metrics = DisplayMetrics()
+        val metrics = context?.resources?.displayMetrics ?: return false
         val widthDp = metrics.widthPixels / metrics.density
         val heightDp = metrics.heightPixels / metrics.density
-        return min(widthDp, heightDp) > 720
+        return min(widthDp, heightDp) >= 720
     }
 }

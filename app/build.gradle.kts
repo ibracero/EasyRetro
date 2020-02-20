@@ -34,6 +34,9 @@ android {
             )
         }
     }
+    (kotlinOptions as org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions).apply {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 }
 
 androidExtensions {
