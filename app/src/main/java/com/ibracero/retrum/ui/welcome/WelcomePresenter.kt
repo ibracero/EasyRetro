@@ -1,4 +1,4 @@
-package com.ibracero.retrum.ui.account.welcome
+package com.ibracero.retrum.ui.welcome
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException

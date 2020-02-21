@@ -10,11 +10,13 @@
 	<string name="action_no">No</string>
 	<string name="offline_message">Your connection seems unavailable. Some features might be disabled</string>
 	<string name="sign_in_with_email">Sign in with email</string>
+	<string name="create_account_with_email">Create account</string>
 	<string name="sign_in_with_google">Sign in with Google</string>
 	<string name="create_account">Create account</string>
 	<string name="or">or</string>
 	<string name="email">Email</string>
 	<string name="password">Password</string>
+	<string name="confirm_password">Confirm password</string>
 	<string name="invite">Invite</string>
 	<string name="logout">Log out</string>
 	<string name="confirm_logout">Confirm exit</string>
@@ -23,4 +25,14 @@
 	<string name="retro_join_link_format" translatable="false">https://retrum.app/join/%1$s</string>
 	<string name="review_old_retros">Check previous ones</string>
 	<string name="create_retro">Create a new retro</string>
+	<string name="email_validation_error">Please, insert a valid email address</string>
+	<string name="password_minimum_length_validation_error">Please, insert at least 6 alphanumeric characters</string>
+	<string name="password_alphanumeric_validation_error">Please insert a valid password (alphanumeric characters only)</string>
+	<string name="sign_in">Sign in</string>
+	<string name="sign_up">Sign up</string>
+	<string name="sign_up_with_email">Sign up with email</string>
+	<string name="confirm_password_validation_error">This field does not match with the password above</string>
+	<string name="forgot_your_password_label">Forgot your password?</string>
+	<string name="forgot_your_password_button">Reset here</string>
+	<string name="confirm">Confirm</string>
 </resources>

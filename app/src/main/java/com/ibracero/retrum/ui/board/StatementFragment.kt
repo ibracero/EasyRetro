@@ -42,6 +42,7 @@ abstract class StatementFragment : Fragment() {
         statement_recycler_view.adapter = adapter
     }
 
+
     private fun processPositivePoints(positivePoints: List<Statement>) {
         adapter.submitList(positivePoints)
     }

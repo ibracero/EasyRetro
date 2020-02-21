@@ -7,7 +7,7 @@
 
 	<fragment
 		android:id="@+id/navigation_welcome"
-		android:name="com.ibracero.retrum.ui.account.welcome.WelcomeFragment"
+		android:name="com.ibracero.retrum.ui.welcome.WelcomeFragment"
 		android:label="@string/app_name"
 		tools:layout="@layout/fragment_welcome">
 		<argument
@@ -32,14 +32,33 @@
 
 	<fragment
 		android:id="@+id/navigation_login_with_email"
-		android:name="com.ibracero.retrum.ui.account.login.LoginFragment"
-		android:label="@string/app_name"
-		tools:layout="@layout/fragment_login_email" />
+		android:name="com.ibracero.retrum.ui.account.AccountFragment"
+		tools:layout="@layout/fragment_login_email">
+		<action
+			android:id="@+id/action_reset_password"
+			app:destination="@id/navigation_reset_password"
+			app:enterAnim="@anim/nav_default_enter_anim"
+			app:exitAnim="@anim/nav_default_exit_anim"
+			app:launchSingleTop="true"
+			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+		<argument
+			android:name="arg_is_new_account"
+			app:argType="boolean" />
+	</fragment>
+
+	<fragment
+		android:id="@+id/navigation_reset_password"
+		android:name="com.ibracero.retrum.ui.account.ResetPasswordFragment"
+		tools:layout="@layout/fragment_reset_password">
+		<argument
+			android:name="arg_email"
+			app:argType="string" />
+	</fragment>
 
 	<fragment
 		android:id="@+id/navigation_retro_list"
 		android:name="com.ibracero.retrum.ui.retros.RetroListFragment"
-		android:label="@string/app_name"
 		tools:layout="@layout/fragment_retro_list">
 		<action
 			android:id="@+id/action_retro_clicked"

@@ -13,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+
 class AccountRepositoryImpl(
     private val remoteDataStore: RemoteDataStore,
     private val localDataStore: LocalDataStore,
@@ -63,7 +64,25 @@ class AccountRepositoryImpl(
     }
 
     override fun createUser(email: String, password: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    sendEmailVerification()
+                } else {
+                    Timber.d("signUpWithEmail:failed")
+                }
+            }
+    }
+
+    override fun resetPassword(email: String) {
+        firebaseAuth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Timber.d("resetPasswordEmail:success")
+                } else {
+                    Timber.d("resetPasswordEmail:failed")
+                }
+            }
     }
 
     override fun logOut() {
@@ -72,5 +91,16 @@ class AccountRepositoryImpl(
         scope.launch {
             localDataStore.clearAll()
         }
+    }
+
+    private fun sendEmailVerification() {
+        firebaseAuth.currentUser?.sendEmailVerification()
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Timber.d("sendEmailVerification:success")
+                } else {
+                    Timber.d("sendEmailVerification:failed")
+                }
+            }
     }
 }

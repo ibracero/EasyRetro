@@ -1,4 +1,4 @@
-package com.ibracero.retrum.ui.account.welcome
+package com.ibracero.retrum.ui.welcome
 
 import android.content.Intent
 import android.os.Bundle
@@ -13,6 +13,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.visible
 import com.ibracero.retrum.domain.SignInCallback
+import com.ibracero.retrum.ui.account.AccountFragment.Companion.ARG_IS_NEW_ACCOUNT
 import kotlinx.android.synthetic.main.fragment_welcome.*
 import org.koin.android.ext.android.inject
 
@@ -39,14 +40,19 @@ class WelcomeFragment : Fragment() {
         group_post_it.visible()
         if (arguments?.getBoolean(ARG_IS_LOGOUT) == true) {
             google_sign_in.visible()
+            email_sign_in.visible()
         } else {
             buttonsLayoutHandler.postDelayed({
-                if (!welcomePresenter.isSessionOpen()) google_sign_in.visible()
-                else navigateToRetroList()
+                if (!welcomePresenter.isSessionOpen()) {
+                    google_sign_in.visible()
+                    email_sign_in.visible()
+                } else navigateToRetroList()
             }, BUTTONS_SHOW_DELAY)
         }
 
         google_sign_in.setOnClickListener { launchGoogleSignIn(it) }
+        email_sign_in.setOnClickListener { navigateToLogin() }
+        sign_up_button.setOnClickListener { navigateToRegister() }
     }
 
     private fun launchGoogleSignIn(it: View) {
@@ -77,6 +83,15 @@ class WelcomeFragment : Fragment() {
 
     private fun navigateToRetroList() {
         findNavController().navigate(R.id.action_sign_in_success)
+    }
+
+    private fun navigateToLogin() {
+        findNavController().navigate(R.id.navigation_login_with_email)
+    }
+
+    private fun navigateToRegister() {
+        val bundle = Bundle().apply { putBoolean(ARG_IS_NEW_ACCOUNT, true) }
+        findNavController().navigate(R.id.navigation_login_with_email, bundle)
     }
 
     private fun getSignInOptions() =

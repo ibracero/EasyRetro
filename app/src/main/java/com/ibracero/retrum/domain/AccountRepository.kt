@@ -13,4 +13,6 @@ interface AccountRepository {
     fun logOut()
 
     fun isSessionOpen(): Boolean
+
+    fun resetPassword(email: String)
 }

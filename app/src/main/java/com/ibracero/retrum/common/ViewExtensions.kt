@@ -1,26 +1,30 @@
 package com.ibracero.retrum.common
 
 import android.content.Context
-import android.graphics.Typeface
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
+import android.widget.EditText
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputLayout
 import timber.log.Timber
 
 fun View.visible() {
     visibility = View.VISIBLE
 }
 
+fun View.isVisible() = visibility == View.VISIBLE
+
 fun View.gone() {
     visibility = View.GONE
 }
+
+fun View.isGone() = visibility == View.GONE
 
 fun View.invisible() {
     visibility = View.INVISIBLE
@@ -70,3 +74,27 @@ fun View?.hideKeyboard() {
 
     imm?.hideSoftInputFromWindow(windowToken, 0);
 }
+
+fun EditText.addTextWatcher(
+    beforeTextChanged: (() -> Unit)? = null,
+    onTextChanged: (() -> Unit)? = null,
+    afterTextChanged: (() -> Unit)? = null
+) {
+    this.addTextChangedListener(object : TextWatcher {
+        override fun afterTextChanged(s: Editable?) {
+            afterTextChanged?.invoke()
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            beforeTextChanged?.invoke()
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            onTextChanged?.invoke()
+        }
+
+    })
+}
+
+fun TextInputLayout.hasValidText() =
+    this.error == null && this.editText?.text?.isEmpty() == false
