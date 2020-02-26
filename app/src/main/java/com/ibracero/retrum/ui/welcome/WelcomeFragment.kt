@@ -8,14 +8,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.visible
-import com.ibracero.retrum.domain.SignInCallback
+import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.ui.account.AccountFragment.Companion.ARG_IS_NEW_ACCOUNT
 import kotlinx.android.synthetic.main.fragment_welcome.*
-import org.koin.android.ext.android.inject
+import org.koin.android.viewmodel.ext.android.viewModel
 
 
 class WelcomeFragment : Fragment() {
@@ -28,36 +29,25 @@ class WelcomeFragment : Fragment() {
     }
 
     private val buttonsLayoutHandler = Handler()
-    private val welcomePresenter: WelcomePresenter by inject()
+    private val welcomeViewModel: WelcomeViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_welcome, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        group_post_it.visible()
-        if (arguments?.getBoolean(ARG_IS_LOGOUT) == true) {
-            google_sign_in.visible()
-            email_sign_in.visible()
-        } else {
-            buttonsLayoutHandler.postDelayed({
-                if (!welcomePresenter.isSessionOpen()) {
-                    google_sign_in.visible()
-                    email_sign_in.visible()
-                } else navigateToRetroList()
-            }, BUTTONS_SHOW_DELAY)
-        }
-
-        google_sign_in.setOnClickListener { launchGoogleSignIn(it) }
-        email_sign_in.setOnClickListener { navigateToLogin() }
-        sign_up_button.setOnClickListener { navigateToRegister() }
+        initUi()
+        welcomeViewModel.googleSignInLiveData.observeForever { processGoogleSignInResponse(it) }
     }
 
-    private fun launchGoogleSignIn(it: View) {
-        val signInIntent = GoogleSignIn.getClient(it.context, getSignInOptions()).signInIntent
-        startActivityForResult(signInIntent, GOOGLE_SIGN_IN_REQUEST_CODE)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            welcomeViewModel.handleSignInResult(task)
+        }
     }
 
     override fun onDestroyView() {
@@ -65,24 +55,42 @@ class WelcomeFragment : Fragment() {
         buttonsLayoutHandler.removeCallbacksAndMessages(null)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            welcomePresenter.handleSignInResult(task, object : SignInCallback {
-                override fun onSignedIn() {
-                    navigateToRetroList()
-                }
+    private fun processGoogleSignInResponse(response: Either<ServerError, Unit>) {
+        response.fold({
+            //showSnackbar
+        }, {
+            navigateToRetroList()
+        })
+    }
 
-                override fun onError(throwable: Throwable) {
-                    //show snackbar
-                }
-            })
-        }
+    private fun initUi() {
+        group_post_it.visible()
+        if (arguments?.getBoolean(ARG_IS_LOGOUT) == true) {
+            google_sign_in.visible()
+            email_sign_in.visible()
+        } else checkSessionStarted()
+
+        google_sign_in.setOnClickListener { launchGoogleSignIn(it) }
+        email_sign_in.setOnClickListener { navigateToLogin() }
+        sign_up_button.setOnClickListener { navigateToRegister() }
+    }
+
+    private fun checkSessionStarted() {
+        buttonsLayoutHandler.postDelayed({
+            if (!welcomeViewModel.isSessionOpen()) {
+                google_sign_in.visible()
+                email_sign_in.visible()
+            } else navigateToRetroList()
+        }, BUTTONS_SHOW_DELAY)
+    }
+
+    private fun launchGoogleSignIn(it: View) {
+        val signInIntent = GoogleSignIn.getClient(it.context, getSignInOptions()).signInIntent
+        startActivityForResult(signInIntent, GOOGLE_SIGN_IN_REQUEST_CODE)
     }
 
     private fun navigateToRetroList() {
-        findNavController().navigate(R.id.action_sign_in_success)
+        findNavController().navigate(R.id.navigation_retro_list)
     }
 
     private fun navigateToLogin() {

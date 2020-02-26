@@ -6,17 +6,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import arrow.core.Either
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.addTextWatcher
 import com.ibracero.retrum.common.hasValidText
 import com.ibracero.retrum.common.isVisible
 import com.ibracero.retrum.common.visible
+import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.ui.account.ResetPasswordFragment.Companion.ARG_EMAIL
 import kotlinx.android.synthetic.main.fragment_login_email.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class AccountFragment : Fragment() {
+class AccountFragment : Fragment(R.layout.fragment_login_email) {
 
     companion object {
         private const val MINIMUM_PASSWORD_LENGHT = 6
@@ -28,12 +31,30 @@ class AccountFragment : Fragment() {
 
     private val passwordRegex = PASSWORD_PATTERN.toRegex()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_login_email, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initUi(arguments?.getBoolean(ARG_IS_NEW_ACCOUNT) ?: false)
+
+        accountViewModel.run {
+            signInLiveData.observe(this@AccountFragment, Observer { processSignInResult(it) })
+            signUpLiveData.observe(this@AccountFragment, Observer { processSignUpResult(it) })
+        }
+    }
+
+    private fun processSignInResult(response: Either<ServerError, Unit>) {
+        response.fold({
+            //showSnackbar
+        }, {
+            navigateToRetroList()
+        })
+    }
+
+    private fun processSignUpResult(response: Either<ServerError, Unit>) {
+        response.fold({
+            //showSnackbar
+        }, {
+           navigateToEmailVerification()
+        })
     }
 
     private fun initUi(isNewAccount: Boolean) {
@@ -112,6 +133,14 @@ class AccountFragment : Fragment() {
         if (email_input_field.text.toString().isEmpty()) email_input_layout.error = null
         if (password_input_field.text.toString().isEmpty()) password_input_layout.error = null
         if (confirm_password_input_field.text.toString().isEmpty()) confirm_password_input_layout.error = null
+    }
+
+    private fun navigateToRetroList() {
+        findNavController().navigate(R.id.action_navigation_login_with_email_to_navigation_retro_list)
+    }
+
+    private fun navigateToEmailVerification() {
+
     }
 
     private fun navigateToResetPassword() {

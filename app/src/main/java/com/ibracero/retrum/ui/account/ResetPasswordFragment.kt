@@ -6,14 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import arrow.core.Either
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.addTextWatcher
 import com.ibracero.retrum.common.hasValidText
+import com.ibracero.retrum.data.remote.ServerError
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class ResetPasswordFragment : Fragment() {
+class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
 
     companion object {
         const val ARG_EMAIL = "arg_email"
@@ -21,15 +24,16 @@ class ResetPasswordFragment : Fragment() {
 
     private val resetPasswordViewModel: ResetPasswordViewModel by viewModel()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_reset_password, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setHasOptionsMenu(true)
 
         initUi(arguments?.getString(ARG_EMAIL).orEmpty())
+
+        resetPasswordViewModel.resetPasswordLiveData.observe(this, Observer {
+            processResetPasswordResponse(it)
+        })
     }
 
     private fun initUi(email: String) {
@@ -52,5 +56,14 @@ class ResetPasswordFragment : Fragment() {
 
     private fun checkEmailField() {
         confirm_button.isEnabled = email_input_layout.hasValidText()
+    }
+
+    private fun processResetPasswordResponse(response: Either<ServerError, Unit>) {
+        response.fold({
+            //showSnackbar
+        }, {
+            //show toast
+            findNavController().navigateUp()
+        })
     }
 }

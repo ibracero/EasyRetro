@@ -21,7 +21,7 @@ import com.ibracero.retrum.ui.account.ResetPasswordViewModel
 import com.ibracero.retrum.ui.board.BoardViewModel
 import com.ibracero.retrum.ui.board.StatementViewModel
 import com.ibracero.retrum.ui.retros.RetroListViewModel
-import com.ibracero.retrum.ui.welcome.WelcomePresenter
+import com.ibracero.retrum.ui.welcome.WelcomeViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -60,15 +60,17 @@ val appModule = module {
 
 val viewModelModule = module {
 
-    viewModel { RetroListViewModel(get(), get(), get()) }
+    viewModel { RetroListViewModel(get(), get(), get(), get()) }
 
     viewModel { StatementViewModel(get()) }
 
     viewModel { BoardViewModel(get()) }
 
-    viewModel { AccountViewModel(get()) }
+    viewModel { AccountViewModel(get(), get()) }
 
-    viewModel { ResetPasswordViewModel(get()) }
+    viewModel { ResetPasswordViewModel(get(), get()) }
+
+    viewModel { WelcomeViewModel(get(), get()) }
 }
 
 val mapperModule = module {
@@ -81,7 +83,6 @@ val mapperModule = module {
 
 val accountModule = module {
 
-    factory<AccountRepository> { AccountRepositoryImpl(get(), get(), get()) }
+    factory<AccountRepository> { AccountRepositoryImpl(get(), get()) }
 
-    factory { WelcomePresenter(get()) }
 }
