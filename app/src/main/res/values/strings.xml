@@ -11,7 +11,7 @@
 	<string name="offline_message">Your connection seems unavailable. Some features might be disabled</string>
 	<string name="sign_in_with_email">Sign in with email</string>
 	<string name="create_account_with_email">Create account</string>
-	<string name="sign_in_with_google">Sign in with Google</string>
+	<string name="sign_in_with_google">Continue with Google</string>
 	<string name="create_account">Create account</string>
 	<string name="or">or</string>
 	<string name="email">Email</string>
@@ -35,4 +35,10 @@
 	<string name="forgot_your_password_label">Forgot your password?</string>
 	<string name="forgot_your_password_button">Reset here</string>
 	<string name="confirm">Confirm</string>
+	<string name="verify_your_account">Verify your account</string>
+	<string name="email_verification_message">Please, check your inbox. For safety reasons, we just sent you an email with a verification link</string>
+	<string name="email_verification_did_not_receive_it">Didn\'t receive it?</string>
+	<string name="resend_verification_email">Resend verification email</string>
+	<string name="open_your_email_app">Open your email app</string>
+	<string name="reset_password_directions">Please insert the email you used to create your account. We will send you the instructions to reset your password‘</string>
 </resources>

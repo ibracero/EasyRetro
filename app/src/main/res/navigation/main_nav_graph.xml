@@ -15,7 +15,7 @@
 			app:argType="boolean" />
 		<action
 			android:id="@+id/action_sign_in_with_email"
-			app:destination="@id/navigation_login_with_email"
+			app:destination="@id/navigation_email_account"
 			app:enterAnim="@anim/nav_default_enter_anim"
 			app:exitAnim="@anim/nav_default_exit_anim"
 			app:launchSingleTop="true"
@@ -31,7 +31,7 @@
 	</fragment>
 
 	<fragment
-		android:id="@+id/navigation_login_with_email"
+		android:id="@+id/navigation_email_account"
 		android:name="com.ibracero.retrum.ui.account.AccountFragment"
 		tools:layout="@layout/fragment_login_email">
 		<action
@@ -42,12 +42,39 @@
 			app:launchSingleTop="true"
 			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
 			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+		<action
+			android:id="@+id/action_verify_email"
+			app:destination="@id/navigation_email_verification"
+			app:enterAnim="@anim/nav_default_enter_anim"
+			app:exitAnim="@anim/nav_default_exit_anim"
+			app:launchSingleTop="true"
+			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+		<action
+			android:id="@+id/action_logged_in"
+			app:destination="@id/navigation_retro_list"
+			app:enterAnim="@anim/nav_default_enter_anim"
+			app:exitAnim="@anim/nav_default_exit_anim"
+			app:launchSingleTop="true"
+			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
 		<argument
 			android:name="arg_is_new_account"
 			app:argType="boolean" />
+	</fragment>
+
+	<fragment
+		android:id="@+id/navigation_email_verification"
+		android:name="com.ibracero.retrum.ui.account.EmailVerificationFragment"
+		tools:layout="@layout/fragment_email_verification">
 		<action
-			android:id="@+id/action_navigation_login_with_email_to_navigation_retro_list"
-			app:destination="@id/navigation_retro_list" />
+			android:id="@+id/action_email_verified"
+			app:destination="@id/navigation_retro_list"
+			app:enterAnim="@anim/nav_default_enter_anim"
+			app:exitAnim="@anim/nav_default_exit_anim"
+			app:launchSingleTop="true"
+			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
 	</fragment>
 
 	<fragment

@@ -27,8 +27,6 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
-
         initUi(arguments?.getString(ARG_EMAIL).orEmpty())
 
         resetPasswordViewModel.resetPasswordLiveData.observe(this, Observer {

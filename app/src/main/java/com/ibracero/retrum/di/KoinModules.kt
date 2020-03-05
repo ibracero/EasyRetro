@@ -17,6 +17,7 @@ import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.domain.RetroRepository
 import com.ibracero.retrum.ui.account.AccountViewModel
+import com.ibracero.retrum.ui.account.EmailVerificationViewModel
 import com.ibracero.retrum.ui.account.ResetPasswordViewModel
 import com.ibracero.retrum.ui.board.BoardViewModel
 import com.ibracero.retrum.ui.board.StatementViewModel
@@ -71,6 +72,8 @@ val viewModelModule = module {
     viewModel { ResetPasswordViewModel(get(), get()) }
 
     viewModel { WelcomeViewModel(get(), get()) }
+
+    viewModel { EmailVerificationViewModel(get(), get()) }
 }
 
 val mapperModule = module {

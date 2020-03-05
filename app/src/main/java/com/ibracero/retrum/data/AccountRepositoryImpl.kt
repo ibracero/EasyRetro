@@ -4,7 +4,6 @@ import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.remote.RemoteDataStore
 import com.ibracero.retrum.data.remote.ServerError
@@ -14,7 +13,6 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-
 class AccountRepositoryImpl(
     private val remoteDataStore: RemoteDataStore,
     private val localDataStore: LocalDataStore
@@ -22,7 +20,24 @@ class AccountRepositoryImpl(
 
     private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
-    override fun isSessionOpen(): Boolean = firebaseAuth.currentUser != null
+    override fun isSessionOpen(): Boolean = firebaseAuth.currentUser?.isEmailVerified == true
+
+    override suspend fun getUserStatus(): AccountRepository.UserStatus {
+        val currentUser = firebaseAuth.currentUser ?: return AccountRepository.UserStatus.UNKNOWN
+        return suspendCoroutine { continuation ->
+            currentUser.reload()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val status = when (firebaseAuth.currentUser?.isEmailVerified) {
+                            true -> AccountRepository.UserStatus.VERIFIED
+                            false -> AccountRepository.UserStatus.NON_VERIFIED
+                            null -> AccountRepository.UserStatus.UNKNOWN
+                        }
+                        continuation.resume(status)
+                    } else continuation.resume(AccountRepository.UserStatus.UNKNOWN)
+                }
+        }
+    }
 
     override suspend fun firebaseAuthWithGoogle(account: GoogleSignInAccount): Either<ServerError, Unit> {
         return suspendCoroutine { continuation ->
@@ -49,14 +64,16 @@ class AccountRepositoryImpl(
         }
     }
 
-    override suspend fun loginUser(email: String, password: String): Either<ServerError, Unit> {
+    override suspend fun loginUser(email: String, password: String): Either<ServerError, AccountRepository.UserStatus> {
         return suspendCoroutine { continuation ->
             firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Timber.d("signInWithEmail:success")
-                        val user = firebaseAuth.currentUser
-                        continuation.resume(Either.right(Unit))
+                        val isVerified = firebaseAuth.currentUser?.isEmailVerified ?: false
+                        val userStatus = if (isVerified) AccountRepository.UserStatus.VERIFIED
+                        else AccountRepository.UserStatus.NON_VERIFIED
+                        continuation.resume(Either.right(userStatus))
                     } else {
                         Timber.e(task.exception, "signInWithEmail:failed")
                         continuation.resume(Either.left(ServerError.GoogleSignInError))
@@ -91,6 +108,10 @@ class AccountRepositoryImpl(
                     }
                 }
         }
+    }
+
+    override suspend fun resendVerificationEmail(): Either<ServerError, Unit> {
+        return suspendCoroutine { sendEmailVerification(it) }
     }
 
     private fun sendEmailVerification(continuation: Continuation<Either<ServerError, Unit>>) {

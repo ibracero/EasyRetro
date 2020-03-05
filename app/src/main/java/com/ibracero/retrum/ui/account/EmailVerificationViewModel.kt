@@ -10,33 +10,35 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
-class AccountViewModel(
+class EmailVerificationViewModel(
     private val repository: AccountRepository,
     private val dispatchers: CoroutineDispatcherProvider
 ) : ViewModel() {
-
-    val signInLiveData = MutableLiveData<Either<ServerError, AccountRepository.UserStatus>>()
-    val signUpLiveData = MutableLiveData<Either<ServerError, Unit>>()
 
     private val job = Job()
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    fun signIn(email: String, password: String) {
+    val sendVerificationLiveData = MutableLiveData<Either<ServerError, Unit>>()
+    val userStatusLiveData = MutableLiveData<AccountRepository.UserStatus>()
+
+    fun resendVerificationEmail() {
         scope.launch {
-            val signInResult = repository.loginUser(email, password)
+            val result = repository.resendVerificationEmail()
             withContext(dispatchers.main) {
-                signInLiveData.postValue(signInResult)
+                sendVerificationLiveData.postValue(result)
             }
         }
     }
 
-    fun signUp(email: String, password: String) {
+    fun refreshUserStatus() {
         scope.launch {
-            val signUpResult = repository.createUser(email, password)
+            val userStatus = repository.getUserStatus()
+            Timber.d("User status refreshed: ${userStatus.name}")
             withContext(dispatchers.main) {
-                signUpLiveData.postValue(signUpResult)
+                userStatusLiveData.postValue(userStatus)
             }
         }
     }
@@ -45,4 +47,5 @@ class AccountViewModel(
         super.onCleared()
         job.cancel()
     }
+
 }

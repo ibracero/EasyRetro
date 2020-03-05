@@ -2,9 +2,7 @@ package com.ibracero.retrum.ui.account
 
 import android.os.Bundle
 import android.util.Patterns
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -15,6 +13,7 @@ import com.ibracero.retrum.common.hasValidText
 import com.ibracero.retrum.common.isVisible
 import com.ibracero.retrum.common.visible
 import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.ui.account.ResetPasswordFragment.Companion.ARG_EMAIL
 import kotlinx.android.synthetic.main.fragment_login_email.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -28,24 +27,41 @@ class AccountFragment : Fragment(R.layout.fragment_login_email) {
     }
 
     private val accountViewModel: AccountViewModel by viewModel()
-
     private val passwordRegex = PASSWORD_PATTERN.toRegex()
+    private val signInObserver = Observer<Either<ServerError, AccountRepository.UserStatus>> { processSignInResult(it) }
+    private val signUpObserver = Observer<Either<ServerError, Unit>> { processSignUpResult(it) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initUi(arguments?.getBoolean(ARG_IS_NEW_ACCOUNT) ?: false)
+    }
+
+    override fun onStart() {
+        super.onStart()
 
         accountViewModel.run {
-            signInLiveData.observe(this@AccountFragment, Observer { processSignInResult(it) })
-            signUpLiveData.observe(this@AccountFragment, Observer { processSignUpResult(it) })
+            signInLiveData.observe(this@AccountFragment, signInObserver)
+            signUpLiveData.observe(this@AccountFragment, signUpObserver)
         }
     }
 
-    private fun processSignInResult(response: Either<ServerError, Unit>) {
+    override fun onStop() {
+        super.onStop()
+        accountViewModel.run {
+            signInLiveData.removeObserver(signInObserver)
+            signUpLiveData.removeObserver(signUpObserver)
+        }
+    }
+
+    private fun processSignInResult(response: Either<ServerError, AccountRepository.UserStatus>) {
         response.fold({
             //showSnackbar
         }, {
-            navigateToRetroList()
+            when (it) {
+                AccountRepository.UserStatus.VERIFIED -> navigateToRetroList()
+                AccountRepository.UserStatus.NON_VERIFIED -> navigateToEmailVerification()
+                AccountRepository.UserStatus.UNKNOWN -> Unit
+            }
         })
     }
 
@@ -53,7 +69,7 @@ class AccountFragment : Fragment(R.layout.fragment_login_email) {
         response.fold({
             //showSnackbar
         }, {
-           navigateToEmailVerification()
+            navigateToEmailVerification()
         })
     }
 
@@ -136,11 +152,11 @@ class AccountFragment : Fragment(R.layout.fragment_login_email) {
     }
 
     private fun navigateToRetroList() {
-        findNavController().navigate(R.id.action_navigation_login_with_email_to_navigation_retro_list)
+        findNavController().navigate(R.id.action_logged_in)
     }
 
     private fun navigateToEmailVerification() {
-
+        findNavController().navigate(R.id.action_verify_email)
     }
 
     private fun navigateToResetPassword() {

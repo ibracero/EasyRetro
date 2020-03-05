@@ -4,6 +4,18 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
+	<androidx.appcompat.widget.Toolbar
+		android:id="@+id/email_verification_toolbar"
+		android:layout_width="0dp"
+		android:layout_height="?android:actionBarSize"
+		android:background="@color/colorPrimaryDark"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		app:navigationIcon="@drawable/ic_arrow_back"
+		app:title="@string/verify_your_account"
+		app:titleTextColor="@color/primaryTextColor" />
+
 	<TextView
 		android:id="@+id/title_label"
 		android:layout_width="wrap_content"
@@ -11,7 +23,7 @@
 		android:gravity="center"
 		android:paddingStart="42dp"
 		android:paddingEnd="42dp"
-		android:text="Please, check your inbox. For safety reasons, we just sent you an email with a verification link"
+		android:text="@string/email_verification_message"
 		android:textColor="@color/primaryTextColor"
 		app:layout_constraintBottom_toTopOf="@id/email_icon"
 		app:layout_constraintEnd_toEndOf="parent"
@@ -24,41 +36,64 @@
 		android:layout_width="128dp"
 		android:layout_height="128dp"
 		android:layout_marginTop="48dp"
-		app:layout_constraintBottom_toTopOf="@id/email_not_received_label"
+		app:layout_constraintBottom_toTopOf="@id/open_email_app_button"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/title_label"
 		app:srcCompat="@drawable/ic_email" />
 
-	<TextView
-		android:id="@+id/email_not_received_label"
+	<Button
+		android:id="@+id/open_email_app_button"
+		style="@style/DarkButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginTop="48dp"
-		android:gravity="center"
-		android:paddingStart="42dp"
-		android:paddingEnd="42dp"
-		android:text="Didn't receive it?"
-		android:textColor="@color/primaryTextColor"
-		app:layout_constraintBottom_toTopOf="@id/resend_button"
+		android:layout_marginStart="42dp"
+		android:layout_marginTop="42dp"
+		android:layout_marginEnd="42dp"
+		android:drawableStart="@drawable/ic_refresh"
+		android:paddingStart="16dp"
+		android:paddingEnd="16dp"
+		android:text="@string/open_your_email_app"
+		android:textAlignment="center"
+		app:layout_constraintBottom_toTopOf="@id/resend_verification_email"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/email_icon" />
 
-	<Button
-		android:id="@+id/resend_button"
-		style="@style/DarkButton"
-		android:layout_width="0dp"
+	<TextView
+		android:id="@+id/email_not_received_label"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginStart="42dp"
+		android:gravity="center"
+		android:paddingStart="8dp"
+		android:paddingTop="16dp"
+		android:paddingEnd="4dp"
+		android:paddingBottom="16dp"
+		android:text="@string/email_verification_did_not_receive_it"
+		android:textColor="@color/primaryTextColor"
+		app:layout_constraintBottom_toBottomOf="@id/resend_verification_email"
+		app:layout_constraintEnd_toStartOf="@id/resend_verification_email"
+		app:layout_constraintHorizontal_chainStyle="packed"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/open_email_app_button"
+		app:layout_constraintTop_toTopOf="@id/resend_verification_email" />
+
+	<TextView
+		android:id="@+id/resend_verification_email"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
 		android:layout_marginTop="16dp"
-		android:layout_marginEnd="42dp"
-		android:text="Resend verification email"
-		android:textAlignment="center"
+		android:paddingStart="4dp"
+		android:paddingTop="16dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="16dp"
+		android:text="@string/resend_verification_email"
+		android:textColor="@color/primaryTextColor"
+		android:textStyle="bold"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/email_not_received_label" />
+		app:layout_constraintStart_toEndOf="@id/email_not_received_label"
+		app:layout_constraintTop_toBottomOf="@id/open_email_app_button" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

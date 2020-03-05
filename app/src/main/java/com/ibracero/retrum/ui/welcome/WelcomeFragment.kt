@@ -94,12 +94,12 @@ class WelcomeFragment : Fragment() {
     }
 
     private fun navigateToLogin() {
-        findNavController().navigate(R.id.navigation_login_with_email)
+        findNavController().navigate(R.id.navigation_email_account)
     }
 
     private fun navigateToRegister() {
         val bundle = Bundle().apply { putBoolean(ARG_IS_NEW_ACCOUNT, true) }
-        findNavController().navigate(R.id.navigation_login_with_email, bundle)
+        findNavController().navigate(R.id.navigation_email_account, bundle)
     }
 
     private fun getSignInOptions() =

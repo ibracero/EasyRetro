@@ -38,7 +38,7 @@
 
 	<Button
 		android:id="@+id/email_sign_in"
-		android:layout_width="232dp"
+		android:layout_width="256dp"
 		android:layout_height="56dp"
 		android:layout_marginTop="132dp"
 		android:background="@color/colorPrimaryDark"
@@ -59,7 +59,7 @@
 
 	<Button
 		android:id="@+id/google_sign_in"
-		android:layout_width="232dp"
+		android:layout_width="256dp"
 		android:layout_height="56dp"
 		android:layout_marginTop="16dp"
 		android:background="@color/colorPrimaryDark"
