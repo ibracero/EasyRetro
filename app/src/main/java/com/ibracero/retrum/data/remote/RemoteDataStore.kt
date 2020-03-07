@@ -9,6 +9,7 @@ import com.ibracero.retrum.data.remote.firestore.CloudFireStore.FirestoreTable
 import com.ibracero.retrum.data.remote.firestore.RetroRemote
 import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.data.remote.firestore.UserRemote
+import com.ibracero.retrum.domain.Failure
 import timber.log.Timber
 import java.util.*
 import kotlin.coroutines.resume
@@ -22,7 +23,7 @@ class RemoteDataStore {
     private var retrosObserver: ListenerRegistration? = null
     private var usersObserver: ListenerRegistration? = null
 
-    suspend fun createRetro(userEmail: String, retroTitle: String): Either<ServerError, RetroRemote> {
+    suspend fun createRetro(userEmail: String, retroTitle: String): Either<Failure, RetroRemote> {
         val userRef = db.collection(FirestoreTable.TABLE_USERS).document(userEmail)
 
         val retroValues = hashMapOf(
@@ -49,7 +50,7 @@ class RemoteDataStore {
                 }
         }
 
-        if (!retroCreated) return Either.left(ServerError.CreateRetroError)
+        if (!retroCreated) return Either.left(Failure.CreateRetroError)
 
         //Add created retro to user retro list
         return suspendCoroutine { continuation ->
@@ -61,12 +62,12 @@ class RemoteDataStore {
                 }
                 .addOnFailureListener {
                     Timber.e(it, "Couldn't add $retroUuid to user: $userEmail")
-                    continuation.resume(Either.left(ServerError.CreateRetroError))
+                    continuation.resume(Either.left(Failure.CreateRetroError))
                 }
         }
     }
 
-    fun observeUserRetros(userEmail: String, onUpdate: (Either<ServerError, List<RetroRemote>>) -> Unit) {
+    fun observeUserRetros(userEmail: String, onUpdate: (Either<Failure, List<RetroRemote>>) -> Unit) {
         retrosObserver?.remove()
         retrosObserver = db.collection(FirestoreTable.TABLE_USERS)
             .document(userEmail)
@@ -90,7 +91,7 @@ class RemoteDataStore {
             }
     }
 
-    fun observeRetroUsers(retroUuid: String, onUpdate: (Either<ServerError, List<UserRemote>>) -> Unit) {
+    fun observeRetroUsers(retroUuid: String, onUpdate: (Either<Failure, List<UserRemote>>) -> Unit) {
         usersObserver?.remove()
         usersObserver = db.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
@@ -122,7 +123,7 @@ class RemoteDataStore {
     fun observeStatements(
         userEmail: String,
         retroUuid: String,
-        onUpdate: (Either<ServerError, List<StatementRemote>>) -> Unit
+        onUpdate: (Either<Failure, List<StatementRemote>>) -> Unit
     ) {
         joinRetro(userEmail, retroUuid)
 
@@ -151,7 +152,7 @@ class RemoteDataStore {
             }
     }
 
-    suspend fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote): Either<ServerError, Unit> {
+    suspend fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote): Either<Failure, Unit> {
         val item = hashMapOf(
             FirestoreField.STATEMENT_AUTHOR to statementRemote.userEmail,
             FirestoreField.STATEMENT_TYPE to statementRemote.statementType,
@@ -168,7 +169,7 @@ class RemoteDataStore {
                     continuation.resume(Either.right(Unit))
                 }
                 .addOnFailureListener {
-                    continuation.resume(Either.left(ServerError.CreateStatementError))
+                    continuation.resume(Either.left(Failure.CreateStatementError))
                 }
         }
     }

@@ -4,7 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import arrow.core.Either
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.AccountRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -16,7 +16,7 @@ class ResetPasswordViewModel(
     private val dispatchers: CoroutineDispatcherProvider
 ) : ViewModel() {
 
-    val resetPasswordLiveData = MutableLiveData<Either<ServerError, Unit>>()
+    val resetPasswordLiveData = MutableLiveData<Either<Failure, Unit>>()
 
     private val job = Job()
     private val coroutineContext = job + dispatchers.io

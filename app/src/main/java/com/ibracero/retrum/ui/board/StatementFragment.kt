@@ -11,7 +11,7 @@ import androidx.lifecycle.Observer
 import arrow.core.Either
 import com.ibracero.retrum.R
 import com.ibracero.retrum.data.local.Statement
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.StatementType
 import com.ibracero.retrum.ui.Payload
 import kotlinx.android.synthetic.main.statement_list.*
@@ -54,7 +54,7 @@ abstract class StatementFragment : Fragment() {
             .observe(this, Observer { processStatementAdded(it) })
     }
 
-    private fun processStatementAdded(result: Either<ServerError, Unit>) {
+    private fun processStatementAdded(result: Either<Failure, Unit>) {
         result.fold(
             {
                 //showError

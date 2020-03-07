@@ -2,9 +2,7 @@ package com.ibracero.retrum.ui.account
 
 import android.os.Bundle
 import android.util.Patterns
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -12,7 +10,7 @@ import arrow.core.Either
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.addTextWatcher
 import com.ibracero.retrum.common.hasValidText
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -56,7 +54,7 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         confirm_button.isEnabled = email_input_layout.hasValidText()
     }
 
-    private fun processResetPasswordResponse(response: Either<ServerError, Unit>) {
+    private fun processResetPasswordResponse(response: Either<Failure, Unit>) {
         response.fold({
             //showSnackbar
         }, {

@@ -13,7 +13,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.visible
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.ui.account.AccountFragment.Companion.ARG_IS_NEW_ACCOUNT
 import kotlinx.android.synthetic.main.fragment_welcome.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -55,7 +55,7 @@ class WelcomeFragment : Fragment() {
         buttonsLayoutHandler.removeCallbacksAndMessages(null)
     }
 
-    private fun processGoogleSignInResponse(response: Either<ServerError, Unit>) {
+    private fun processGoogleSignInResponse(response: Either<Failure, Unit>) {
         response.fold({
             //showSnackbar
         }, {

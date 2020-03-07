@@ -9,7 +9,7 @@ import com.ibracero.retrum.data.local.LocalDataStore
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.RemoteDataStore
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.RetroRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -30,8 +30,8 @@ class RetroRepositoryImpl(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    override fun createRetro(title: String): LiveData<Either<ServerError, Retro>> {
-        val retroLiveData = MutableLiveData<Either<ServerError, Retro>>()
+    override fun createRetro(title: String): LiveData<Either<Failure, Retro>> {
+        val retroLiveData = MutableLiveData<Either<Failure, Retro>>()
         scope.launch {
             val retroEither = remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
                 .map { retroRemoteToDomainMapper.map(it) }

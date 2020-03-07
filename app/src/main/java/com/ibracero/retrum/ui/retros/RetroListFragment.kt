@@ -18,7 +18,7 @@ import com.ibracero.retrum.R
 import com.ibracero.retrum.common.NetworkStatus.ONLINE
 import com.ibracero.retrum.common.hideKeyboard
 import com.ibracero.retrum.data.local.Retro
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.ui.Payload
 import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_LOGOUT
 import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
@@ -120,7 +120,7 @@ class RetroListFragment : Fragment() {
             })
     }
 
-    private fun processCreateRetroResponse(retroEither: Either<ServerError, Retro>) {
+    private fun processCreateRetroResponse(retroEither: Either<Failure, Retro>) {
         retroEither.fold({
             retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(false))
             showError()

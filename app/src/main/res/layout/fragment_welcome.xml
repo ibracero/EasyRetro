@@ -11,7 +11,7 @@
 		android:id="@+id/post_it_image"
 		android:layout_width="172dp"
 		android:layout_height="172dp"
-		app:layout_constraintBottom_toTopOf="@id/email_sign_in"
+		app:layout_constraintBottom_toTopOf="@id/google_sign_in"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent"
@@ -37,31 +37,10 @@
 		tools:ignore="RtlSymmetry" />
 
 	<Button
-		android:id="@+id/email_sign_in"
-		android:layout_width="256dp"
-		android:layout_height="56dp"
-		android:layout_marginTop="132dp"
-		android:background="@color/colorPrimaryDark"
-		android:drawableStart="@drawable/ic_email"
-		android:paddingStart="16dp"
-		android:paddingEnd="16dp"
-		android:text="@string/sign_in_with_email"
-		android:textAllCaps="false"
-		android:textColor="@color/primaryTextColor"
-		android:textStyle="bold"
-		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@id/google_sign_in"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/post_it_image"
-		app:layout_constraintVertical_chainStyle="packed"
-		tools:visibility="visible" />
-
-	<Button
 		android:id="@+id/google_sign_in"
 		android:layout_width="256dp"
 		android:layout_height="56dp"
-		android:layout_marginTop="16dp"
+		android:layout_marginTop="132dp"
 		android:background="@color/colorPrimaryDark"
 		android:drawableStart="@drawable/googleg_standard_color_18"
 		android:paddingStart="16dp"
@@ -71,40 +50,32 @@
 		android:textColor="@color/primaryTextColor"
 		android:textStyle="bold"
 		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@id/or_label"
+		app:layout_constraintBottom_toTopOf="@id/email_sign_in"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/email_sign_in"
+		app:layout_constraintTop_toBottomOf="@id/post_it_image"
 		tools:visibility="visible" />
 
-	<TextView
-		android:id="@+id/or_label"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:layout_marginBottom="16dp"
-		android:text="@string/or"
-		android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-		android:textColor="@color/primaryTextColor"
-		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@id/email_create_account"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/google_sign_in" />
-
 	<Button
-		android:id="@+id/email_create_account"
-		android:layout_width="232dp"
+		android:id="@+id/email_sign_in"
+		android:layout_width="256dp"
 		android:layout_height="56dp"
-		android:drawableStart="@drawable/ic_add_circle"
+		android:layout_marginTop="16dp"
+		android:background="@color/colorPrimaryDark"
+		android:drawableStart="@drawable/ic_email"
 		android:paddingStart="16dp"
 		android:paddingEnd="16dp"
-		android:text="@string/create_account"
+		android:text="@string/sign_in_with_email"
+		android:textAllCaps="false"
+		android:textColor="@color/primaryTextColor"
+		android:textStyle="bold"
 		android:visibility="gone"
-		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintBottom_toTopOf="@id/divider"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/or_label" />
+		app:layout_constraintTop_toBottomOf="@id/google_sign_in"
+		app:layout_constraintVertical_chainStyle="packed"
+		tools:visibility="visible" />
 
 	<View
 		android:id="@+id/divider"
@@ -112,9 +83,10 @@
 		android:layout_height="1dp"
 		android:layout_marginTop="16dp"
 		android:background="@color/lightGreyColor"
-		app:layout_constraintEnd_toEndOf="@id/google_sign_in"
-		app:layout_constraintStart_toStartOf="@id/google_sign_in"
-		app:layout_constraintTop_toBottomOf="@id/google_sign_in" />
+		app:layout_constraintEnd_toEndOf="@id/email_sign_in"
+		app:layout_constraintBottom_toTopOf="@id/sign_up_button"
+		app:layout_constraintStart_toStartOf="@id/email_sign_in"
+		app:layout_constraintTop_toBottomOf="@id/email_sign_in" />
 
 	<TextView
 		android:id="@+id/sign_up_button"
@@ -126,9 +98,10 @@
 		android:text="@string/sign_up"
 		android:textColor="@color/primaryTextColor"
 		android:textStyle="bold"
-		app:layout_constraintEnd_toEndOf="@id/google_sign_in"
-		app:layout_constraintStart_toStartOf="@id/google_sign_in"
-		app:layout_constraintTop_toBottomOf="@id/divider" />
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="@id/divider"
+		app:layout_constraintTop_toBottomOf="@id/divider"
+		app:layout_constraintStart_toStartOf="@id/divider"/>
 
 	<androidx.constraintlayout.widget.Group
 		android:id="@+id/group_post_it"

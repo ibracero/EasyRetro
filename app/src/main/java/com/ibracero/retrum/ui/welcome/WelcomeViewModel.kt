@@ -7,7 +7,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.AccountRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -24,7 +24,7 @@ class WelcomeViewModel(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    val googleSignInLiveData = MutableLiveData<Either<ServerError, Unit>>()
+    val googleSignInLiveData = MutableLiveData<Either<Failure, Unit>>()
 
     fun isSessionOpen(): Boolean = repository.isSessionOpen()
 
@@ -32,10 +32,10 @@ class WelcomeViewModel(
         try {
             val account = task?.getResult(ApiException::class.java)
             if (account != null) firebaseAuthWithGoogle(account)
-            else googleSignInLiveData.postValue(Either.left(ServerError.GoogleSignInError))
+            else googleSignInLiveData.postValue(Either.left(Failure.UnknownError))
         } catch (e: ApiException) {
             Timber.e(e)
-            googleSignInLiveData.postValue(Either.left(ServerError.GoogleSignInError))
+            googleSignInLiveData.postValue(Either.left(Failure.UnknownError))
         }
     }
 

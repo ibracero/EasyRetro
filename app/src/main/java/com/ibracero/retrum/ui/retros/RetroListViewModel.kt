@@ -7,7 +7,7 @@ import arrow.core.Either
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.common.RetrumConnectionManager
 import com.ibracero.retrum.data.local.Retro
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.domain.RetroRepository
 import kotlinx.coroutines.CoroutineScope
@@ -24,7 +24,7 @@ class RetroListViewModel(
 
     val retroLiveData: LiveData<List<Retro>> = retroRepository.getRetros()
     val connectivityLiveData = connectionManager.connectionLiveData
-    val logoutLiveData = MutableLiveData<Either<ServerError, Unit>>()
+    val logoutLiveData = MutableLiveData<Either<Failure, Unit>>()
 
     private val job = Job()
     private val coroutineContext = job + dispatchers.io

@@ -4,15 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import arrow.core.Either
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.data.local.LocalDataStore
-import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.data.mapper.StatementRemoteToDomainMapper
 import com.ibracero.retrum.data.mapper.UserRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.RemoteDataStore
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.data.remote.firestore.StatementRemote
 import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.domain.StatementType
@@ -47,8 +45,8 @@ class BoardRepositoryImpl(
         retroUuid: String,
         description: String,
         statementType: StatementType
-    ): LiveData<Either<ServerError, Unit>> {
-        val statementLiveData = MutableLiveData<Either<ServerError, Unit>>()
+    ): LiveData<Either<Failure, Unit>> {
+        val statementLiveData = MutableLiveData<Either<Failure, Unit>>()
         scope.launch {
             val eitherResult = remoteDataStore.addStatementToBoard(
                 retroUuid = retroUuid,

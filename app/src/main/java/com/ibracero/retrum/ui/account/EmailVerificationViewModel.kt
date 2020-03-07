@@ -4,8 +4,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import arrow.core.Either
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
-import com.ibracero.retrum.data.remote.ServerError
 import com.ibracero.retrum.domain.AccountRepository
+import com.ibracero.retrum.domain.Failure
+import com.ibracero.retrum.domain.UserStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -21,8 +22,8 @@ class EmailVerificationViewModel(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    val sendVerificationLiveData = MutableLiveData<Either<ServerError, Unit>>()
-    val userStatusLiveData = MutableLiveData<AccountRepository.UserStatus>()
+    val sendVerificationLiveData = MutableLiveData<Either<Failure, Unit>>()
+    val userStatusLiveData = MutableLiveData<Either<Failure, UserStatus>>()
 
     fun resendVerificationEmail() {
         scope.launch {
@@ -36,7 +37,6 @@ class EmailVerificationViewModel(
     fun refreshUserStatus() {
         scope.launch {
             val userStatus = repository.getUserStatus()
-            Timber.d("User status refreshed: ${userStatus.name}")
             withContext(dispatchers.main) {
                 userStatusLiveData.postValue(userStatus)
             }

@@ -12,8 +12,9 @@ import com.ibracero.retrum.common.addTextWatcher
 import com.ibracero.retrum.common.hasValidText
 import com.ibracero.retrum.common.isVisible
 import com.ibracero.retrum.common.visible
-import com.ibracero.retrum.data.remote.ServerError
+import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.AccountRepository
+import com.ibracero.retrum.domain.UserStatus
 import com.ibracero.retrum.ui.account.ResetPasswordFragment.Companion.ARG_EMAIL
 import kotlinx.android.synthetic.main.fragment_login_email.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -28,8 +29,8 @@ class AccountFragment : Fragment(R.layout.fragment_login_email) {
 
     private val accountViewModel: AccountViewModel by viewModel()
     private val passwordRegex = PASSWORD_PATTERN.toRegex()
-    private val signInObserver = Observer<Either<ServerError, AccountRepository.UserStatus>> { processSignInResult(it) }
-    private val signUpObserver = Observer<Either<ServerError, Unit>> { processSignUpResult(it) }
+    private val signInObserver = Observer<Either<Failure, UserStatus>> { processSignInResult(it) }
+    private val signUpObserver = Observer<Either<Failure, Unit>> { processSignUpResult(it) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -38,34 +39,31 @@ class AccountFragment : Fragment(R.layout.fragment_login_email) {
 
     override fun onStart() {
         super.onStart()
+        accountViewModel.onStart()
 
         accountViewModel.run {
-            signInLiveData.observe(this@AccountFragment, signInObserver)
-            signUpLiveData.observe(this@AccountFragment, signUpObserver)
+            signInLiveData?.observe(this@AccountFragment, signInObserver)
+            signUpLiveData?.observe(this@AccountFragment, signUpObserver)
         }
     }
 
     override fun onStop() {
         super.onStop()
-        accountViewModel.run {
-            signInLiveData.removeObserver(signInObserver)
-            signUpLiveData.removeObserver(signUpObserver)
-        }
+        accountViewModel.onStop()
     }
 
-    private fun processSignInResult(response: Either<ServerError, AccountRepository.UserStatus>) {
+    private fun processSignInResult(response: Either<Failure, UserStatus>) {
         response.fold({
             //showSnackbar
         }, {
             when (it) {
-                AccountRepository.UserStatus.VERIFIED -> navigateToRetroList()
-                AccountRepository.UserStatus.NON_VERIFIED -> navigateToEmailVerification()
-                AccountRepository.UserStatus.UNKNOWN -> Unit
+                UserStatus.VERIFIED -> navigateToRetroList()
+                UserStatus.NON_VERIFIED -> navigateToEmailVerification()
             }
         })
     }
 
-    private fun processSignUpResult(response: Either<ServerError, Unit>) {
+    private fun processSignUpResult(response: Either<Failure, Unit>) {
         response.fold({
             //showSnackbar
         }, {

@@ -8,8 +8,8 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.ibracero.retrum.R
-import com.ibracero.retrum.data.remote.ServerError
-import com.ibracero.retrum.domain.AccountRepository
+import com.ibracero.retrum.domain.Failure
+import com.ibracero.retrum.domain.UserStatus
 import kotlinx.android.synthetic.main.fragment_email_verification.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -17,8 +17,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification) {
 
     private val viewModel: EmailVerificationViewModel by viewModel()
-    private val userStatusObserver = Observer<AccountRepository.UserStatus> { processUserStatus(it) }
-
+    private val userStatusObserver = Observer<Either<Failure, UserStatus>> { processUserStatus(it) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,7 +50,7 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
         requireActivity().startActivity(intent)
     }
 
-    private fun processResendEmailResult(result: Either<ServerError, Unit>) {
+    private fun processResendEmailResult(result: Either<Failure, Unit>) {
         result.fold({
             //showSnackbar
         }, {
@@ -59,16 +58,22 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
         })
     }
 
-    private fun processUserStatus(userStatus: AccountRepository.UserStatus?) {
-        when (userStatus) {
-            AccountRepository.UserStatus.VERIFIED -> {
-                //showSnackbar
-                //delay
-                navigateToRetroList()
+    private fun processUserStatus(userStatusEither: Either<Failure, UserStatus>) {
+        userStatusEither.fold(
+            {
+                //process failure
+            },
+            {
+                when (it) {
+                    UserStatus.VERIFIED -> {
+                        //showSnackbar
+                        //delay
+                        navigateToRetroList()
+                    }
+                    UserStatus.NON_VERIFIED -> Unit
+                }
             }
-            AccountRepository.UserStatus.NON_VERIFIED -> Unit
-            AccountRepository.UserStatus.UNKNOWN -> findNavController().navigateUp()
-        }
+        )
     }
 
     private fun navigateToRetroList() {
