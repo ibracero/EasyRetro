@@ -5,16 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.CachedRecyclerViewHolder
-import com.ibracero.retrum.common.gone
-import com.ibracero.retrum.common.visible
+import com.ibracero.retrum.common.extensions.gone
+import com.ibracero.retrum.common.extensions.visible
 import com.ibracero.retrum.data.local.User
 import kotlinx.android.synthetic.main.item_user.*
-import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
 
 class UserListAdapter : ListAdapter<User, UserViewHolder>(UserDiffCalback()) {

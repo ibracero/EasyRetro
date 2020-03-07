@@ -33,7 +33,7 @@
 	<fragment
 		android:id="@+id/navigation_email_account"
 		android:name="com.ibracero.retrum.ui.account.AccountFragment"
-		tools:layout="@layout/fragment_login_email">
+		tools:layout="@layout/fragment_account">
 		<action
 			android:id="@+id/action_reset_password"
 			app:destination="@id/navigation_reset_password"

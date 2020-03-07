@@ -1,4 +1,4 @@
-package com.ibracero.retrum.common
+package com.ibracero.retrum.common.extensions
 
 import android.content.Context
 import android.text.Editable

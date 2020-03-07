@@ -1,6 +1,7 @@
 package com.ibracero.retrum.domain
 
 import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
@@ -15,6 +16,7 @@ sealed class Failure constructor(message: String? = null) {
                 is FirebaseAuthInvalidCredentialsException -> InvalidUserCredentialsFailure
                 is FirebaseAuthRecentLoginRequiredException -> TokenExpiredFailure
                 is FirebaseAuthUserCollisionException -> UserCollisionFailure
+                is FirebaseTooManyRequestsException -> TooManyRequestsFailure
                 else -> UnknownError
             }
         }
@@ -31,4 +33,5 @@ sealed class Failure constructor(message: String? = null) {
 
     object TokenExpiredFailure : Failure() // Credentials no longer valid. Login again
     object UserCollisionFailure : Failure() // User is already in use
+    object TooManyRequestsFailure : Failure() // Too many requests done in a brief period of time
 }

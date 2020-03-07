@@ -47,5 +47,4 @@ class EmailVerificationViewModel(
         super.onCleared()
         job.cancel()
     }
-
 }

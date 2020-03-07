@@ -11,12 +11,17 @@ import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
-import com.ibracero.retrum.common.visible
+import com.ibracero.retrum.common.extensions.showErrorSnackbar
+import com.ibracero.retrum.common.extensions.visible
 import com.ibracero.retrum.domain.Failure
+import com.ibracero.retrum.ui.FailureMessage
 import com.ibracero.retrum.ui.account.AccountFragment.Companion.ARG_IS_NEW_ACCOUNT
 import kotlinx.android.synthetic.main.fragment_welcome.*
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 
 class WelcomeFragment : Fragment() {
@@ -45,8 +50,14 @@ class WelcomeFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            welcomeViewModel.handleSignInResult(task)
+            try {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                val account = task?.getResult(ApiException::class.java)
+                welcomeViewModel.handleSignInResult(account)
+            } catch (e: ApiException) {
+                Timber.e(e)
+                processGoogleSignInResponse(Either.left(Failure.UnknownError))
+            }
         }
     }
 
@@ -57,7 +68,7 @@ class WelcomeFragment : Fragment() {
 
     private fun processGoogleSignInResponse(response: Either<Failure, Unit>) {
         response.fold({
-            //showSnackbar
+            welcome_root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
         }, {
             navigateToRetroList()
         })

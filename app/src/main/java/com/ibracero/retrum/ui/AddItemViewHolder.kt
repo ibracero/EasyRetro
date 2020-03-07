@@ -6,6 +6,7 @@ import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
 import android.widget.EditText
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.*
+import com.ibracero.retrum.common.extensions.*
 import kotlinx.android.synthetic.main.item_add.*
 
 class AddItemViewHolder(

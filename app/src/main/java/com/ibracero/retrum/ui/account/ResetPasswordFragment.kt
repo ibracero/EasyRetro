@@ -8,8 +8,8 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.ibracero.retrum.R
-import com.ibracero.retrum.common.addTextWatcher
-import com.ibracero.retrum.common.hasValidText
+import com.ibracero.retrum.common.extensions.addTextWatcher
+import com.ibracero.retrum.common.extensions.hasValidText
 import com.ibracero.retrum.domain.Failure
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 import org.koin.android.viewmodel.ext.android.viewModel

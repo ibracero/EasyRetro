@@ -41,4 +41,18 @@
 	<string name="resend_verification_email">Resend verification email</string>
 	<string name="open_your_email_app">Open your email app</string>
 	<string name="reset_password_directions">Please insert the email you used to create your account. We will send you the instructions to reset your password‘</string>
+
+	<!--Errors-->
+	<string name="error_generic">Couldn\'t complete the requested operation. Please, check your connection and try again later.</string>
+	<string name="error_network">Your internet connection don\'t seem to be available. Please, check your connection and try again later.</string>
+	<string name="error_invalid_user">We couldn\'t find that user in our database. Do you want to sign up?</string>
+	<string name="error_invalid_user_credentials">The credentials you provided are not correct. Please, check them and try again.</string>
+	<string name="error_token_expired">For safety reasons, we need you to login again.</string>
+	<string name="error_user_collision">The user you provided already exists. Do you want to sign in?</string>
+	<string name="error_too_many_requests">Too many requests. We have blocked them due to unusual activity. Please, try again later.</string>
+
+	<!--Confirmations-->
+	<string name="confirmation_email_sent">We have just sent a new confirmation link to your email</string>
+	<string name="confirmation_user_verified">Your user has been verified successfully!</string>
+
 </resources>

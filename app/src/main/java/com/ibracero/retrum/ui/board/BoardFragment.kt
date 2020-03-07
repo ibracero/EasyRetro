@@ -15,7 +15,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.NetworkStatus
 import com.ibracero.retrum.common.RetrumConnectionManager
-import com.ibracero.retrum.common.hideKeyboard
+import com.ibracero.retrum.common.extensions.hideKeyboard
 import com.ibracero.retrum.domain.BoardRepository
 import com.ibracero.retrum.ui.board.action.ActionsFragment
 import com.ibracero.retrum.ui.board.negative.NegativeFragment

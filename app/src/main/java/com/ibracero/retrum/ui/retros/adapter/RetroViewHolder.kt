@@ -3,10 +3,9 @@ package com.ibracero.retrum.ui.retros.adapter
 import android.view.ViewGroup
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.BaseViewHolder
-import com.ibracero.retrum.common.inflate
+import com.ibracero.retrum.common.extensions.inflate
 import com.ibracero.retrum.data.local.Retro
 import kotlinx.android.synthetic.main.item_retro.*
-import kotlinx.android.synthetic.main.item_retro.view.*
 
 class RetroViewHolder(
     parent: ViewGroup,

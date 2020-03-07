@@ -16,7 +16,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.NetworkStatus.ONLINE
-import com.ibracero.retrum.common.hideKeyboard
+import com.ibracero.retrum.common.extensions.hideKeyboard
 import com.ibracero.retrum.data.local.Retro
 import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.ui.Payload

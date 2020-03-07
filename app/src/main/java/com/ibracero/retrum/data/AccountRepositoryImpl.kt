@@ -24,7 +24,7 @@ class AccountRepositoryImpl(
     override fun isSessionOpen(): Boolean = firebaseAuth.currentUser != null
 
     override suspend fun getUserStatus(): Either<Failure, UserStatus> {
-        val currentUser = firebaseAuth.currentUser ?: return Either.left(Failure.InvalidUserFailure)
+        val currentUser = firebaseAuth.currentUser ?: return Either.left(Failure.UnknownError)
         return suspendCoroutine { continuation ->
             currentUser.reload()
                 .addOnCompleteListener { task ->

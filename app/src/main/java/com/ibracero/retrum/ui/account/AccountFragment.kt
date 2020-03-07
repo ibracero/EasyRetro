@@ -3,23 +3,22 @@ package com.ibracero.retrum.ui.account
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
+import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
-import com.ibracero.retrum.common.addTextWatcher
-import com.ibracero.retrum.common.hasValidText
-import com.ibracero.retrum.common.isVisible
-import com.ibracero.retrum.common.visible
+import com.ibracero.retrum.common.extensions.*
 import com.ibracero.retrum.domain.Failure
-import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.domain.UserStatus
+import com.ibracero.retrum.ui.FailureMessage
 import com.ibracero.retrum.ui.account.ResetPasswordFragment.Companion.ARG_EMAIL
-import kotlinx.android.synthetic.main.fragment_login_email.*
+import kotlinx.android.synthetic.main.fragment_account.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class AccountFragment : Fragment(R.layout.fragment_login_email) {
+class AccountFragment : Fragment(R.layout.fragment_account) {
 
     companion object {
         private const val MINIMUM_PASSWORD_LENGHT = 6
@@ -52,43 +51,15 @@ class AccountFragment : Fragment(R.layout.fragment_login_email) {
         accountViewModel.onStop()
     }
 
-    private fun processSignInResult(response: Either<Failure, UserStatus>) {
-        response.fold({
-            //showSnackbar
-        }, {
-            when (it) {
-                UserStatus.VERIFIED -> navigateToRetroList()
-                UserStatus.NON_VERIFIED -> navigateToEmailVerification()
-            }
-        })
-    }
-
-    private fun processSignUpResult(response: Either<Failure, Unit>) {
-        response.fold({
-            //showSnackbar
-        }, {
-            navigateToEmailVerification()
-        })
-    }
-
     private fun initUi(isNewAccount: Boolean) {
-
-        if (isNewAccount) {
-            sign_in_toolbar.setTitle(R.string.sign_up_with_email)
-            sign_in_button.setText(R.string.sign_up)
-            confirm_password_input_layout.visible()
-        } else {
-            sign_in_toolbar.setTitle(R.string.sign_in_with_email)
-            sign_in_button.setText(R.string.sign_in)
-            reset_password_label.visible()
-            reset_password_button.visible()
-
-            val resetPasswordClickListener = { _: View -> navigateToResetPassword() }
-            reset_password_button.setOnClickListener(resetPasswordClickListener)
-            reset_password_label.setOnClickListener(resetPasswordClickListener)
-        }
+        if (isNewAccount) setupSignUp()
+        else setupSignIn()
 
         sign_in_toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+
+        val resetPasswordClickListener = { _: View -> navigateToResetPassword() }
+        reset_password_button.setOnClickListener(resetPasswordClickListener)
+        reset_password_label.setOnClickListener(resetPasswordClickListener)
 
         email_input_field.addTextWatcher(afterTextChanged = {
             if (Patterns.EMAIL_ADDRESS.toRegex().matches(email_input_field.text.toString())) {
@@ -125,11 +96,68 @@ class AccountFragment : Fragment(R.layout.fragment_login_email) {
             val email = email_input_field.text.toString()
             val password = password_input_field.text.toString()
 
-            if (!isNewAccount) accountViewModel.signIn(email, password)
+            if (!confirm_password_input_layout.isVisible()) accountViewModel.signIn(email, password)
             else accountViewModel.signUp(email, password)
         }
 
         checkFieldErrors()
+    }
+
+    private fun processSignInResult(response: Either<Failure, UserStatus>) {
+        response.fold({
+            when (it) {
+                is Failure.InvalidUserFailure -> {
+                    account_root.showErrorSnackbar(
+                        message = R.string.error_invalid_user,
+                        duration = Snackbar.LENGTH_INDEFINITE,
+                        actionText = R.string.sign_up
+                    ) {
+                        setupSignUp()
+                    }
+                }
+                else -> showError(FailureMessage.parse(it))
+            }
+        }, {
+            when (it) {
+                UserStatus.VERIFIED -> navigateToRetroList()
+                UserStatus.NON_VERIFIED -> navigateToEmailVerification()
+            }
+        })
+    }
+
+    private fun processSignUpResult(response: Either<Failure, Unit>) {
+        response.fold({
+            when (it) {
+                is Failure.UserCollisionFailure -> {
+                    account_root.showErrorSnackbar(
+                        message = R.string.error_user_collision,
+                        duration = Snackbar.LENGTH_INDEFINITE,
+                        actionText = R.string.sign_in
+                    ) {
+                        setupSignIn()
+                    }
+                }
+                else -> showError(FailureMessage.parse(it))
+            }
+        }, {
+            navigateToEmailVerification()
+        })
+    }
+
+    private fun setupSignUp() {
+        sign_in_toolbar.setTitle(R.string.sign_up_with_email)
+        sign_in_button.setText(R.string.sign_up)
+        confirm_password_input_layout.visible()
+        reset_password_label.gone()
+        reset_password_button.gone()
+    }
+
+    private fun setupSignIn() {
+        sign_in_toolbar.setTitle(R.string.sign_in_with_email)
+        sign_in_button.setText(R.string.sign_in)
+        confirm_password_input_layout.gone()
+        reset_password_label.visible()
+        reset_password_button.visible()
     }
 
     private fun checkFieldErrors() {
@@ -147,6 +175,10 @@ class AccountFragment : Fragment(R.layout.fragment_login_email) {
         if (email_input_field.text.toString().isEmpty()) email_input_layout.error = null
         if (password_input_field.text.toString().isEmpty()) password_input_layout.error = null
         if (confirm_password_input_field.text.toString().isEmpty()) confirm_password_input_layout.error = null
+    }
+
+    private fun showError(@StringRes messageRes: Int) {
+        account_root.showErrorSnackbar(message = messageRes, duration = Snackbar.LENGTH_LONG)
     }
 
     private fun navigateToRetroList() {

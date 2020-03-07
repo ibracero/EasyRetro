@@ -3,9 +3,9 @@ package com.ibracero.retrum.ui.board
 import android.view.ViewGroup
 import com.ibracero.retrum.R
 import com.ibracero.retrum.common.BaseViewHolder
-import com.ibracero.retrum.common.getColor
-import com.ibracero.retrum.common.inflate
-import com.ibracero.retrum.common.visibleOrGone
+import com.ibracero.retrum.common.extensions.getColor
+import com.ibracero.retrum.common.extensions.inflate
+import com.ibracero.retrum.common.extensions.visibleOrGone
 import com.ibracero.retrum.data.local.Statement
 import com.ibracero.retrum.domain.StatementType
 import kotlinx.android.synthetic.main.item_statement.*
