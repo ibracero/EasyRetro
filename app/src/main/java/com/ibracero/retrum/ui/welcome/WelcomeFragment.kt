@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -17,6 +18,7 @@ import com.ibracero.retrum.R
 import com.ibracero.retrum.common.extensions.showErrorSnackbar
 import com.ibracero.retrum.common.extensions.visible
 import com.ibracero.retrum.domain.Failure
+import com.ibracero.retrum.domain.UserStatus
 import com.ibracero.retrum.ui.FailureMessage
 import com.ibracero.retrum.ui.account.AccountFragment.Companion.ARG_IS_NEW_ACCOUNT
 import kotlinx.android.synthetic.main.fragment_welcome.*
@@ -28,9 +30,6 @@ class WelcomeFragment : Fragment() {
 
     companion object {
         const val GOOGLE_SIGN_IN_REQUEST_CODE = 2901
-        const val BUTTONS_SHOW_DELAY = 2000L
-
-        const val ARG_IS_LOGOUT = "arg_logout"
     }
 
     private val buttonsLayoutHandler = Handler()
@@ -44,7 +43,8 @@ class WelcomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initUi()
-        welcomeViewModel.googleSignInLiveData.observeForever { processGoogleSignInResponse(it) }
+        welcomeViewModel.googleSignInLiveData.observe(this, Observer { processGoogleSignInResponse(it) })
+        welcomeViewModel.userSessionLiveData.observe(this, Observer { processUserSession(it) })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -66,6 +66,17 @@ class WelcomeFragment : Fragment() {
         buttonsLayoutHandler.removeCallbacksAndMessages(null)
     }
 
+    private fun processUserSession(userStatus: Either<Failure, UserStatus>) {
+        userStatus.fold({
+            showButtons()
+        }, {
+            when (it) {
+                UserStatus.VERIFIED -> navigateToRetroList()
+                else -> showButtons()
+            }
+        })
+    }
+
     private fun processGoogleSignInResponse(response: Either<Failure, Unit>) {
         response.fold({
             welcome_root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
@@ -76,23 +87,15 @@ class WelcomeFragment : Fragment() {
 
     private fun initUi() {
         group_post_it.visible()
-        if (arguments?.getBoolean(ARG_IS_LOGOUT) == true) {
-            google_sign_in.visible()
-            email_sign_in.visible()
-        } else checkSessionStarted()
 
         google_sign_in.setOnClickListener { launchGoogleSignIn(it) }
         email_sign_in.setOnClickListener { navigateToLogin() }
         sign_up_button.setOnClickListener { navigateToRegister() }
     }
 
-    private fun checkSessionStarted() {
-        buttonsLayoutHandler.postDelayed({
-            if (!welcomeViewModel.isSessionOpen()) {
-                google_sign_in.visible()
-                email_sign_in.visible()
-            } else navigateToRetroList()
-        }, BUTTONS_SHOW_DELAY)
+    private fun showButtons() {
+        google_sign_in.visible()
+        email_sign_in.visible()
     }
 
     private fun launchGoogleSignIn(it: View) {
@@ -101,11 +104,11 @@ class WelcomeFragment : Fragment() {
     }
 
     private fun navigateToRetroList() {
-        findNavController().navigate(R.id.navigation_retro_list)
+        findNavController().navigate(R.id.action_sign_in_success)
     }
 
     private fun navigateToLogin() {
-        findNavController().navigate(R.id.navigation_email_account)
+        findNavController().navigate(R.id.action_sign_in_with_email)
     }
 
     private fun navigateToRegister() {

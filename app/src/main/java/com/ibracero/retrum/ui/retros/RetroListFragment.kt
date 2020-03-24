@@ -162,7 +162,6 @@ class RetroListFragment : Fragment() {
     }
 
     private fun navigateToLoginScreen() {
-        val args = Bundle().apply { putBoolean(ARGUMENT_LOGOUT, true) }
-        findNavController().navigate(R.id.action_logout_clicked, args)
+        findNavController().navigate(R.id.action_logout_clicked)
     }
 }

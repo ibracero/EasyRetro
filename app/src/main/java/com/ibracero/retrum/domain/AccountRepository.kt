@@ -19,5 +19,4 @@ interface AccountRepository {
 
     suspend fun getUserStatus(): Either<Failure, UserStatus>
 
-    fun isSessionOpen(): Boolean
 }
