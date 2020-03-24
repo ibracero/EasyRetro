@@ -63,7 +63,7 @@ class RetroListFragment : Fragment() {
         (requireActivity() as ComponentActivity).onBackPressedDispatcher.addCallback(backPressedCallback)
 
         initUi()
-        retroListViewModel.retroLiveData.observe(this@RetroListFragment, Observer { showRetros(it) })
+        retroListViewModel.retroLiveData.observe(viewLifecycleOwner, Observer { showRetros(it) })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -86,7 +86,7 @@ class RetroListFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         retroListViewModel.startObservingRetros()
-        retroListViewModel.connectivityLiveData.observe(this@RetroListFragment, Observer {
+        retroListViewModel.connectivityLiveData.observe(viewLifecycleOwner, Observer {
             when (it) {
                 ONLINE -> offlineSnackbar.dismiss()
                 else -> offlineSnackbar.show()
@@ -150,9 +150,9 @@ class RetroListFragment : Fragment() {
     }
 
     private fun onLogoutConfirmed() {
-        retroListViewModel.logout()
         logoutFromGoogle()
         navigateToLoginScreen()
+        retroListViewModel.logout()
     }
 
     private fun navigateToRetroBoard(retro: Retro) {

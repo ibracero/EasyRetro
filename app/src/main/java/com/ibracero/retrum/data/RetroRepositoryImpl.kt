@@ -2,6 +2,7 @@ package com.ibracero.retrum.data
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
 import arrow.core.Either
 import com.google.firebase.auth.FirebaseAuth
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
@@ -30,17 +31,14 @@ class RetroRepositoryImpl(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    override fun createRetro(title: String): LiveData<Either<Failure, Retro>> {
-        val retroLiveData = MutableLiveData<Either<Failure, Retro>>()
-        scope.launch {
+    override fun createRetro(title: String): LiveData<Either<Failure, Retro>> =
+        liveData {
             val retroEither = remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
                 .map { retroRemoteToDomainMapper.map(it) }
-            retroLiveData.postValue(retroEither)
+            emit(retroEither)
         }
-        return retroLiveData
-    }
 
-    override fun getRetro(retroUuid: String) = localDataStore.getRetroInfo(retroUuid)
+    override fun getRetro(retroUuid: String): LiveData<Retro> = localDataStore.getRetroInfo(retroUuid)
 
     override fun getRetros(): LiveData<List<Retro>> = localDataStore.getRetros()
 

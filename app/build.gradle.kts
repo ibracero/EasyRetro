@@ -50,6 +50,7 @@ dependencies {
     implementation(Libraries.androidx_constraint_layout)
     implementation(Libraries.androidx_lifecycle_extensions)
     implementation(Libraries.androidx_lifecycle_viewmodel_extensions)
+    implementation(Libraries.androidx_lifecycle_livedata_extensions)
     implementation(Libraries.androidx_navigation_fragment_ktx)
     implementation(Libraries.androidx_navigation_ui_ktx)
     implementation(Libraries.firebase_firestore)

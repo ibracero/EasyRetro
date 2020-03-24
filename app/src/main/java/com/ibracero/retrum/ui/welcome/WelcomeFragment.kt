@@ -43,8 +43,8 @@ class WelcomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initUi()
-        welcomeViewModel.googleSignInLiveData.observe(this, Observer { processGoogleSignInResponse(it) })
-        welcomeViewModel.userSessionLiveData.observe(this, Observer { processUserSession(it) })
+        welcomeViewModel.googleSignInLiveData.observe(viewLifecycleOwner, Observer { processGoogleSignInResponse(it) })
+        welcomeViewModel.userSessionLiveData.observe(viewLifecycleOwner, Observer { processUserSession(it) })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
