@@ -13,18 +13,26 @@
 		<action
 			android:id="@+id/action_sign_in_with_email"
 			app:destination="@id/navigation_email_account"
-			app:enterAnim="@anim/nav_default_enter_anim"
-			app:exitAnim="@anim/nav_default_exit_anim"
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
 			app:launchSingleTop="true"
-			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 		<action
-			android:id="@+id/action_sign_in_success"
+			android:id="@+id/action_register"
+			app:destination="@id/navigation_email_account"
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
+			app:launchSingleTop="true"
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
+		<action
+			android:id="@+id/action_logged_in"
 			app:destination="@id/navigation_retro_list"
-			app:enterAnim="@anim/nav_default_enter_anim"
-			app:exitAnim="@anim/nav_default_exit_anim"
-			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 	</fragment>
 
 	<fragment
@@ -34,27 +42,27 @@
 		<action
 			android:id="@+id/action_reset_password"
 			app:destination="@id/navigation_reset_password"
-			app:enterAnim="@anim/nav_default_enter_anim"
-			app:exitAnim="@anim/nav_default_exit_anim"
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
 			app:launchSingleTop="true"
-			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 		<action
 			android:id="@+id/action_verify_email"
 			app:destination="@id/navigation_email_verification"
-			app:enterAnim="@anim/nav_default_enter_anim"
-			app:exitAnim="@anim/nav_default_exit_anim"
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
 			app:launchSingleTop="true"
-			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 		<action
 			android:id="@+id/action_logged_in"
 			app:destination="@id/navigation_retro_list"
-			app:enterAnim="@anim/nav_default_enter_anim"
-			app:exitAnim="@anim/nav_default_exit_anim"
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
 			app:launchSingleTop="true"
-			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 		<argument
 			android:name="arg_is_new_account"
 			app:argType="boolean" />
@@ -67,11 +75,11 @@
 		<action
 			android:id="@+id/action_email_verified"
 			app:destination="@id/navigation_retro_list"
-			app:enterAnim="@anim/nav_default_enter_anim"
-			app:exitAnim="@anim/nav_default_exit_anim"
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
 			app:launchSingleTop="true"
-			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 	</fragment>
 
 	<fragment
@@ -90,25 +98,31 @@
 		<action
 			android:id="@+id/action_retro_clicked"
 			app:destination="@id/navigation_container"
-			app:enterAnim="@anim/nav_default_enter_anim"
-			app:exitAnim="@anim/nav_default_exit_anim"
-			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 
 		<action
 			android:id="@+id/action_logout_clicked"
 			app:destination="@id/navigation_welcome"
-			app:enterAnim="@anim/nav_default_enter_anim"
-			app:exitAnim="@anim/nav_default_exit_anim"
-			app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-			app:popExitAnim="@anim/nav_default_pop_exit_anim" />
-
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 	</fragment>
 
 	<fragment
 		android:id="@+id/navigation_container"
 		android:name="com.ibracero.retrum.ui.board.BoardFragment"
 		tools:layout="@layout/fragment_board">
+		<action
+			android:id="@+id/action_back_to_retro_list"
+			app:destination="@id/navigation_welcome"
+			app:enterAnim="@anim/enter_from_right"
+			app:exitAnim="@anim/exit_to_left"
+			app:popEnterAnim="@anim/enter_from_left"
+			app:popExitAnim="@anim/exit_to_right" />
 		<argument
 			android:name="arg_retro_uuid"
 			app:argType="string" />

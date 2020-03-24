@@ -8,6 +8,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
@@ -142,20 +144,60 @@ class BoardFragment : Fragment() {
 
         nav_view?.setupWithNavController(navController)
         nav_view?.setOnNavigationItemSelectedListener { menuItem ->
-
-            val destinationId = when (menuItem.itemId) {
-                R.id.navigation_positive -> R.id.navigation_positive
-                R.id.navigation_negative -> R.id.navigation_negative
-                R.id.navigation_actions -> R.id.navigation_actions
-                else -> -1
-            }
-
-            if (destinationId != -1 && destinationId != navController.currentDestination?.id) {
-                navController.navigate(destinationId, arguments)
-            }
-
+            onTabSelected(menuItem, navController)
             true
         }
+    }
+
+    private fun onTabSelected(menuItem: MenuItem, navController: NavController) {
+        val selectedPositionId = when (menuItem.itemId) {
+            R.id.positive_tab_button -> R.id.navigation_positive
+            R.id.negative_tab_button -> R.id.navigation_negative
+            R.id.actions_tab_button -> R.id.navigation_actions
+            else -> -1
+        }
+
+        val currentPositionId = navController.currentDestination?.id
+        if (selectedPositionId != -1 && selectedPositionId != currentPositionId) {
+            navController.navigate(
+                selectedPositionId,
+                arguments,
+                getTransitionAnimation(currentPositionId!!, selectedPositionId)
+            )
+        }
+    }
+
+    private fun getTransitionAnimation(currentPositionId: Int, selectedPositionId: Int): NavOptions {
+        val builder = NavOptions.Builder()
+        return when {
+            currentPositionId == R.id.navigation_positive -> {
+                builder.apply { swipeRight() }
+            }
+            currentPositionId == R.id.navigation_negative && selectedPositionId == R.id.navigation_positive -> {
+                builder.apply { swipeLeft() }
+            }
+            currentPositionId == R.id.navigation_negative && selectedPositionId == R.id.navigation_actions -> {
+                builder.apply { swipeRight() }
+            }
+            currentPositionId == R.id.navigation_actions -> {
+                builder.apply { swipeLeft() }
+            }
+            else -> builder
+        }.build()
+    }
+
+    private fun NavOptions.Builder.swipeLeft() {
+        setEnterAnim(R.anim.enter_from_left)
+        setExitAnim(R.anim.exit_to_right)
+        setPopEnterAnim(R.anim.enter_from_right)
+        setPopExitAnim(R.anim.exit_to_left)
+    }
+
+    private fun NavOptions.Builder.swipeRight() {
+        setEnterAnim(R.anim.enter_from_right)
+        setExitAnim(R.anim.exit_to_left)
+        setPopEnterAnim(R.anim.enter_from_left)
+        setPopExitAnim(R.anim.exit_to_right)
     }
 
     private fun initLandscapeUi() {
@@ -167,7 +209,7 @@ class BoardFragment : Fragment() {
     }
 
     private fun navigateToRetroList() {
-        findNavController().navigate(R.id.navigation_retro_list)
+        findNavController().navigateUp()
     }
 
     private fun displayShareSheet() {

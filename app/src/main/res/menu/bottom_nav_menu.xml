@@ -2,17 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<item
-		android:id="@+id/navigation_positive"
+		android:id="@+id/positive_tab_button"
 		android:icon="@drawable/ic_positive"
 		android:title="@string/title_positive" />
 
 	<item
-		android:id="@+id/navigation_negative"
+		android:id="@+id/negative_tab_button"
 		android:icon="@drawable/ic_negative"
 		android:title="@string/title_negative" />
 
 	<item
-		android:id="@+id/navigation_actions"
+		android:id="@+id/actions_tab_button"
 		android:icon="@drawable/ic_action_point"
 		android:title="@string/title_actions" />
 
