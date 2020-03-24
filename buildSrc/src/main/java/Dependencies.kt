@@ -43,7 +43,7 @@ object Libraries {
         const val androidx_navigation_version = "2.0.0"
         const val androidx_compat_version = "1.1.0"
         const val androidx_constraint_layout_version = "1.1.3"
-        const val androidx_lifecycle_version = "2.0.0"
+        const val androidx_lifecycle_version = "2.1.0"
         const val google_material_version = "1.0.0"
         const val firebase_firestore_version = "21.1.1"
         const val firebase_analytics_version = "17.2.1"
@@ -63,6 +63,7 @@ object Libraries {
     const val androidx_appcompat = "androidx.appcompat:appcompat:$androidx_compat_version"
     const val androidx_material = "com.google.android.material:material:$google_material_version"
     const val androidx_lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:$androidx_lifecycle_version"
+    const val androidx_lifecycle_viewmodel_extensions = "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidx_lifecycle_version"
     const val androidx_constraint_layout =
         "androidx.constraintlayout:constraintlayout:$androidx_constraint_layout_version"
     const val androidx_navigation_fragment_ktx =

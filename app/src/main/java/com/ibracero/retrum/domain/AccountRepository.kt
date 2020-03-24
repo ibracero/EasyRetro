@@ -5,11 +5,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 
 interface AccountRepository {
 
-    suspend fun firebaseAuthWithGoogle(account: GoogleSignInAccount): Either<Failure, Unit>
+    suspend fun signWithGoogleAccount(account: GoogleSignInAccount): Either<Failure, Unit>
 
-    suspend fun loginUser(email: String, password: String): Either<Failure, UserStatus>
+    suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus>
 
-    suspend fun createUser(email: String, password: String): Either<Failure, Unit>
+    suspend fun signUpWithEmail(email: String, password: String): Either<Failure, Unit>
 
     suspend fun logOut(): Either<Failure, Unit>
 

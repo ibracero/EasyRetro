@@ -2,37 +2,22 @@ package com.ibracero.retrum.ui.account
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import arrow.core.Either
-import com.ibracero.retrum.common.CoroutineDispatcherProvider
-import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.AccountRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import com.ibracero.retrum.domain.Failure
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ResetPasswordViewModel(
-    private val accountRepository: AccountRepository,
-    private val dispatchers: CoroutineDispatcherProvider
+    private val accountRepository: AccountRepository
 ) : ViewModel() {
 
     val resetPasswordLiveData = MutableLiveData<Either<Failure, Unit>>()
 
-    private val job = Job()
-    private val coroutineContext = job + dispatchers.io
-    private val scope = CoroutineScope(coroutineContext)
-
     fun resetPassword(email: String) {
-        scope.launch {
+        viewModelScope.launch {
             val result = accountRepository.resetPassword(email)
-            withContext(dispatchers.main) {
-                resetPasswordLiveData.postValue(result)
-            }
+            resetPasswordLiveData.postValue(result)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        job.cancel()
     }
 }

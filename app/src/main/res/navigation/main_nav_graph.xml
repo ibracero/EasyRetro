@@ -106,23 +106,16 @@
 		<action
 			android:id="@+id/action_logout_clicked"
 			app:destination="@id/navigation_welcome"
-			app:enterAnim="@anim/enter_from_right"
-			app:exitAnim="@anim/exit_to_left"
-			app:popEnterAnim="@anim/enter_from_left"
-			app:popExitAnim="@anim/exit_to_right" />
+			app:enterAnim="@anim/enter_from_left"
+			app:exitAnim="@anim/exit_to_right"
+			app:popEnterAnim="@anim/enter_from_right"
+			app:popExitAnim="@anim/exit_to_left" />
 	</fragment>
 
 	<fragment
 		android:id="@+id/navigation_container"
 		android:name="com.ibracero.retrum.ui.board.BoardFragment"
 		tools:layout="@layout/fragment_board">
-		<action
-			android:id="@+id/action_back_to_retro_list"
-			app:destination="@id/navigation_welcome"
-			app:enterAnim="@anim/enter_from_right"
-			app:exitAnim="@anim/exit_to_left"
-			app:popEnterAnim="@anim/enter_from_left"
-			app:popExitAnim="@anim/exit_to_right" />
 		<argument
 			android:name="arg_retro_uuid"
 			app:argType="string" />

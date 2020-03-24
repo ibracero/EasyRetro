@@ -2,25 +2,17 @@ package com.ibracero.retrum.ui.welcome
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.domain.AccountRepository
 import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.UserStatus
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class WelcomeViewModel(
-    private val repository: AccountRepository,
-    private val dispatchers: CoroutineDispatcherProvider
+    private val repository: AccountRepository
 ) : ViewModel() {
-
-    private val job = Job()
-    private val coroutineContext = job + dispatchers.io
-    private val scope = CoroutineScope(coroutineContext)
 
     init {
         checkUserSession()
@@ -35,25 +27,15 @@ class WelcomeViewModel(
     }
 
     private fun checkUserSession() {
-        scope.launch {
-            val result = repository.getUserStatus()
-            withContext(dispatchers.main) {
-                userSessionLiveData.postValue(result)
-            }
+        viewModelScope.launch {
+            userSessionLiveData.postValue(repository.getUserStatus())
         }
     }
 
     private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
-        scope.launch {
-            val result = repository.firebaseAuthWithGoogle(account)
-            withContext(dispatchers.main) {
-                googleSignInLiveData.postValue(result)
-            }
+        viewModelScope.launch {
+            val result = repository.signWithGoogleAccount(account)
+            googleSignInLiveData.postValue(result)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        job.cancel()
     }
 }

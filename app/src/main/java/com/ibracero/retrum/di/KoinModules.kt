@@ -67,13 +67,13 @@ val viewModelModule = module {
 
     viewModel { BoardViewModel(get()) }
 
-    viewModel { AccountViewModel(get(), get()) }
+    viewModel { AccountViewModel(get()) }
 
-    viewModel { ResetPasswordViewModel(get(), get()) }
+    viewModel { ResetPasswordViewModel(get()) }
 
-    viewModel { WelcomeViewModel(get(), get()) }
+    viewModel { WelcomeViewModel(get()) }
 
-    viewModel { EmailVerificationViewModel(get(), get()) }
+    viewModel { EmailVerificationViewModel(get()) }
 }
 
 val mapperModule = module {
@@ -86,6 +86,6 @@ val mapperModule = module {
 
 val accountModule = module {
 
-    factory<AccountRepository> { AccountRepositoryImpl(get(), get()) }
+    factory<AccountRepository> { AccountRepositoryImpl(get(), get(), get()) }
 
 }

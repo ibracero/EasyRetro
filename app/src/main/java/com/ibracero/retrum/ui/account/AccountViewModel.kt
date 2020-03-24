@@ -2,6 +2,7 @@ package com.ibracero.retrum.ui.account
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import com.ibracero.retrum.common.CoroutineDispatcherProvider
 import com.ibracero.retrum.domain.Failure
@@ -13,18 +14,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class AccountViewModel(
-    private val repository: AccountRepository,
-    private val dispatchers: CoroutineDispatcherProvider
+    private val repository: AccountRepository
 ) : ViewModel() {
 
     var signInLiveData: MutableLiveData<Either<Failure, UserStatus>>? = null
         private set
     var signUpLiveData: MutableLiveData<Either<Failure, Unit>>? = null
         private set
-
-    private val job = Job()
-    private val coroutineContext = job + dispatchers.io
-    private val scope = CoroutineScope(coroutineContext)
 
     fun onStart() {
         signInLiveData = MutableLiveData<Either<Failure, UserStatus>>()
@@ -37,25 +33,16 @@ class AccountViewModel(
     }
 
     fun signIn(email: String, password: String) {
-        scope.launch {
-            val signInResult = repository.loginUser(email, password)
-            withContext(dispatchers.main) {
-                signInLiveData?.postValue(signInResult)
-            }
+        viewModelScope.launch {
+            val signInResult = repository.signWithEmail(email, password)
+            signInLiveData?.postValue(signInResult)
         }
     }
 
     fun signUp(email: String, password: String) {
-        scope.launch {
-            val signUpResult = repository.createUser(email, password)
-            withContext(dispatchers.main) {
-                signUpLiveData?.postValue(signUpResult)
-            }
+        viewModelScope.launch {
+            val signUpResult = repository.signUpWithEmail(email, password)
+            signUpLiveData?.postValue(signUpResult)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        job.cancel()
     }
 }
