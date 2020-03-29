@@ -14,12 +14,12 @@ class WelcomeViewModel(
     private val repository: AccountRepository
 ) : ViewModel() {
 
+    val googleSignInLiveData = MutableLiveData<Either<Failure, Unit>>()
+    val userSessionLiveData = MutableLiveData<Either<Failure, UserStatus>>()
+
     init {
         checkUserSession()
     }
-
-    val googleSignInLiveData = MutableLiveData<Either<Failure, Unit>>()
-    val userSessionLiveData = MutableLiveData<Either<Failure, UserStatus>>()
 
     fun handleSignInResult(account: GoogleSignInAccount?) {
         if (account != null) firebaseAuthWithGoogle(account)

@@ -7,26 +7,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.material.snackbar.Snackbar
 import com.ibracero.retrum.R
-import com.ibracero.retrum.common.NetworkStatus.ONLINE
+import com.ibracero.retrum.common.BaseFragment
 import com.ibracero.retrum.common.extensions.hideKeyboard
 import com.ibracero.retrum.data.local.Retro
-import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.ui.Payload
-import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_LOGOUT
 import com.ibracero.retrum.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
-class RetroListFragment : Fragment() {
+class RetroListFragment :
+    BaseFragment<RetroListViewState, RetroListViewEffect, RetroListViewEvent, RetroListViewModel>() {
+
+    override val viewModel: RetroListViewModel by viewModel()
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -34,18 +30,7 @@ class RetroListFragment : Fragment() {
         }
     }
 
-    private val retroListViewModel: RetroListViewModel by viewModel()
     private val retroListAdapter = RetroListAdapter(::onRetroClicked, ::onAddClicked)
-
-    private val offlineSnackbar by lazy {
-        Snackbar.make(
-            retro_list_root,
-            R.string.offline_message,
-            Snackbar.LENGTH_INDEFINITE
-        ).apply {
-            view.setBackgroundResource(R.color.colorAccent)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +48,6 @@ class RetroListFragment : Fragment() {
         (requireActivity() as ComponentActivity).onBackPressedDispatcher.addCallback(backPressedCallback)
 
         initUi()
-        retroListViewModel.retroLiveData.observe(viewLifecycleOwner, Observer { showRetros(it) })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -85,19 +69,30 @@ class RetroListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        retroListViewModel.startObservingRetros()
-        retroListViewModel.connectivityLiveData.observe(viewLifecycleOwner, Observer {
-            when (it) {
-                ONLINE -> offlineSnackbar.dismiss()
-                else -> offlineSnackbar.show()
-            }
-        })
+        viewModel.process(viewEvent = RetroListViewEvent.FetchRetros)
     }
 
     override fun onStop() {
         super.onStop()
-        retroListViewModel.stopObservingRetros()
         view.hideKeyboard()
+    }
+
+    override fun renderViewState(viewState: RetroListViewState) {
+        when (viewState.fetchRetrosStatus) {
+            is FetchRetrosStatus.Fetched -> showRetros(viewState.fetchRetrosStatus.retros)
+        }
+
+        when (viewState.retroCreationStatus) {
+            RetroCreationStatus.Created -> retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(true))
+            RetroCreationStatus.NotCreated -> retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(false))
+        }
+    }
+
+    override fun renderViewEffect(viewEffect: RetroListViewEffect) {
+        when (viewEffect) {
+            is RetroListViewEffect.ShowSnackBar -> showError()
+            is RetroListViewEffect.OpenRetroDetail -> navigateToRetroBoard(viewEffect.retroUuid)
+        }
     }
 
     private fun showRetros(it: List<Retro>?) {
@@ -111,24 +106,11 @@ class RetroListFragment : Fragment() {
     }
 
     private fun onRetroClicked(retro: Retro) {
-        navigateToRetroBoard(retro)
+        viewModel.process(viewEvent = RetroListViewEvent.RetroClicked(retro = retro))
     }
 
     private fun onAddClicked(retroTitle: String) {
-        retroListViewModel.createRetro(retroTitle).observe(this@RetroListFragment,
-            Observer { retroEither ->
-                processCreateRetroResponse(retroEither)
-            })
-    }
-
-    private fun processCreateRetroResponse(retroEither: Either<Failure, Retro>) {
-        retroEither.fold({
-            retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(false))
-            showError()
-        }, { retro ->
-            retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(true))
-            navigateToRetroBoard(retro = retro)
-        })
+        viewModel.process(viewEvent = RetroListViewEvent.CreateRetroClicked(retroName = retroTitle))
     }
 
     private fun showError() {
@@ -152,12 +134,12 @@ class RetroListFragment : Fragment() {
     private fun onLogoutConfirmed() {
         logoutFromGoogle()
         navigateToLoginScreen()
-        retroListViewModel.logout()
+        viewModel.process(viewEvent = RetroListViewEvent.LogoutClicked)
     }
 
-    private fun navigateToRetroBoard(retro: Retro) {
+    private fun navigateToRetroBoard(retroUuid: String) {
         val args = Bundle().apply {
-            putString(ARGUMENT_RETRO_UUID, retro.uuid)
+            putString(ARGUMENT_RETRO_UUID, retroUuid)
         }
         findNavController().navigate(R.id.action_retro_clicked, args)
     }
@@ -165,4 +147,5 @@ class RetroListFragment : Fragment() {
     private fun navigateToLoginScreen() {
         findNavController().navigate(R.id.action_logout_clicked)
     }
+
 }

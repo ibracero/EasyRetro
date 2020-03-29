@@ -6,11 +6,11 @@ import com.ibracero.retrum.data.local.Retro
 
 interface RetroRepository {
 
-    fun createRetro(title: String): LiveData<Either<Failure, Retro>>
+    suspend fun createRetro(title: String): Either<Failure, Retro>
 
     fun getRetro(retroUuid: String): LiveData<Retro>
 
-    fun getRetros(): LiveData<List<Retro>>
+    suspend fun getRetros(): Either<Failure, List<Retro>>
 
     fun startObservingUserRetros()
 

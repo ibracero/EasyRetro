@@ -61,7 +61,7 @@ val appModule = module {
 
 val viewModelModule = module {
 
-    viewModel { RetroListViewModel(get(), get(), get()) }
+    viewModel { RetroListViewModel(get(), get()) }
 
     viewModel { StatementViewModel(get()) }
 

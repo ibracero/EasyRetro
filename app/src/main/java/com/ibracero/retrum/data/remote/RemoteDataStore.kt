@@ -67,6 +67,31 @@ class RemoteDataStore {
         }
     }
 
+    suspend fun getUserRetros(userEmail: String): Either<Failure, List<RetroRemote>>{
+        return suspendCoroutine { continuation ->
+            db.collection(FirestoreTable.TABLE_USERS)
+                .document(userEmail)
+                .get()
+                .addOnSuccessListener {snapshot ->
+                    val retroDocs = snapshot?.get(FirestoreField.USER_RETROS) as List<DocumentReference>? ?: emptyList()
+                    Tasks.whenAllComplete(retroDocs.map { it.get() })
+                        .addOnSuccessListener { tasks ->
+                            val retros =
+                                tasks.filter { it.isSuccessful }
+                                    .mapNotNull {
+                                        val documentSnapshot = it.result as DocumentSnapshot
+                                        val values = documentSnapshot.data
+                                        RetroRemote(
+                                            uuid = documentSnapshot.id,
+                                            title = (values?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty()
+                                        )
+                                    }
+                            continuation.resume(Either.right(retros))
+                        }
+                }
+        }
+    }
+
     fun observeUserRetros(userEmail: String, onUpdate: (Either<Failure, List<RetroRemote>>) -> Unit) {
         retrosObserver?.remove()
         retrosObserver = db.collection(FirestoreTable.TABLE_USERS)

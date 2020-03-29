@@ -12,16 +12,13 @@ import com.ibracero.retrum.data.mapper.RetroRemoteToDomainMapper
 import com.ibracero.retrum.data.remote.RemoteDataStore
 import com.ibracero.retrum.domain.Failure
 import com.ibracero.retrum.domain.RetroRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class RetroRepositoryImpl(
     private val localDataStore: LocalDataStore,
     private val remoteDataStore: RemoteDataStore,
     private val retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
-    dispatchers: CoroutineDispatcherProvider
+    private val dispatchers: CoroutineDispatcherProvider
 ) : RetroRepository {
 
     private val userEmail: String
@@ -31,16 +28,20 @@ class RetroRepositoryImpl(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    override fun createRetro(title: String): LiveData<Either<Failure, Retro>> =
-        liveData {
-            val retroEither = remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
+    override suspend fun createRetro(title: String): Either<Failure, Retro> =
+        withContext(dispatchers.io) {
+            remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
                 .map { retroRemoteToDomainMapper.map(it) }
-            emit(retroEither)
         }
 
     override fun getRetro(retroUuid: String): LiveData<Retro> = localDataStore.getRetroInfo(retroUuid)
 
-    override fun getRetros(): LiveData<List<Retro>> = localDataStore.getRetros()
+    override suspend fun getRetros(): Either<Failure, List<Retro>> =
+        withContext(dispatchers.io) {
+            remoteDataStore.getUserRetros(userEmail)
+                .map { localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map)) }
+            Either.right(localDataStore.getRetros())
+        }
 
     override fun startObservingUserRetros() {
         remoteDataStore.observeUserRetros(userEmail) {

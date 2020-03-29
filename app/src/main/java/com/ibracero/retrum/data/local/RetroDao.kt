@@ -8,7 +8,7 @@ import com.ibracero.retrum.domain.StatementType
 interface RetroDao {
 
     @Query("SELECT * FROM $TABLE_RETRO ORDER BY timestamp ASC")
-    fun getUserRetros(): LiveData<List<Retro>>
+    fun getUserRetros(): List<Retro>
 
     @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
     fun getRetroInfo(retroUuid: String): LiveData<Retro>
