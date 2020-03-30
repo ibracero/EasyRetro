@@ -7,37 +7,37 @@
 
 	<fragment
 		android:id="@+id/navigation_positive"
-		android:name="com.ibracero.retrum.ui.board.positive.PositiveFragment"
+		android:name="com.easyretro.ui.board.positive.PositiveFragment"
 		android:label="@string/title_positive"
 		tools:layout="@layout/statement_list">
 
 		<argument
 			android:name="arg_retro"
-			app:argType="com.ibracero.retrum.data.local.Retro" />
+			app:argType="com.easyretro.data.local.Retro" />
 
 	</fragment>
 
 	<fragment
 		android:id="@+id/navigation_negative"
-		android:name="com.ibracero.retrum.ui.board.negative.NegativeFragment"
+		android:name="com.easyretro.ui.board.negative.NegativeFragment"
 		android:label="@string/title_negative"
 		tools:layout="@layout/statement_list">
 
 		<argument
 			android:name="arg_retro"
-			app:argType="com.ibracero.retrum.data.local.Retro" />
+			app:argType="com.easyretro.data.local.Retro" />
 
 	</fragment>
 
 	<fragment
 		android:id="@+id/navigation_actions"
-		android:name="com.ibracero.retrum.ui.board.action.ActionsFragment"
+		android:name="com.easyretro.ui.board.action.ActionsFragment"
 		android:label="@string/title_actions"
 		tools:layout="@layout/statement_list">
 
 		<argument
 			android:name="arg_retro"
-			app:argType="com.ibracero.retrum.data.local.Retro" />
+			app:argType="com.easyretro.data.local.Retro" />
 
 	</fragment>
 

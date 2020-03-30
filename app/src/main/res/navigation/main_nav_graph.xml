@@ -7,7 +7,7 @@
 
 	<fragment
 		android:id="@+id/navigation_welcome"
-		android:name="com.ibracero.retrum.ui.welcome.WelcomeFragment"
+		android:name="com.easyretro.ui.welcome.WelcomeFragment"
 		android:label="@string/app_name"
 		tools:layout="@layout/fragment_welcome">
 		<action
@@ -37,7 +37,7 @@
 
 	<fragment
 		android:id="@+id/navigation_email_account"
-		android:name="com.ibracero.retrum.ui.account.AccountFragment"
+		android:name="com.easyretro.ui.account.AccountFragment"
 		tools:layout="@layout/fragment_account">
 		<action
 			android:id="@+id/action_reset_password"
@@ -70,7 +70,7 @@
 
 	<fragment
 		android:id="@+id/navigation_email_verification"
-		android:name="com.ibracero.retrum.ui.account.EmailVerificationFragment"
+		android:name="com.easyretro.ui.account.EmailVerificationFragment"
 		tools:layout="@layout/fragment_email_verification">
 		<action
 			android:id="@+id/action_email_verified"
@@ -84,7 +84,7 @@
 
 	<fragment
 		android:id="@+id/navigation_reset_password"
-		android:name="com.ibracero.retrum.ui.account.ResetPasswordFragment"
+		android:name="com.easyretro.ui.account.ResetPasswordFragment"
 		tools:layout="@layout/fragment_reset_password">
 		<argument
 			android:name="arg_email"
@@ -93,7 +93,7 @@
 
 	<fragment
 		android:id="@+id/navigation_retro_list"
-		android:name="com.ibracero.retrum.ui.retros.RetroListFragment"
+		android:name="com.easyretro.ui.retros.RetroListFragment"
 		tools:layout="@layout/fragment_retro_list">
 		<action
 			android:id="@+id/action_retro_clicked"
@@ -114,7 +114,7 @@
 
 	<fragment
 		android:id="@+id/navigation_container"
-		android:name="com.ibracero.retrum.ui.board.BoardFragment"
+		android:name="com.easyretro.ui.board.BoardFragment"
 		tools:layout="@layout/fragment_board">
 		<argument
 			android:name="arg_retro_uuid"

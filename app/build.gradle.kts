@@ -12,7 +12,7 @@ plugins {
 android {
     compileSdkVersion(AndroidSdk.compile)
     defaultConfig {
-        applicationId = "com.ibracero.retrum"
+        applicationId = "com.easyretro"
         minSdkVersion(AndroidSdk.min)
         targetSdkVersion(AndroidSdk.target)
         versionCode = Project.versionCode

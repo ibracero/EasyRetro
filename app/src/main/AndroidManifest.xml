@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
-	package="com.ibracero.retrum">
+	package="com.easyretro">
 
 	<application
-		android:name=".RetrumApp"
+		android:name="com.easyretro.EasyRetroApp"
 		android:allowBackup="false"
 		android:icon="@mipmap/ic_launcher"
 		android:label="@string/app_name"
@@ -13,7 +13,7 @@
 		android:theme="@style/AppTheme"
 		tools:ignore="GoogleAppIndexingWarning">
 		<activity
-			android:name=".ui.MainActivity"
+			android:name="com.easyretro.ui.MainActivity"
 			android:label="@string/app_name"
 			android:windowSoftInputMode="adjustResize">
 			<nav-graph android:value="@navigation/main_nav_graph" />
@@ -28,7 +28,7 @@
 				<category android:name="android.intent.category.BROWSABLE" />
 
 				<data
-					android:host="retrum.app"
+					android:host="easyretro.app"
 					android:pathPrefix="/join"
 					android:scheme="https" />
 			</intent-filter>-->

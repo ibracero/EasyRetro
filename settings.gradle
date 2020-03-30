@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name='Retrum'
+rootProject.name='EasyRetro'

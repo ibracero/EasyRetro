@@ -1,5 +1,5 @@
 <resources>
-	<string name="app_name" translatable="false">Retrum</string>
+	<string name="app_name" translatable="false">EasyRetro</string>
 	<string name="title_positive">Went well</string>
 	<string name="title_negative">Not so well</string>
 	<string name="title_actions">Actions</string>
@@ -54,5 +54,6 @@
 	<!--Confirmations-->
 	<string name="confirmation_email_sent">We have just sent a new confirmation link to your email</string>
 	<string name="confirmation_user_verified">Your user has been verified successfully!</string>
+	<string name="welcome_message">Welcome to\nEasyRetro</string>
 
 </resources>

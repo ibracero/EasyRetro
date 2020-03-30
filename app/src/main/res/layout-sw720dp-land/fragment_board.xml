@@ -38,7 +38,7 @@
 
 	<fragment
 		android:id="@+id/positive_container"
-		android:name="com.ibracero.retrum.ui.board.positive.PositiveFragment"
+		android:name="com.easyretro.ui.board.positive.PositiveFragment"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		app:layout_constraintBottom_toBottomOf="parent"
@@ -48,7 +48,7 @@
 
 	<fragment
 		android:id="@+id/negative_container"
-		android:name="com.ibracero.retrum.ui.board.negative.NegativeFragment"
+		android:name="com.easyretro.ui.board.negative.NegativeFragment"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		app:layout_constraintBottom_toBottomOf="parent"
@@ -58,7 +58,7 @@
 
 	<fragment
 		android:id="@+id/actions_container"
-		android:name="com.ibracero.retrum.ui.board.action.ActionsFragment"
+		android:name="com.easyretro.ui.board.action.ActionsFragment"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		app:layout_constraintBottom_toBottomOf="parent"
