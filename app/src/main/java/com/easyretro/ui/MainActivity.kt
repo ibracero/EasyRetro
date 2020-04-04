@@ -1,9 +1,9 @@
 package com.easyretro.ui
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.easyretro.R
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -12,20 +12,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar?.hide()
+        Timber.d("Activity onCreate with intent data: ${intent.data}")
     }
 
-    override fun onStart() {
-        super.onStart()
-        handleDeepLink()
-    }
-
-    private fun handleDeepLink() {
-        FirebaseDynamicLinks.getInstance().getDynamicLink(intent)
-            .addOnSuccessListener {
-                Timber.d("Dynamic link received ${it?.link ?: ""}")
-            }
-            .addOnFailureListener {
-                Timber.e(it)
-            }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Timber.d("Activity onNewIntent with intent data: ${intent.data}")
     }
 }

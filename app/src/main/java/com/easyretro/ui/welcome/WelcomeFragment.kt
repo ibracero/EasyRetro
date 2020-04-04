@@ -1,13 +1,17 @@
 package com.easyretro.ui.welcome
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -21,6 +25,7 @@ import com.easyretro.domain.Failure
 import com.easyretro.domain.UserStatus
 import com.easyretro.ui.FailureMessage
 import com.easyretro.ui.account.AccountFragment.Companion.ARG_IS_NEW_ACCOUNT
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.android.synthetic.main.fragment_welcome.*
 import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber

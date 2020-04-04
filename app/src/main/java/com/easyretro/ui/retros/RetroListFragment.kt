@@ -1,5 +1,6 @@
 package com.easyretro.ui.retros
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -16,8 +17,10 @@ import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.data.local.Retro
 import com.easyretro.ui.Payload
 import com.easyretro.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 class RetroListFragment :
     BaseFragment<RetroListViewState, RetroListViewEffect, RetroListViewEvent, RetroListViewModel>() {
@@ -44,7 +47,6 @@ class RetroListFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         (requireActivity() as ComponentActivity).onBackPressedDispatcher.addCallback(backPressedCallback)
 
         initUi()
@@ -69,6 +71,7 @@ class RetroListFragment :
 
     override fun onStart() {
         super.onStart()
+        handleDeepLink()
         viewModel.process(viewEvent = RetroListViewEvent.FetchRetros)
     }
 
@@ -148,4 +151,20 @@ class RetroListFragment :
         findNavController().navigate(R.id.action_logout_clicked)
     }
 
+    private fun handleDeepLink() {
+        activity?.intent?.let { intent ->
+            FirebaseDynamicLinks.getInstance()
+                .getDynamicLink(intent)
+                .addOnSuccessListener {
+                    activity?.intent = null
+                    Timber.d("User is logged in. Handling deeplink: ${it?.link?.toString()}")
+                    it?.link?.let { uri ->
+                        navigateToRetroBoard(uri.lastPathSegment.orEmpty())
+                    }
+                }
+                .addOnFailureListener {
+                    Timber.e(it)
+                }
+        }
+    }
 }

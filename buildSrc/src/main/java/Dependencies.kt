@@ -41,7 +41,7 @@ object Plugins {
 
 object Libraries {
     object Versions {
-        const val androidx_navigation_version = "2.0.0"
+        const val androidx_navigation_version = "2.2.1"
         const val androidx_compat_version = "1.1.0"
         const val androidx_constraint_layout_version = "1.1.3"
         const val androidx_lifecycle_version = "2.2.0"
