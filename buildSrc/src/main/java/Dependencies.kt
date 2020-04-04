@@ -6,6 +6,7 @@ import Libraries.Versions.arrow_version
 import Libraries.Versions.coroutines_version
 import Libraries.Versions.firebase_analytics_version
 import Libraries.Versions.firebase_auth_version
+import Libraries.Versions.firebase_dynamic_links_version
 import Libraries.Versions.firebase_firestore_version
 import Libraries.Versions.glide_version
 import Libraries.Versions.google_material_version
@@ -47,6 +48,7 @@ object Libraries {
         const val google_material_version = "1.0.0"
         const val firebase_firestore_version = "21.4.1"
         const val firebase_analytics_version = "17.2.3"
+        const val firebase_dynamic_links_version = "19.1.0"
         const val firebase_auth_version = "19.3.0"
         const val coroutines_version = "1.3.4"
         const val koin_version = "2.1.5"
@@ -63,8 +65,10 @@ object Libraries {
     const val androidx_appcompat = "androidx.appcompat:appcompat:$androidx_compat_version"
     const val androidx_material = "com.google.android.material:material:$google_material_version"
     const val androidx_lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:$androidx_lifecycle_version"
-    const val androidx_lifecycle_viewmodel_extensions = "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidx_lifecycle_version"
-    const val androidx_lifecycle_livedata_extensions = "androidx.lifecycle:lifecycle-livedata-ktx:$androidx_lifecycle_version"
+    const val androidx_lifecycle_viewmodel_extensions =
+        "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidx_lifecycle_version"
+    const val androidx_lifecycle_livedata_extensions =
+        "androidx.lifecycle:lifecycle-livedata-ktx:$androidx_lifecycle_version"
     const val androidx_constraint_layout =
         "androidx.constraintlayout:constraintlayout:$androidx_constraint_layout_version"
     const val androidx_navigation_fragment_ktx =
@@ -72,6 +76,7 @@ object Libraries {
     const val androidx_navigation_ui_ktx = "androidx.navigation:navigation-ui-ktx:$androidx_navigation_version"
     const val firebase_firestore = "com.google.firebase:firebase-firestore:$firebase_firestore_version"
     const val firebase_analytics = "com.google.firebase:firebase-analytics:$firebase_analytics_version"
+    const val firebase_dynamic_links = "com.google.firebase:firebase-dynamic-links:$firebase_dynamic_links_version"
     const val coroutines_core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     const val coroutines_android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     const val koin_android = "org.koin:koin-android:$koin_version"

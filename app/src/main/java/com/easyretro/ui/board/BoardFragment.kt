@@ -2,6 +2,7 @@ package com.easyretro.ui.board
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
@@ -23,6 +24,8 @@ import com.easyretro.ui.board.action.ActionsFragment
 import com.easyretro.ui.board.negative.NegativeFragment
 import com.easyretro.ui.board.positive.PositiveFragment
 import com.easyretro.ui.board.users.UserListAdapter
+import com.google.firebase.dynamiclinks.DynamicLink
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -98,7 +101,7 @@ class BoardFragment : Fragment() {
                 true
             }
             R.id.action_invite -> {
-                displayShareSheet()
+                generateDeepLink(onDeepLinkCreated = ::displayShareSheet)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -212,8 +215,22 @@ class BoardFragment : Fragment() {
         findNavController().navigateUp()
     }
 
-    private fun displayShareSheet() {
+
+    private fun generateDeepLink(onDeepLinkCreated: (Uri) -> Unit) {
         val link = getString(R.string.retro_join_link_format, getRetroUuidArgument().orEmpty())
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
+            .setLink(Uri.parse(link))
+            .setDomainUriPrefix("https://easyretro.page.link")
+            .setAndroidParameters(DynamicLink.AndroidParameters.Builder().build())
+            .buildShortDynamicLink()
+            .addOnSuccessListener {
+                it?.shortLink?.let { shortLink ->
+                    onDeepLinkCreated(shortLink)
+                }//showerror
+            }
+    }
+
+    private fun displayShareSheet(shortLink: Uri?) {
         val retroTitle = getRetroUuidArgument()?.let {
             boardViewModel.getRetroInfo(it).value?.title
         }.orEmpty()
@@ -222,7 +239,7 @@ class BoardFragment : Fragment() {
             action = Intent.ACTION_SEND
             putExtra(
                 Intent.EXTRA_TEXT,
-                getString(R.string.retro_invitation_message, retroTitle, link)
+                getString(R.string.retro_invitation_message, retroTitle, shortLink?.toString())
             )
             type = "text/plain"
         }
