@@ -11,6 +11,9 @@ import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.domain.Failure
 import com.easyretro.domain.RetroRepository
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 class RetroRepositoryImpl(
     private val localDataStore: LocalDataStore,
@@ -34,23 +37,19 @@ class RetroRepositoryImpl(
 
     override fun getRetro(retroUuid: String): LiveData<Retro> = localDataStore.getRetroInfo(retroUuid)
 
-    override suspend fun getRetros(): Either<Failure, List<Retro>> =
-        withContext(dispatchers.io) {
-            remoteDataStore.getUserRetros(userEmail)
-                .map { localDataStore.saveRetros(it.map(retroRemoteToDomainMapper::map)) }
-            Either.right(localDataStore.getRetros())
-        }
+    override suspend fun getRetros(): Flow<Either<Failure, List<Retro>>> {
+        return flow {
+            val localRetros = localDataStore.getRetros()
+            if (localRetros.isNotEmpty()) emit(Either.right(localRetros))
 
-    override fun startObservingUserRetros() {
-        remoteDataStore.observeUserRetros(userEmail) {
-            scope.launch {
-                it.map { retros -> localDataStore.saveRetros(retros.map(retroRemoteToDomainMapper::map)) }
-            }
-        }
-    }
-
-    override fun stopObservingUserRetros() {
-        remoteDataStore.stopObservingUserRetros()
+            val remoteEither = remoteDataStore.getUserRetros(userEmail)
+                .map {
+                    val retros = it.map(retroRemoteToDomainMapper::map)
+                    localDataStore.saveRetros(retros)
+                    retros
+                }
+            emit(remoteEither)
+        }.flowOn(dispatchers.io)
     }
 
     override fun dispose() {

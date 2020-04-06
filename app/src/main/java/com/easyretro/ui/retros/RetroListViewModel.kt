@@ -7,6 +7,7 @@ import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.Failure
 import com.easyretro.domain.RetroRepository
 import com.easyretro.ui.FailureMessage
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class RetroListViewModel(
@@ -39,12 +40,15 @@ class RetroListViewModel(
     private fun fetchRetros() {
         viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.Loading)
         viewModelScope.launch {
-            retroRepository.getRetros().fold({ failure ->
-                viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.NotFetched)
-                viewEffect = failure.toViewEffect()
-            }, {
-                viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.Fetched(retros = it))
-            })
+            retroRepository.getRetros()
+                .collect {
+                    it.fold({ failure ->
+                        viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.NotFetched)
+                        viewEffect = failure.toViewEffect()
+                    }, {
+                        viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.Fetched(retros = it))
+                    })
+                }
         }
     }
 

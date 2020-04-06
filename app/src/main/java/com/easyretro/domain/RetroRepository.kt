@@ -3,6 +3,7 @@ package com.easyretro.domain
 import androidx.lifecycle.LiveData
 import arrow.core.Either
 import com.easyretro.data.local.Retro
+import kotlinx.coroutines.flow.Flow
 
 interface RetroRepository {
 
@@ -10,11 +11,7 @@ interface RetroRepository {
 
     fun getRetro(retroUuid: String): LiveData<Retro>
 
-    suspend fun getRetros(): Either<Failure, List<Retro>>
-
-    fun startObservingUserRetros()
-
-    fun stopObservingUserRetros()
+    suspend fun getRetros(): Flow<Either<Failure, List<Retro>>>
 
     fun dispose()
 }

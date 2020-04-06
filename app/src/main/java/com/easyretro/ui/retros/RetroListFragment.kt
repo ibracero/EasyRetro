@@ -1,11 +1,11 @@
 package com.easyretro.ui.retros
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
@@ -14,6 +14,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.easyretro.R
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.hideKeyboard
+import com.easyretro.common.extensions.showErrorSnackbar
+import com.easyretro.common.extensions.showSnackBar
 import com.easyretro.data.local.Retro
 import com.easyretro.ui.Payload
 import com.easyretro.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
@@ -93,7 +95,7 @@ class RetroListFragment :
 
     override fun renderViewEffect(viewEffect: RetroListViewEffect) {
         when (viewEffect) {
-            is RetroListViewEffect.ShowSnackBar -> showError()
+            is RetroListViewEffect.ShowSnackBar -> showError(viewEffect.errorMessage)
             is RetroListViewEffect.OpenRetroDetail -> navigateToRetroBoard(viewEffect.retroUuid)
         }
     }
@@ -116,12 +118,11 @@ class RetroListFragment :
         viewModel.process(viewEvent = RetroListViewEvent.CreateRetroClicked(retroName = retroTitle))
     }
 
-    private fun showError() {
-        Toast.makeText(context, "Couldn't create retro", Toast.LENGTH_SHORT).show()
+    private fun showError(@StringRes errorMessage: Int) {
+        retro_list_root.showErrorSnackbar(message = errorMessage)
     }
 
     private fun showLogoutConfirmationDialog() {
-
         val safeContext = context ?: return
 
         AlertDialog.Builder(safeContext)

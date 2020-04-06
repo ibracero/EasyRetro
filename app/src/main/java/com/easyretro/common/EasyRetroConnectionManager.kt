@@ -12,6 +12,7 @@ class EasyRetroConnectionManager(private val connectivityManager: ConnectivityMa
     val connectionLiveData = MutableLiveData<NetworkStatus>().apply {
         value = getNetworkStatus()
     }
+
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             connectionLiveData.postValue(NetworkStatus.ONLINE)

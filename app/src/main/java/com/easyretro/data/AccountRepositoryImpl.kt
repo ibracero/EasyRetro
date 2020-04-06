@@ -1,15 +1,16 @@
 package com.easyretro.data
 
 import arrow.core.Either
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
+import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.Failure
 import com.easyretro.domain.UserStatus
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.coroutines.Continuation
@@ -19,6 +20,7 @@ import kotlin.coroutines.suspendCoroutine
 class AccountRepositoryImpl(
     private val remoteDataStore: RemoteDataStore,
     private val localDataStore: LocalDataStore,
+    private val sessionSharedPrefsManager: SessionSharedPrefsManager,
     private val dispatchers: CoroutineDispatcherProvider
 ) : AccountRepository {
 
@@ -45,6 +47,7 @@ class AccountRepositoryImpl(
                                     lastName = account.familyName.orEmpty(),
                                     photoUrl = account.photoUrl?.toString().orEmpty()
                                 )
+                                sessionSharedPrefsManager.setSessionStarted()
                                 continuation.resume(Either.right(Unit))
                             } ?: continuation.resume(Either.left(Failure.InvalidUserFailure))
                         } else continuation.parseExceptionAndResume(task.exception)
@@ -60,8 +63,11 @@ class AccountRepositoryImpl(
                         if (task.isSuccessful) {
                             Timber.d("signInWithEmail:success")
                             firebaseAuth.currentUser?.isEmailVerified?.let { verified ->
-                                val userStatus = if (verified) UserStatus.VERIFIED
-                                else UserStatus.NON_VERIFIED
+                                val userStatus =
+                                    if (verified) {
+                                        sessionSharedPrefsManager.setSessionStarted()
+                                        UserStatus.VERIFIED
+                                    } else UserStatus.NON_VERIFIED
                                 continuation.resume(Either.right(userStatus))
                             } ?: continuation.resume(Either.left(Failure.TokenExpiredFailure))
                         } else continuation.parseExceptionAndResume(task.exception)
@@ -102,6 +108,7 @@ class AccountRepositoryImpl(
         withContext(dispatchers.io) {
             suspendCoroutine<Either<Failure, Unit>> { continuation ->
                 try {
+                    sessionSharedPrefsManager.setSessionEnded()
                     firebaseAuth.signOut()
                     localDataStore.clearAll()
                     continuation.resume(Either.right(Unit))
@@ -116,14 +123,16 @@ class AccountRepositoryImpl(
         return suspendCoroutine { continuation ->
             currentUser.reload()
                 .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val status = when (firebaseAuth.currentUser?.isEmailVerified) {
-                            true -> Either.right(UserStatus.VERIFIED)
-                            false -> Either.right(UserStatus.NON_VERIFIED)
-                            null -> Either.left(Failure.InvalidUserFailure)
-                        }
-                        continuation.resume(status)
-                    } else continuation.parseExceptionAndResume(task.exception)
+                    val sessionStarted =
+                        if (task.isSuccessful) firebaseAuth.currentUser?.isEmailVerified
+                        else sessionSharedPrefsManager.isSessionStarted()
+
+                    val status = when (sessionStarted) {
+                        true -> Either.right(UserStatus.VERIFIED)
+                        false -> Either.right(UserStatus.NON_VERIFIED)
+                        null -> Either.left(Failure.InvalidUserFailure)
+                    }
+                    continuation.resume(status)
                 }
         }
     }

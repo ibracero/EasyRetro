@@ -50,7 +50,7 @@ object Libraries {
         const val firebase_analytics_version = "17.2.3"
         const val firebase_dynamic_links_version = "19.1.0"
         const val firebase_auth_version = "19.3.0"
-        const val coroutines_version = "1.3.4"
+        const val coroutines_version = "1.3.5"
         const val koin_version = "2.1.5"
         const val timber_version = "4.7.1"
         const val room_version = "2.2.5"

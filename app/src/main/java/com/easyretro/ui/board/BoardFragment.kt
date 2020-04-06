@@ -36,7 +36,6 @@ class BoardFragment : Fragment() {
 
     companion object {
         const val ARGUMENT_RETRO_UUID = "arg_retro_uuid"
-        const val ARGUMENT_LOGOUT = "arg_logout"
     }
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
@@ -75,7 +74,7 @@ class BoardFragment : Fragment() {
         users_recyclerview.adapter = userListAdapter
 
         getRetroUuidArgument()?.let { uuid ->
-            boardViewModel.getRetroInfo(uuid).observe(this@BoardFragment, Observer { retro ->
+            boardViewModel.getRetroInfo(uuid).observe(viewLifecycleOwner, Observer { retro ->
                 initToolbar(retro?.title)
                 userListAdapter.submitList(retro?.users ?: emptyList())
             })

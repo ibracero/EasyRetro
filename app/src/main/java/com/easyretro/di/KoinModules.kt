@@ -9,6 +9,7 @@ import com.easyretro.data.BoardRepositoryImpl
 import com.easyretro.data.RetroRepositoryImpl
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.EasyRetroDatabase
+import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.mapper.RetroRemoteToDomainMapper
 import com.easyretro.data.mapper.StatementRemoteToDomainMapper
 import com.easyretro.data.mapper.UserRemoteToDomainMapper
@@ -24,6 +25,7 @@ import com.easyretro.ui.board.StatementViewModel
 import com.easyretro.ui.retros.RetroListViewModel
 import com.easyretro.ui.welcome.WelcomeViewModel
 import org.koin.android.ext.koin.androidApplication
+import org.koin.android.ext.koin.androidContext
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -86,6 +88,7 @@ val mapperModule = module {
 
 val accountModule = module {
 
-    factory<AccountRepository> { AccountRepositoryImpl(get(), get(), get()) }
+    factory<AccountRepository> { AccountRepositoryImpl(get(), get(), get(), get()) }
 
+    factory { SessionSharedPrefsManager(androidContext()) }
 }
