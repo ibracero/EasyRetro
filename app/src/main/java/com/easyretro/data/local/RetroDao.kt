@@ -10,7 +10,10 @@ interface RetroDao {
     fun getUserRetros(): List<Retro>
 
     @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
-    fun getRetroInfo(retroUuid: String): LiveData<Retro>
+    fun getRetro(retroUuid: String): Retro
+
+    @Update
+    fun updateRetro(retroUuid: Retro)
 
     @Query("SELECT * FROM $TABLE_STATEMENT WHERE retroUuid == :retroUuid AND type == 'POSITIVE' ORDER BY timestamp DESC")
     fun getPositiveStatements(retroUuid: String): LiveData<List<Statement>>
@@ -38,12 +41,6 @@ interface RetroDao {
 
     @Query("DELETE FROM $TABLE_RETRO")
     fun deleteAllRetros()
-
-    @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
-    fun getRetro(retroUuid: String): Retro
-
-    @Update
-    fun updateRetro(retroUuid: Retro)
 
     @Transaction
     fun dropStatementsAndInsert(statements: List<Statement>) {

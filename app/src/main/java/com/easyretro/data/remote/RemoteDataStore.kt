@@ -150,8 +150,6 @@ class RemoteDataStore {
         retroUuid: String,
         onUpdate: (Either<Failure, List<StatementRemote>>) -> Unit
     ) {
-        joinRetro(userEmail, retroUuid)
-
         statementObserver?.remove()
         statementObserver = db.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
@@ -237,7 +235,7 @@ class RemoteDataStore {
             .set(data, SetOptions.merge())
     }
 
-    private fun joinRetro(userEmail: String, retroUuid: String) {
+    fun joinRetro(userEmail: String, retroUuid: String) {
         val userRef = db.collection(FirestoreTable.TABLE_USERS)
             .document(userEmail)
 

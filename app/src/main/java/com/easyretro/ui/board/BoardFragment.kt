@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -16,34 +15,36 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.snackbar.Snackbar
 import com.easyretro.R
+import com.easyretro.common.BaseFragment
 import com.easyretro.common.NetworkStatus
 import com.easyretro.common.EasyRetroConnectionManager
+import com.easyretro.common.extensions.exhaustive
 import com.easyretro.common.extensions.hideKeyboard
+import com.easyretro.common.extensions.showErrorSnackbar
 import com.easyretro.domain.BoardRepository
 import com.easyretro.ui.board.action.ActionsFragment
 import com.easyretro.ui.board.negative.NegativeFragment
 import com.easyretro.ui.board.positive.PositiveFragment
 import com.easyretro.ui.board.users.UserListAdapter
-import com.google.firebase.dynamiclinks.DynamicLink
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
 import kotlin.math.min
 
 
-class BoardFragment : Fragment() {
+class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEvent, BoardViewModel>() {
 
     companion object {
         const val ARGUMENT_RETRO_UUID = "arg_retro_uuid"
     }
+
+    override val viewModel: BoardViewModel by viewModel()
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             navigateToRetroList()
         }
     }
-    private val boardViewModel: BoardViewModel by viewModel()
     private val boardRepository: BoardRepository by inject()
     private val connectionManager: EasyRetroConnectionManager by inject()
 
@@ -74,10 +75,8 @@ class BoardFragment : Fragment() {
         users_recyclerview.adapter = userListAdapter
 
         getRetroUuidArgument()?.let { uuid ->
-            boardViewModel.getRetroInfo(uuid).observe(viewLifecycleOwner, Observer { retro ->
-                initToolbar(retro?.title)
-                userListAdapter.submitList(retro?.users ?: emptyList())
-            })
+            viewModel.process(BoardViewEvent.JoinRetro(retroUuid = uuid))
+            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid = uuid))
         }
     }
 
@@ -100,7 +99,14 @@ class BoardFragment : Fragment() {
                 true
             }
             R.id.action_invite -> {
-                generateDeepLink(onDeepLinkCreated = ::displayShareSheet)
+                getRetroUuidArgument()?.let { uuid ->
+                    viewModel.process(
+                        BoardViewEvent.ShareRetroLink(
+                            retroUuid = uuid,
+                            link = getString(R.string.retro_join_link_format, uuid)
+                        )
+                    )
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -134,8 +140,22 @@ class BoardFragment : Fragment() {
         view.hideKeyboard()
     }
 
+    override fun renderViewState(viewState: BoardViewState) {
+        initToolbar(viewState.retro.title)
+        userListAdapter.submitList(viewState.retro.users)
+    }
+
+    @Suppress("IMPLICIT_CAST_TO_ANY")
+    override fun renderViewEffect(viewEffect: BoardViewEffect) {
+        when (viewEffect) {
+            is BoardViewEffect.ShowSnackBar -> board_root.showErrorSnackbar(message = viewEffect.errorMessage)
+            is BoardViewEffect.ShowShareSheet ->
+                displayShareSheet(retroName = viewEffect.retroTitle, shortLink = viewEffect.shortLink)
+        }.exhaustive
+    }
+
     private fun initToolbar(title: String?) {
-        board_toolbar.title = title ?: getString(R.string.app_name)
+        board_toolbar.title = title
         (requireActivity() as AppCompatActivity).setSupportActionBar(board_toolbar)
     }
 
@@ -214,31 +234,12 @@ class BoardFragment : Fragment() {
         findNavController().navigateUp()
     }
 
-
-    private fun generateDeepLink(onDeepLinkCreated: (Uri) -> Unit) {
-        val link = getString(R.string.retro_join_link_format, getRetroUuidArgument().orEmpty())
-        FirebaseDynamicLinks.getInstance().createDynamicLink()
-            .setLink(Uri.parse(link))
-            .setDomainUriPrefix("https://easyretro.page.link")
-            .setAndroidParameters(DynamicLink.AndroidParameters.Builder().build())
-            .buildShortDynamicLink()
-            .addOnSuccessListener {
-                it?.shortLink?.let { shortLink ->
-                    onDeepLinkCreated(shortLink)
-                }//showerror
-            }
-    }
-
-    private fun displayShareSheet(shortLink: Uri?) {
-        val retroTitle = getRetroUuidArgument()?.let {
-            boardViewModel.getRetroInfo(it).value?.title
-        }.orEmpty()
-
+    private fun displayShareSheet(shortLink: Uri?, retroName: String) {
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(
                 Intent.EXTRA_TEXT,
-                getString(R.string.retro_invitation_message, retroTitle, shortLink?.toString())
+                getString(R.string.retro_invitation_message, retroName, shortLink?.toString())
             )
             type = "text/plain"
         }
@@ -247,7 +248,7 @@ class BoardFragment : Fragment() {
         startActivity(shareIntent)
     }
 
-    private fun getRetroUuidArgument() = arguments?.getString(ARGUMENT_RETRO_UUID)
+    private fun getRetroUuidArgument(): String? = arguments?.getString(ARGUMENT_RETRO_UUID)
 
     private fun isPortraitMode() = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 

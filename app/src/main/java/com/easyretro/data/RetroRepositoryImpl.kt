@@ -1,6 +1,5 @@
 package com.easyretro.data
 
-import androidx.lifecycle.LiveData
 import arrow.core.Either
 import com.google.firebase.auth.FirebaseAuth
 import com.easyretro.common.CoroutineDispatcherProvider
@@ -25,17 +24,22 @@ class RetroRepositoryImpl(
     private val userEmail: String
         get() = FirebaseAuth.getInstance().currentUser?.email.orEmpty()
 
-    private val job = Job()
-    private val coroutineContext = job + dispatchers.io
-    private val scope = CoroutineScope(coroutineContext)
-
     override suspend fun createRetro(title: String): Either<Failure, Retro> =
         withContext(dispatchers.io) {
             remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
                 .map { retroRemoteToDomainMapper.map(it) }
         }
 
-    override fun getRetro(retroUuid: String): LiveData<Retro> = localDataStore.getRetroInfo(retroUuid)
+    override suspend fun joinRetro(uuid: String) {
+        withContext(dispatchers.io) {
+            remoteDataStore.joinRetro(userEmail = userEmail, retroUuid = uuid)
+        }
+    }
+
+    override suspend fun getRetro(retroUuid: String): Either<Failure, Retro> =
+        withContext(dispatchers.io) {
+            Either.right(localDataStore.getRetro(retroUuid))
+        }
 
     override suspend fun getRetros(): Flow<Either<Failure, List<Retro>>> {
         return flow {
@@ -50,10 +54,5 @@ class RetroRepositoryImpl(
                 }
             emit(remoteEither)
         }.flowOn(dispatchers.io)
-    }
-
-    override fun dispose() {
-        scope.cancel()
-        remoteDataStore.stopObservingAll()
     }
 }

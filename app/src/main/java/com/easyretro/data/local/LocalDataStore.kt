@@ -22,7 +22,7 @@ class LocalDataStore(private val retroDao: RetroDao) {
 
     fun getActionPoints(retroUuid: String) = retroDao.getActionPoints(retroUuid)
 
-    fun getRetroInfo(retroUuid: String) = retroDao.getRetroInfo(retroUuid)
+    fun getRetro(retroUuid: String) = retroDao.getRetro(retroUuid)
 
     fun updateRetroUsers(retroUuid: String, users: List<User>) {
         val retro = retroDao.getRetro(retroUuid)

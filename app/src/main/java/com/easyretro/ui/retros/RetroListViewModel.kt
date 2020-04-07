@@ -32,11 +32,6 @@ class RetroListViewModel(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        retroRepository.dispose()
-    }
-
     private fun fetchRetros() {
         viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.Loading)
         viewModelScope.launch {
