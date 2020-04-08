@@ -18,6 +18,7 @@ class FailureMessage {
                 Failure.TooManyRequestsFailure -> R.string.error_too_many_requests
                 Failure.CreateRetroError -> TODO()
                 Failure.CreateStatementError -> TODO()
+                Failure.RemoveStatementError -> TODO()
             }
         }
     }

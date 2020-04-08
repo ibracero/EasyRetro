@@ -25,6 +25,7 @@ sealed class Failure constructor(message: String? = null) {
     object UnknownError : Failure()
     object CreateRetroError : Failure()
     object CreateStatementError : Failure()
+    object RemoveStatementError : Failure()
 
     object NetworkFailure : Failure() // Unreachable host
     object InvalidUserFailure : Failure() // User not found / User disabled / token expired  / invalid token

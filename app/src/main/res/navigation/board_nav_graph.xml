@@ -9,7 +9,7 @@
 		android:id="@+id/navigation_positive"
 		android:name="com.easyretro.ui.board.positive.PositiveFragment"
 		android:label="@string/title_positive"
-		tools:layout="@layout/statement_list">
+		tools:layout="@layout/fragment_statements">
 
 		<argument
 			android:name="arg_retro"
@@ -21,7 +21,7 @@
 		android:id="@+id/navigation_negative"
 		android:name="com.easyretro.ui.board.negative.NegativeFragment"
 		android:label="@string/title_negative"
-		tools:layout="@layout/statement_list">
+		tools:layout="@layout/fragment_statements">
 
 		<argument
 			android:name="arg_retro"
@@ -33,7 +33,7 @@
 		android:id="@+id/navigation_actions"
 		android:name="com.easyretro.ui.board.action.ActionsFragment"
 		android:label="@string/title_actions"
-		tools:layout="@layout/statement_list">
+		tools:layout="@layout/fragment_statements">
 
 		<argument
 			android:name="arg_retro"

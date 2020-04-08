@@ -67,12 +67,12 @@ class RemoteDataStore {
         }
     }
 
-    suspend fun getUserRetros(userEmail: String): Either<Failure, List<RetroRemote>>{
+    suspend fun getUserRetros(userEmail: String): Either<Failure, List<RetroRemote>> {
         return suspendCoroutine { continuation ->
             db.collection(FirestoreTable.TABLE_USERS)
                 .document(userEmail)
                 .get()
-                .addOnSuccessListener {snapshot ->
+                .addOnSuccessListener { snapshot ->
                     val retroDocs = snapshot?.get(FirestoreField.USER_RETROS) as List<DocumentReference>? ?: emptyList()
                     Tasks.whenAllComplete(retroDocs.map { it.get() })
                         .addOnSuccessListener { tasks ->
@@ -197,12 +197,20 @@ class RemoteDataStore {
         }
     }
 
-    fun removeStatement(retroUuid: String, statementUuid: String) {
-        db.collection(FirestoreTable.TABLE_RETROS)
-            .document(retroUuid)
-            .collection(FirestoreCollection.COLLECTION_STATEMENTS)
-            .document(statementUuid)
-            .delete()
+    suspend fun removeStatement(retroUuid: String, statementUuid: String): Either<Failure, Unit> {
+        return suspendCoroutine { continuation ->
+            db.collection(FirestoreTable.TABLE_RETROS)
+                .document(retroUuid)
+                .collection(FirestoreCollection.COLLECTION_STATEMENTS)
+                .document(statementUuid)
+                .delete()
+                .addOnSuccessListener {
+                    continuation.resume(Either.right(Unit))
+                }
+                .addOnFailureListener {
+                    continuation.resume(Either.left(Failure.RemoveStatementError))
+                }
+        }
     }
 
     fun stopObservingStatements() {

@@ -84,6 +84,7 @@ object Libraries {
     const val timber = "com.jakewharton.timber:timber:$timber_version"
     const val androidx_room = "androidx.room:room-runtime:$room_version"
     const val androidx_room_compiler = "androidx.room:room-compiler:$room_version"
+    const val androidx_room_ktx = "androidx.room:room-ktx:$room_version"
     const val room_debugger = "com.amitshekhar.android:debug-db:$room_debugger_version"
     const val arrow = "io.arrow-kt:arrow-core:$arrow_version"
     const val firebase_auth = "com.google.firebase:firebase-auth:$firebase_auth_version"

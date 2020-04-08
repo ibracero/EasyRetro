@@ -16,6 +16,9 @@ import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.StatementType
 import com.easyretro.domain.StatementType.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import java.util.*
 
 class BoardRepositoryImpl(
@@ -23,7 +26,7 @@ class BoardRepositoryImpl(
     val remoteDataStore: RemoteDataStore,
     val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
     val userRemoteToDomainMapper: UserRemoteToDomainMapper,
-    dispatchers: CoroutineDispatcherProvider
+    val dispatchers: CoroutineDispatcherProvider
 ) : BoardRepository {
 
     private val userEmail: String
@@ -33,22 +36,21 @@ class BoardRepositoryImpl(
     private val coroutineContext = job + dispatchers.io
     private val scope = CoroutineScope(coroutineContext)
 
-    override fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>> {
+    override suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>> {
         return when (statementType) {
             POSITIVE -> localDataStore.getPositiveStatements(retroUuid)
             NEGATIVE -> localDataStore.getNegativeStatements(retroUuid)
             ACTION_POINT -> localDataStore.getActionPoints(retroUuid)
-        }
+        }.flowOn(dispatchers.io)
     }
 
-    override fun addStatement(
+    override suspend fun addStatement(
         retroUuid: String,
         description: String,
         statementType: StatementType
-    ): LiveData<Either<Failure, Unit>> {
-        val statementLiveData = MutableLiveData<Either<Failure, Unit>>()
-        scope.launch {
-            val eitherResult = remoteDataStore.addStatementToBoard(
+    ): Either<Failure, Unit> {
+        return withContext(dispatchers.io) {
+            remoteDataStore.addStatementToBoard(
                 retroUuid = retroUuid,
                 statementRemote = StatementRemote(
                     userEmail = userEmail,
@@ -56,10 +58,13 @@ class BoardRepositoryImpl(
                     statementType = statementType.toString().toLowerCase(Locale.getDefault())
                 )
             )
-            statementLiveData.postValue(eitherResult)
         }
-        return statementLiveData
     }
+
+    override suspend fun removeStatement(statement: Statement): Either<Failure, Unit> =
+        withContext(dispatchers.io) {
+            remoteDataStore.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
+        }
 
     override fun startObservingStatements(retroUuid: String) {
         remoteDataStore.observeStatements(userEmail, retroUuid) {
@@ -79,10 +84,6 @@ class BoardRepositoryImpl(
                 }
             }
         }
-    }
-
-    override fun removeStatement(statement: Statement) {
-        remoteDataStore.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
     }
 
     override fun stopObservingStatements() {

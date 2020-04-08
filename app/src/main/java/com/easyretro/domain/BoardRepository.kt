@@ -1,16 +1,20 @@
 package com.easyretro.domain
 
-import androidx.lifecycle.LiveData
 import arrow.core.Either
 import com.easyretro.data.local.Statement
+import kotlinx.coroutines.flow.Flow
 
 interface BoardRepository {
 
-    fun getStatements(retroUuid: String, statementType: StatementType): LiveData<List<Statement>>
+    suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>>
 
-    fun addStatement(retroUuid: String, description: String, statementType: StatementType): LiveData<Either<Failure, Unit>>
+    suspend fun addStatement(
+        retroUuid: String,
+        description: String,
+        statementType: StatementType
+    ): Either<Failure, Unit>
 
-    fun removeStatement(statement: Statement)
+    suspend fun removeStatement(statement: Statement): Either<Failure, Unit>
 
     fun startObservingStatements(retroUuid: String)
 

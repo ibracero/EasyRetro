@@ -1,7 +1,7 @@
 package com.easyretro.data.local
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RetroDao {
@@ -16,13 +16,13 @@ interface RetroDao {
     fun updateRetro(retroUuid: Retro)
 
     @Query("SELECT * FROM $TABLE_STATEMENT WHERE retroUuid == :retroUuid AND type == 'POSITIVE' ORDER BY timestamp DESC")
-    fun getPositiveStatements(retroUuid: String): LiveData<List<Statement>>
+    fun getPositiveStatements(retroUuid: String): Flow<List<Statement>>
 
     @Query("SELECT * FROM $TABLE_STATEMENT WHERE retroUuid == :retroUuid AND type == 'NEGATIVE' ORDER BY timestamp DESC")
-    fun getNegativeStatements(retroUuid: String): LiveData<List<Statement>>
+    fun getNegativeStatements(retroUuid: String): Flow<List<Statement>>
 
     @Query("SELECT * FROM $TABLE_STATEMENT WHERE retroUuid == :retroUuid AND type == 'ACTION_POINT' ORDER BY timestamp DESC")
-    fun getActionPoints(retroUuid: String): LiveData<List<Statement>>
+    fun getActionPoints(retroUuid: String): Flow<List<Statement>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertRetros(retros: List<Retro>)

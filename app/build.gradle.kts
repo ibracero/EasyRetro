@@ -63,6 +63,7 @@ dependencies {
     implementation(Libraries.koin_android_viewmodel)
     implementation(Libraries.timber)
     implementation(Libraries.androidx_room)
+    implementation(Libraries.androidx_room_ktx)
     implementation(Libraries.arrow)
     implementation(Libraries.play_services_auth)
     implementation(Libraries.glide)
