@@ -8,21 +8,11 @@ interface BoardRepository {
 
     suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>>
 
-    suspend fun addStatement(
-        retroUuid: String,
-        description: String,
-        statementType: StatementType
-    ): Either<Failure, Unit>
+    suspend fun addStatement(retroUuid: String, description: String, type: StatementType): Either<Failure, Unit>
 
     suspend fun removeStatement(statement: Statement): Either<Failure, Unit>
 
-    fun startObservingStatements(retroUuid: String)
+    suspend fun startObservingStatements(retroUuid: String): Flow<Either<Failure, Unit>>
 
-    fun startObservingRetroUsers(retroUuid: String)
-
-    fun stopObservingStatements()
-
-    fun stopObservingRetroUsers()
-
-    fun dispose()
+    suspend fun startObservingRetroUsers(retroUuid: String): Flow<Either<Failure, Unit>>
 }

@@ -10,6 +10,10 @@ import com.easyretro.data.remote.firestore.RetroRemote
 import com.easyretro.data.remote.firestore.StatementRemote
 import com.easyretro.data.remote.firestore.UserRemote
 import com.easyretro.domain.Failure
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import timber.log.Timber
 import java.util.*
 import kotlin.coroutines.resume
@@ -18,10 +22,6 @@ import kotlin.coroutines.suspendCoroutine
 class RemoteDataStore {
 
     private val db = FirebaseFirestore.getInstance()
-
-    private var statementObserver: ListenerRegistration? = null
-    private var retrosObserver: ListenerRegistration? = null
-    private var usersObserver: ListenerRegistration? = null
 
     suspend fun createRetro(userEmail: String, retroTitle: String): Either<Failure, RetroRemote> {
         val userRef = db.collection(FirestoreTable.TABLE_USERS).document(userEmail)
@@ -92,66 +92,47 @@ class RemoteDataStore {
         }
     }
 
-    fun observeUserRetros(userEmail: String, onUpdate: (Either<Failure, List<RetroRemote>>) -> Unit) {
-        retrosObserver?.remove()
-        retrosObserver = db.collection(FirestoreTable.TABLE_USERS)
-            .document(userEmail)
-            .addSnapshotListener { snapshot, _ ->
-                val retroDocs = snapshot?.get(FirestoreField.USER_RETROS) as List<DocumentReference>? ?: emptyList()
-                Tasks.whenAllComplete(retroDocs.map { it.get() })
-                    .addOnSuccessListener { tasks ->
-                        val retros =
-                            tasks.filter { it.isSuccessful }
-                                .mapNotNull {
-                                    val documentSnapshot = it.result as DocumentSnapshot
-                                    val values = documentSnapshot.data
-                                    RetroRemote(
-                                        uuid = documentSnapshot.id,
-                                        title = (values?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty()
-                                    )
-                                }
-                        Timber.d("Retros update $retros")
-                        onUpdate(Either.right(retros))
-                    }
-            }
-    }
-
-    fun observeRetroUsers(retroUuid: String, onUpdate: (Either<Failure, List<UserRemote>>) -> Unit) {
-        usersObserver?.remove()
-        usersObserver = db.collection(FirestoreTable.TABLE_RETROS)
-            .document(retroUuid)
-            .addSnapshotListener { snapshot, _ ->
-                val userDocs =
-                    (snapshot?.get(FirestoreField.RETRO_USERS) as List<DocumentReference>?) ?: emptyList()
-                Tasks.whenAllComplete(userDocs.map { it.get() })
-                    .addOnSuccessListener { tasks ->
-                        val users =
-                            tasks.filter { it.isSuccessful }
-                                .mapNotNull {
-                                    val documentSnapshot = it.result as DocumentSnapshot
-                                    val values = documentSnapshot.data
-                                    UserRemote(
-                                        email = documentSnapshot.id,
-                                        firstName = (values?.get(FirestoreField.USER_FIRST_NAME) as String?).orEmpty(),
-                                        lastName = (values?.get(FirestoreField.USER_LAST_NAME) as String?).orEmpty(),
-                                        photoUrl = (values?.get(FirestoreField.USER_PHOTO_URL) as String?).orEmpty()
-                                    )
-                                }
-                        if (!users.isNullOrEmpty() && snapshot?.metadata?.hasPendingWrites() == false) {
-                            Timber.d("Users update $users")
-                            onUpdate(Either.right(users))
+    @ExperimentalCoroutinesApi
+    suspend fun observeRetroUsers(retroUuid: String) =
+        callbackFlow<Either<Failure, List<UserRemote>>> {
+            val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
+                .document(retroUuid)
+                .addSnapshotListener { snapshot, _ ->
+                    val userDocs =
+                        (snapshot?.get(FirestoreField.RETRO_USERS) as List<DocumentReference>?) ?: emptyList()
+                    Tasks.whenAllComplete(userDocs.map { it.get() })
+                        .addOnSuccessListener { tasks ->
+                            val users =
+                                tasks.filter { it.isSuccessful }
+                                    .mapNotNull {
+                                        val documentSnapshot = it.result as DocumentSnapshot
+                                        val values = documentSnapshot.data
+                                        UserRemote(
+                                            email = documentSnapshot.id,
+                                            firstName = (values?.get(FirestoreField.USER_FIRST_NAME) as String?).orEmpty(),
+                                            lastName = (values?.get(FirestoreField.USER_LAST_NAME) as String?).orEmpty(),
+                                            photoUrl = (values?.get(FirestoreField.USER_PHOTO_URL) as String?).orEmpty()
+                                        )
+                                    }
+                            if (!users.isNullOrEmpty() && snapshot?.metadata?.hasPendingWrites() == false) {
+                                Timber.d("Users update $users")
+                                offer(Either.right(users))
+                            }
                         }
-                    }
-            }
-    }
+                }
 
-    fun observeStatements(
+            awaitClose {
+                registrationObserver.remove()
+                cancel()
+            }
+        }
+
+    @ExperimentalCoroutinesApi
+    suspend fun observeStatements(
         userEmail: String,
-        retroUuid: String,
-        onUpdate: (Either<Failure, List<StatementRemote>>) -> Unit
-    ) {
-        statementObserver?.remove()
-        statementObserver = db.collection(FirestoreTable.TABLE_RETROS)
+        retroUuid: String
+    ) = callbackFlow<Either<Failure, List<StatementRemote>>> {
+        val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
             .collection(FirestoreCollection.COLLECTION_STATEMENTS)
             .addSnapshotListener { snapshot, _ ->
@@ -170,9 +151,14 @@ class RemoteDataStore {
 
                 if (statements != null && !snapshot.metadata.hasPendingWrites()) {
                     Timber.d("Statements update $statements")
-                    onUpdate(Either.right(statements.toList()))
+                    offer(Either.right(statements.toList()))
                 }
             }
+
+        awaitClose {
+            registrationObserver.remove()
+            cancel()
+        }
     }
 
     suspend fun addStatementToBoard(retroUuid: String, statementRemote: StatementRemote): Either<Failure, Unit> {
@@ -211,24 +197,6 @@ class RemoteDataStore {
                     continuation.resume(Either.left(Failure.RemoveStatementError))
                 }
         }
-    }
-
-    fun stopObservingStatements() {
-        statementObserver?.remove()
-    }
-
-    fun stopObservingUserRetros() {
-        retrosObserver?.remove()
-    }
-
-    fun stopObservingRetroUsers() {
-        usersObserver?.remove()
-    }
-
-    fun stopObservingAll() {
-        stopObservingRetroUsers()
-        stopObservingStatements()
-        stopObservingRetroUsers()
     }
 
     fun createUser(email: String, firstName: String, lastName: String, photoUrl: String) {

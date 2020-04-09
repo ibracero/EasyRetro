@@ -21,7 +21,6 @@ import com.easyretro.common.EasyRetroConnectionManager
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.common.extensions.showErrorSnackbar
-import com.easyretro.domain.BoardRepository
 import com.easyretro.ui.board.action.ActionsFragment
 import com.easyretro.ui.board.negative.NegativeFragment
 import com.easyretro.ui.board.positive.PositiveFragment
@@ -45,7 +44,6 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
             navigateToRetroList()
         }
     }
-    private val boardRepository: BoardRepository by inject()
     private val connectionManager: EasyRetroConnectionManager by inject()
 
     private val userListAdapter = UserListAdapter()
@@ -118,8 +116,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         requireActivity().onBackPressedDispatcher.addCallback(backPressedCallback)
 
         getRetroUuidArgument()?.let {
-            boardRepository.startObservingStatements(it)
-            boardRepository.startObservingRetroUsers(it)
+            viewModel.process(BoardViewEvent.SubscribeRetroDetails(it))
         }
 
         connectionManager.connectionLiveData.observe(this@BoardFragment, Observer {
@@ -132,8 +129,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
 
     override fun onStop() {
         super.onStop()
-        boardRepository.stopObservingStatements()
-        boardRepository.stopObservingRetroUsers()
+        viewModel.process(BoardViewEvent.UnsubscribeRetroDetails)
 
         backPressedCallback.remove()
 

@@ -5,20 +5,26 @@ import androidx.lifecycle.viewModelScope
 import com.easyretro.R
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
+import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.ui.FailureMessage
 import com.google.firebase.dynamiclinks.DynamicLink
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import com.google.firebase.dynamiclinks.ShortDynamicLink
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class BoardViewModel(
-    private val retroRepository: RetroRepository
+    private val retroRepository: RetroRepository,
+    private val boardRepository: BoardRepository
 ) : BaseViewModel<BoardViewState, BoardViewEffect, BoardViewEvent>() {
 
     companion object {
         private const val DEEPLINK_DOMAIN = "https://easyretro.page.link"
     }
+
+    private var statementObserverJob: Job? = null
 
     override fun process(viewEvent: BoardViewEvent) {
         super.process(viewEvent)
@@ -26,6 +32,8 @@ class BoardViewModel(
             is BoardViewEvent.GetRetroInfo -> getRetroInfo(retroUuid = viewEvent.retroUuid)
             is BoardViewEvent.JoinRetro -> joinRetro(retroUuid = viewEvent.retroUuid)
             is BoardViewEvent.ShareRetroLink -> shareRetroLink(link = viewEvent.link)
+            is BoardViewEvent.SubscribeRetroDetails -> startObservingRetro(retroUuid = viewEvent.retroUuid)
+            BoardViewEvent.UnsubscribeRetroDetails -> stopObservingRetro()
         }.exhaustive
     }
 
@@ -68,5 +76,17 @@ class BoardViewModel(
         viewEffect = link.shortLink?.let { shortLink ->
             BoardViewEffect.ShowShareSheet(retroTitle = retroTitle, shortLink = shortLink)
         } ?: BoardViewEffect.ShowSnackBar(R.string.error_generic)
+    }
+
+    private fun startObservingRetro(retroUuid: String) {
+        statementObserverJob?.cancel()
+        statementObserverJob = viewModelScope.launch {
+            boardRepository.startObservingStatements(retroUuid).collect()
+            boardRepository.startObservingRetroUsers(retroUuid).collect()
+        }
+    }
+
+    private fun stopObservingRetro() {
+        statementObserverJob?.cancel()
     }
 }

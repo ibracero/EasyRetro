@@ -45,7 +45,7 @@ class StatementViewModel(
 
     private fun addStatement(retroUuid: String, description: String, type: StatementType) {
         viewModelScope.launch {
-            boardRepository.addStatement(retroUuid = retroUuid, description = description, statementType = type)
+            boardRepository.addStatement(retroUuid = retroUuid, description = description, type = type)
                 .mapLeft {
                     viewEffect = StatementListViewEffect.ShowSnackBar(FailureMessage.parse(it))
                     viewState = viewState.copy(addState = StatementAddState.NotAdded)
@@ -60,10 +60,5 @@ class StatementViewModel(
                     viewEffect = StatementListViewEffect.ShowSnackBar(FailureMessage.parse(it))
                 }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        boardRepository.dispose()
     }
 }

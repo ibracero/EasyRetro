@@ -67,7 +67,7 @@ val viewModelModule = module {
 
     viewModel { StatementViewModel(get()) }
 
-    viewModel { BoardViewModel(get()) }
+    viewModel { BoardViewModel(get(), get()) }
 
     viewModel { AccountViewModel(get()) }
 

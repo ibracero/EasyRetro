@@ -1,19 +1,19 @@
 package com.easyretro.data.local
 
+import timber.log.Timber
+
 class LocalDataStore(private val retroDao: RetroDao) {
 
     fun getRetros() = retroDao.getUserRetros()
 
     fun saveRetros(retros: List<Retro>) {
+        Timber.d("Updating retros ${retros.joinToString(",") { it.title }}")
         retroDao.insertRetros(retros)
     }
 
     fun saveStatements(statements: List<Statement>) {
+        Timber.d("Updating statements ${statements.size}")
         retroDao.dropStatementsAndInsert(statements)
-    }
-
-    fun saveUser(user: User) {
-        retroDao.insertUser(user)
     }
 
     fun getPositiveStatements(retroUuid: String) = retroDao.getPositiveStatements(retroUuid)
