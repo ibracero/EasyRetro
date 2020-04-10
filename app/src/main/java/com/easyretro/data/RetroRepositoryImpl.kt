@@ -30,11 +30,10 @@ class RetroRepositoryImpl(
                 .map { retroRemoteToDomainMapper.map(it) }
         }
 
-    override suspend fun joinRetro(uuid: String) {
+    override suspend fun joinRetro(uuid: String): Either<Failure, Unit> =
         withContext(dispatchers.io) {
             remoteDataStore.joinRetro(userEmail = userEmail, retroUuid = uuid)
         }
-    }
 
     override suspend fun getRetro(retroUuid: String): Either<Failure, Retro> =
         withContext(dispatchers.io) {

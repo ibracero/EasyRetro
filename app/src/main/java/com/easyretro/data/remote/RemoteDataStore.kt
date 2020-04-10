@@ -143,9 +143,6 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
     }
 
     suspend fun getUserRetros(userEmail: String): Either<Failure, List<RetroRemote>> {
-        if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
-            return Either.left(Failure.UnavailableNetwork)
-
         return suspendCoroutine { continuation ->
             db.collection(FirestoreTable.TABLE_USERS)
                 .document(userEmail)
@@ -214,6 +211,28 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         }
     }
 
+    suspend fun joinRetro(userEmail: String, retroUuid: String): Either<Failure, Unit> {
+        if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
+            return Either.left(Failure.UnavailableNetwork)
+
+        val userRef = db.collection(FirestoreTable.TABLE_USERS)
+            .document(userEmail)
+
+        val retroRef = db.collection(FirestoreTable.TABLE_RETROS)
+            .document(retroUuid)
+
+        return suspendCoroutine { continuation ->
+            Tasks.whenAllComplete(
+                retroRef.update(FirestoreField.RETRO_USERS, FieldValue.arrayUnion(userRef)),
+                userRef.update(FirestoreField.USER_RETROS, FieldValue.arrayUnion(retroRef))
+            ).addOnSuccessListener {
+                continuation.resume(Either.right(Unit))
+            }.addOnFailureListener {
+                continuation.resume(Either.left(Failure.parse(it)))
+            }
+        }
+    }
+
     suspend fun createUser(
         email: String,
         firstName: String,
@@ -242,25 +261,5 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         }
     }
 
-    suspend fun joinRetro(userEmail: String, retroUuid: String): Either<Failure, Unit> {
-        if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
-            return Either.left(Failure.UnavailableNetwork)
 
-        val userRef = db.collection(FirestoreTable.TABLE_USERS)
-            .document(userEmail)
-
-        val retroRef = db.collection(FirestoreTable.TABLE_RETROS)
-            .document(retroUuid)
-
-        return suspendCoroutine { continuation ->
-            Tasks.whenAllComplete(
-                retroRef.update(FirestoreField.RETRO_USERS, FieldValue.arrayUnion(userRef)),
-                userRef.update(FirestoreField.USER_RETROS, FieldValue.arrayUnion(retroRef))
-            ).addOnSuccessListener {
-                continuation.resume(Either.right(Unit))
-            }.addOnFailureListener {
-                continuation.resume(Either.left(Failure.parse(it)))
-            }
-        }
-    }
 }

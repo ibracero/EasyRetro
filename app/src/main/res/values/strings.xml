@@ -44,7 +44,7 @@
 
 	<!--Errors-->
 	<string name="error_generic">Couldn\'t complete the requested operation. Please, check your connection and try again later.</string>
-	<string name="error_network">Your internet connection don\'t seem to be available. Please, check your connection and try again later.</string>
+	<string name="error_network">You seem to be offline. Please check your network connection.</string>
 	<string name="error_invalid_user">We couldn\'t find that user in our database. Do you want to sign up?</string>
 	<string name="error_invalid_user_credentials">The credentials you provided are not correct. Please, check them and try again.</string>
 	<string name="error_token_expired">For safety reasons, we need you to login again.</string>

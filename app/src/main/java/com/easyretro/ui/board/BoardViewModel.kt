@@ -18,8 +18,7 @@ import kotlinx.coroutines.launch
 
 class BoardViewModel(
     private val retroRepository: RetroRepository,
-    private val boardRepository: BoardRepository,
-    private val connectionManager: ConnectionManager
+    private val boardRepository: BoardRepository
 ) : BaseViewModel<BoardViewState, BoardViewEffect, BoardViewEvent>() {
 
     companion object {
@@ -53,7 +52,9 @@ class BoardViewModel(
 
     private fun joinRetro(retroUuid: String) {
         viewModelScope.launch {
-            retroRepository.joinRetro(retroUuid)
+            retroRepository.joinRetro(retroUuid).mapLeft {
+                viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
+            }
         }
     }
 

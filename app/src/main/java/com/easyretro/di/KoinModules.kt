@@ -50,7 +50,7 @@ val appModule = module {
         )
     }
 
-    single { RemoteDataStore() }
+    single { RemoteDataStore(get()) }
 
     single { ConnectionManager(androidApplication().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) }
 
@@ -88,7 +88,7 @@ val mapperModule = module {
 
 val accountModule = module {
 
-    factory<AccountRepository> { AccountRepositoryImpl(get(), get(), get(), get()) }
+    factory<AccountRepository> { AccountRepositoryImpl(get(), get(), get(), get(), get()) }
 
     factory { SessionSharedPrefsManager(androidContext()) }
 }

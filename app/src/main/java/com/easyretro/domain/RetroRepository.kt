@@ -8,7 +8,7 @@ interface RetroRepository {
 
     suspend fun createRetro(title: String): Either<Failure, Retro>
 
-    suspend fun joinRetro(uuid: String)
+    suspend fun joinRetro(uuid: String): Either<Failure, Unit>
 
     suspend fun getRetro(retroUuid: String): Either<Failure, Retro>
 

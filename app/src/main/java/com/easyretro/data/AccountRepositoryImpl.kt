@@ -1,7 +1,9 @@
 package com.easyretro.data
 
 import arrow.core.Either
+import com.easyretro.common.ConnectionManager
 import com.easyretro.common.CoroutineDispatcherProvider
+import com.easyretro.common.NetworkStatus
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.remote.RemoteDataStore
@@ -21,7 +23,8 @@ class AccountRepositoryImpl(
     private val remoteDataStore: RemoteDataStore,
     private val localDataStore: LocalDataStore,
     private val sessionSharedPrefsManager: SessionSharedPrefsManager,
-    private val dispatchers: CoroutineDispatcherProvider
+    private val dispatchers: CoroutineDispatcherProvider,
+    private val connectionManager: ConnectionManager
 ) : AccountRepository {
 
     private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
@@ -31,33 +34,33 @@ class AccountRepositoryImpl(
             reloadUser()
         }
 
-    override suspend fun signWithGoogleAccount(account: GoogleSignInAccount): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
-            suspendCoroutine { continuation ->
+    override suspend fun signWithGoogleAccount(account: GoogleSignInAccount): Either<Failure, Unit> {
+        return if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
+            Either.left(Failure.UnavailableNetwork)
+        else withContext(dispatchers.io) {
+            val signInEither = suspendCoroutine<Either<Failure, Unit>> { continuation ->
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 firebaseAuth.signInWithCredential(credential)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Timber.d("signInWithCredential:success")
                             val user = firebaseAuth.currentUser
-                            user?.let {
-                                remoteDataStore.createUser(
-                                    email = account.email.orEmpty(),
-                                    firstName = account.givenName.orEmpty(),
-                                    lastName = account.familyName.orEmpty(),
-                                    photoUrl = account.photoUrl?.toString().orEmpty()
-                                )
-                                sessionSharedPrefsManager.setSessionStarted()
-                                continuation.resume(Either.right(Unit))
-                            } ?: continuation.resume(Either.left(Failure.InvalidUserFailure))
+                            if (user != null) continuation.resume(Either.right(Unit))
+                            else continuation.resume(Either.left(Failure.InvalidUserFailure))
                         } else continuation.parseExceptionAndResume(task.exception)
                     }
             }
-        }
 
-    override suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus> =
-        withContext(dispatchers.io) {
-            suspendCoroutine { continuation ->
+            if (signInEither.isLeft()) signInEither
+            else startUserSession(account)
+        }
+    }
+
+    override suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus> {
+        return if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
+            Either.left(Failure.UnavailableNetwork)
+        else withContext(dispatchers.io) {
+            suspendCoroutine<Either<Failure, UserStatus>> { continuation ->
                 firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -74,10 +77,13 @@ class AccountRepositoryImpl(
                     }
             }
         }
+    }
 
-    override suspend fun signUpWithEmail(email: String, password: String): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
-            suspendCoroutine { continuation ->
+    override suspend fun signUpWithEmail(email: String, password: String): Either<Failure, Unit> {
+        return if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
+            Either.left(Failure.UnavailableNetwork)
+        else withContext(dispatchers.io) {
+            suspendCoroutine<Either<Failure, Unit>> { continuation ->
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) sendEmailVerification(continuation)
@@ -85,10 +91,13 @@ class AccountRepositoryImpl(
                     }
             }
         }
+    }
 
-    override suspend fun resetPassword(email: String): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
-            suspendCoroutine { continuation ->
+    override suspend fun resetPassword(email: String): Either<Failure, Unit> {
+        return if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
+            Either.left(Failure.UnavailableNetwork)
+        else withContext(dispatchers.io) {
+            suspendCoroutine<Either<Failure, Unit>> { continuation ->
                 firebaseAuth.sendPasswordResetEmail(email)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -98,15 +107,19 @@ class AccountRepositoryImpl(
                     }
             }
         }
+    }
 
-    override suspend fun resendVerificationEmail(): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
-            suspendCoroutine { sendEmailVerification(it) }
+    override suspend fun resendVerificationEmail(): Either<Failure, Unit> {
+        return if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
+            Either.left(Failure.UnavailableNetwork)
+        else withContext(dispatchers.io) {
+            suspendCoroutine<Either<Failure, Unit>> { sendEmailVerification(it) }
         }
+    }
 
     override suspend fun logOut(): Either<Failure, Unit> =
         withContext(dispatchers.io) {
-            suspendCoroutine { continuation ->
+            suspendCoroutine<Either<Failure, Unit>> { continuation ->
                 try {
                     sessionSharedPrefsManager.setSessionEnded()
                     firebaseAuth.signOut()
@@ -120,7 +133,7 @@ class AccountRepositoryImpl(
 
     private suspend fun reloadUser(): Either<Failure, UserStatus> {
         val currentUser = firebaseAuth.currentUser ?: return Either.left(Failure.UnknownError)
-        return suspendCoroutine { continuation ->
+        return suspendCoroutine<Either<Failure, UserStatus>> { continuation ->
             currentUser.reload()
                 .addOnCompleteListener { task ->
                     val sessionStarted =
@@ -146,6 +159,14 @@ class AccountRepositoryImpl(
                 } else continuation.parseExceptionAndResume(task.exception)
             }
     }
+
+    private suspend fun startUserSession(account: GoogleSignInAccount): Either<Failure, Unit> =
+        remoteDataStore.createUser(
+            email = account.email.orEmpty(),
+            firstName = account.givenName.orEmpty(),
+            lastName = account.familyName.orEmpty(),
+            photoUrl = account.photoUrl?.toString().orEmpty()
+        ).map { sessionSharedPrefsManager.setSessionStarted() }
 
     private fun <T> Continuation<Either<Failure, T>>.parseExceptionAndResume(exception: Exception?) {
         if (exception == null) return
