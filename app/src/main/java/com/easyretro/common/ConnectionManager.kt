@@ -7,25 +7,7 @@ import android.net.NetworkRequest
 import android.os.Build
 import androidx.lifecycle.MutableLiveData
 
-class EasyRetroConnectionManager(private val connectivityManager: ConnectivityManager) {
-
-    val connectionLiveData = MutableLiveData<NetworkStatus>().apply {
-        value = getNetworkStatus()
-    }
-
-    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) {
-            connectionLiveData.postValue(NetworkStatus.ONLINE)
-        }
-
-        override fun onLost(network: Network) {
-            connectionLiveData.postValue(NetworkStatus.OFFLINE)
-        }
-    }
-
-    init {
-        connectivityManager.registerNetworkCallback(NetworkRequest.Builder().build(), networkCallback)
-    }
+class ConnectionManager(private val connectivityManager: ConnectivityManager) {
 
     @Suppress("DEPRECATION")
     fun getNetworkStatus(): NetworkStatus {

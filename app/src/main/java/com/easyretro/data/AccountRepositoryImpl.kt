@@ -33,7 +33,7 @@ class AccountRepositoryImpl(
 
     override suspend fun signWithGoogleAccount(account: GoogleSignInAccount): Either<Failure, Unit> =
         withContext(dispatchers.io) {
-            suspendCoroutine<Either<Failure, Unit>> { continuation ->
+            suspendCoroutine { continuation ->
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 firebaseAuth.signInWithCredential(credential)
                     .addOnCompleteListener { task ->
@@ -57,7 +57,7 @@ class AccountRepositoryImpl(
 
     override suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus> =
         withContext(dispatchers.io) {
-            suspendCoroutine<Either<Failure, UserStatus>> { continuation ->
+            suspendCoroutine { continuation ->
                 firebaseAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -77,7 +77,7 @@ class AccountRepositoryImpl(
 
     override suspend fun signUpWithEmail(email: String, password: String): Either<Failure, Unit> =
         withContext(dispatchers.io) {
-            suspendCoroutine<Either<Failure, Unit>> { continuation ->
+            suspendCoroutine { continuation ->
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) sendEmailVerification(continuation)
@@ -88,7 +88,7 @@ class AccountRepositoryImpl(
 
     override suspend fun resetPassword(email: String): Either<Failure, Unit> =
         withContext(dispatchers.io) {
-            suspendCoroutine<Either<Failure, Unit>> { continuation ->
+            suspendCoroutine { continuation ->
                 firebaseAuth.sendPasswordResetEmail(email)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -101,12 +101,12 @@ class AccountRepositoryImpl(
 
     override suspend fun resendVerificationEmail(): Either<Failure, Unit> =
         withContext(dispatchers.io) {
-            suspendCoroutine<Either<Failure, Unit>> { sendEmailVerification(it) }
+            suspendCoroutine { sendEmailVerification(it) }
         }
 
     override suspend fun logOut(): Either<Failure, Unit> =
         withContext(dispatchers.io) {
-            suspendCoroutine<Either<Failure, Unit>> { continuation ->
+            suspendCoroutine { continuation ->
                 try {
                     sessionSharedPrefsManager.setSessionEnded()
                     firebaseAuth.signOut()

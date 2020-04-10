@@ -10,7 +10,7 @@ class FailureMessage {
         fun parse(failure: Failure): Int {
             return when (failure) {
                 Failure.UnknownError -> R.string.error_generic
-                Failure.NetworkFailure -> R.string.error_network
+                Failure.UnavailableNetwork -> R.string.error_network
                 Failure.InvalidUserFailure -> R.string.error_invalid_user
                 Failure.InvalidUserCredentialsFailure -> R.string.error_invalid_user_credentials
                 Failure.TokenExpiredFailure -> R.string.error_token_expired

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.easyretro.R
 import com.easyretro.common.BaseViewModel
+import com.easyretro.common.ConnectionManager
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 
 class BoardViewModel(
     private val retroRepository: RetroRepository,
-    private val boardRepository: BoardRepository
+    private val boardRepository: BoardRepository,
+    private val connectionManager: ConnectionManager
 ) : BaseViewModel<BoardViewState, BoardViewEffect, BoardViewEvent>() {
 
     companion object {

@@ -11,7 +11,7 @@ sealed class Failure constructor(message: String? = null) {
     companion object {
         fun parse(exception: Exception): Failure {
             return when (exception) {
-                is FirebaseNetworkException -> NetworkFailure
+                is FirebaseNetworkException -> UnavailableNetwork
                 is FirebaseAuthInvalidUserException -> InvalidUserFailure
                 is FirebaseAuthInvalidCredentialsException -> InvalidUserCredentialsFailure
                 is FirebaseAuthRecentLoginRequiredException -> TokenExpiredFailure
@@ -21,13 +21,12 @@ sealed class Failure constructor(message: String? = null) {
             }
         }
     }
-
     object UnknownError : Failure()
     object CreateRetroError : Failure()
     object CreateStatementError : Failure()
     object RemoveStatementError : Failure()
 
-    object NetworkFailure : Failure() // Unreachable host
+    object UnavailableNetwork : Failure() // Unreachable host
     object InvalidUserFailure : Failure() // User not found / User disabled / token expired  / invalid token
     object InvalidUserCredentialsFailure :
         Failure() // Invalid credentials when trying to identify / authenticate a user

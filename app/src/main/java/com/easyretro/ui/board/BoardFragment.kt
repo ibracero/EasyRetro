@@ -17,7 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.easyretro.R
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.NetworkStatus
-import com.easyretro.common.EasyRetroConnectionManager
+import com.easyretro.common.ConnectionManager
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.common.extensions.showErrorSnackbar
@@ -44,7 +44,6 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
             navigateToRetroList()
         }
     }
-    private val connectionManager: EasyRetroConnectionManager by inject()
 
     private val userListAdapter = UserListAdapter()
 
@@ -118,13 +117,6 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         getRetroUuidArgument()?.let {
             viewModel.process(BoardViewEvent.SubscribeRetroDetails(it))
         }
-
-        connectionManager.connectionLiveData.observe(this@BoardFragment, Observer {
-            when (it) {
-                NetworkStatus.ONLINE -> offlineSnackbar.dismiss()
-                else -> offlineSnackbar.show()
-            }
-        })
     }
 
     override fun onStop() {

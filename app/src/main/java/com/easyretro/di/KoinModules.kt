@@ -3,7 +3,7 @@ package com.easyretro.di
 import android.content.Context
 import android.net.ConnectivityManager
 import com.easyretro.common.CoroutineDispatcherProvider
-import com.easyretro.common.EasyRetroConnectionManager
+import com.easyretro.common.ConnectionManager
 import com.easyretro.data.AccountRepositoryImpl
 import com.easyretro.data.BoardRepositoryImpl
 import com.easyretro.data.RetroRepositoryImpl
@@ -52,7 +52,7 @@ val appModule = module {
 
     single { RemoteDataStore() }
 
-    single { EasyRetroConnectionManager(androidApplication().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) }
+    single { ConnectionManager(androidApplication().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) }
 
     single { LocalDataStore(get()) }
 
