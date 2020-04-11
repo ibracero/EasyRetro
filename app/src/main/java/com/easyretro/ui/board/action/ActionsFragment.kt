@@ -10,7 +10,7 @@ class ActionsFragment(override val statementType: StatementType = StatementType.
         fun newInstance(retroUuid: String?): ActionsFragment {
             val fragment = ActionsFragment()
             fragment.arguments = Bundle().apply {
-                putString(retroUuid, BoardFragment.ARGUMENT_RETRO_UUID)
+                putString(BoardFragment.ARGUMENT_RETRO_UUID, retroUuid)
             }
             return fragment
         }

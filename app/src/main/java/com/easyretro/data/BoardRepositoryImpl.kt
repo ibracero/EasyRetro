@@ -45,7 +45,7 @@ class BoardRepositoryImpl(
         type: StatementType
     ): Either<Failure, Unit> {
         return withContext(dispatchers.io) {
-            Timber.d("Adding statement ${description}")
+            Timber.d("Adding statement $description")
             remoteDataStore.addStatementToBoard(
                 retroUuid = retroUuid,
                 statementRemote = StatementRemote(

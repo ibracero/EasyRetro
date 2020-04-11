@@ -10,7 +10,7 @@ class NegativeFragment(override val statementType: StatementType = StatementType
         fun newInstance(retroUuid: String?): NegativeFragment {
             val fragment = NegativeFragment()
             fragment.arguments = Bundle().apply {
-                putString(retroUuid, BoardFragment.ARGUMENT_RETRO_UUID)
+                putString(BoardFragment.ARGUMENT_RETRO_UUID, retroUuid)
             }
             return fragment
         }

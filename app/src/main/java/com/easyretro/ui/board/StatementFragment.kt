@@ -32,7 +32,10 @@ abstract class StatementFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initUi()
+    }
 
+    override fun onStart() {
+        super.onStart()
         fetchStatements()
     }
 

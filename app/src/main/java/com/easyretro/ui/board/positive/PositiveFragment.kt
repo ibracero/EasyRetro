@@ -11,7 +11,7 @@ class PositiveFragment(override val statementType: StatementType = StatementType
         fun newInstance(retroUuid: String?): PositiveFragment {
             val fragment = PositiveFragment()
             fragment.arguments = Bundle().apply {
-                putString(retroUuid, BoardFragment.ARGUMENT_RETRO_UUID)
+                putString(BoardFragment.ARGUMENT_RETRO_UUID, retroUuid)
             }
             return fragment
         }
