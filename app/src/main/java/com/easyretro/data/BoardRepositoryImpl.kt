@@ -39,9 +39,13 @@ class BoardRepositoryImpl(
         }.flowOn(dispatchers.io)
     }
 
-    override suspend fun addStatement(retroUuid: String, description: String, type: StatementType): Either<Failure, Unit> {
+    override suspend fun addStatement(
+        retroUuid: String,
+        description: String,
+        type: StatementType
+    ): Either<Failure, Unit> {
         return withContext(dispatchers.io) {
-            Timber.d("Adding ${type.name} statement $description")
+            Timber.d("Adding statement ${description}")
             remoteDataStore.addStatementToBoard(
                 retroUuid = retroUuid,
                 statementRemote = StatementRemote(
@@ -64,7 +68,6 @@ class BoardRepositoryImpl(
         return remoteDataStore.observeStatements(userEmail, retroUuid)
             .map { either ->
                 either.map { statements ->
-                    Timber.d("Statement list update: ${statements.joinToString(",") { it.description }}")
                     localDataStore.saveStatements(statements.map(statementRemoteToDomainMapper::map))
                 }
             }.flowOn(dispatchers.io)
@@ -75,7 +78,6 @@ class BoardRepositoryImpl(
         return remoteDataStore.observeRetroUsers(retroUuid)
             .map { either ->
                 either.map { users ->
-                    Timber.d("User list update: ${users.joinToString(",") { it.email.orEmpty() }}")
                     localDataStore.updateRetroUsers(retroUuid, users.map(userRemoteToDomainMapper::map))
                 }
             }.flowOn(dispatchers.io)

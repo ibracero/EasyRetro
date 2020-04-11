@@ -1,6 +1,7 @@
 package com.easyretro.data.remote
 
 import arrow.core.Either
+import arrow.core.left
 import com.easyretro.common.ConnectionManager
 import com.easyretro.common.NetworkStatus
 import com.google.android.gms.tasks.Tasks
@@ -31,7 +32,10 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
 
             val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
                 .document(retroUuid)
-                .addSnapshotListener { snapshot, _ ->
+                .addSnapshotListener { snapshot, exception ->
+                    if (exception != null)
+                        offer(Either.left(Failure.parse(exception)))
+
                     val userDocs =
                         (snapshot?.get(FirestoreField.RETRO_USERS) as List<DocumentReference>?) ?: emptyList()
                     Tasks.whenAllComplete(userDocs.map { it.get() })
@@ -56,6 +60,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                 }
 
             awaitClose {
+                Timber.d("Stop observing retro $retroUuid users")
                 registrationObserver.remove()
                 cancel()
             }
@@ -69,7 +74,10 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
             .collection(FirestoreCollection.COLLECTION_STATEMENTS)
-            .addSnapshotListener { snapshot, _ ->
+            .addSnapshotListener { snapshot, exception ->
+                if (exception != null)
+                    offer(Either.left(Failure.parse(exception)))
+
                 val statements = snapshot?.documents?.map { doc ->
                     val author = doc.getString(FirestoreField.STATEMENT_AUTHOR).orEmpty()
                     StatementRemote(
@@ -90,6 +98,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
             }
 
         awaitClose {
+            Timber.d("Stop observing retro $retroUuid statements")
             registrationObserver.remove()
             cancel()
         }
@@ -113,19 +122,20 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
             .document(retroUuid)
 
         //Create retro (retros table)
-        val retroCreated = suspendCoroutine<Boolean> { continuation ->
+        val retroEither = suspendCoroutine<Either<Failure, Unit>> { continuation ->
             retroRef.set(retroValues)
                 .addOnSuccessListener {
                     Timber.d("Retro $retroUuid creaded with values: $retroValues")
-                    continuation.resume(true)
+                    continuation.resume(Either.right(Unit))
                 }
                 .addOnFailureListener {
                     Timber.e(it, "Couldn't create: $retroUuid")
-                    continuation.resume(false)
+                    continuation.resume(Either.left(Failure.parse(it)))
                 }
         }
 
-        if (!retroCreated) return Either.left(Failure.CreateRetroError)
+        if (retroEither is Either.Left)
+            return retroEither
 
         //Add created retro to user retro list
         return suspendCoroutine { continuation ->
@@ -136,12 +146,13 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                     continuation.resume(Either.right(RetroRemote(uuid = retroUuid, title = retroTitle)))
                 }
                 .addOnFailureListener {
-                    Timber.e(it, "Couldn't add $retroUuid to user: $userEmail")
+                    Timber.e(it, "Couldn't add retro $retroUuid to user: $userEmail")
                     continuation.resume(Either.left(Failure.CreateRetroError))
                 }
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun getUserRetros(userEmail: String): Either<Failure, List<RetroRemote>> {
         return suspendCoroutine { continuation ->
             db.collection(FirestoreTable.TABLE_USERS)
@@ -161,8 +172,13 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                                             title = (values?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty()
                                         )
                                     }
+                            Timber.d("Get retros request SUCCESS")
                             continuation.resume(Either.right(retros))
                         }
+                }
+                .addOnFailureListener {
+                    Timber.e(it, "Get retros request FAILED")
+                    continuation.resume(Either.left(Failure.parse(it)))
                 }
         }
     }
@@ -184,9 +200,11 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                 .collection(FirestoreCollection.COLLECTION_STATEMENTS)
                 .add(item)
                 .addOnSuccessListener {
+                    Timber.d("Statement ${statementRemote.description} added to retro $retroUuid")
                     continuation.resume(Either.right(Unit))
                 }
                 .addOnFailureListener {
+                    Timber.d(it, "Statement ${statementRemote.description} could not be added to retro $retroUuid")
                     continuation.resume(Either.left(Failure.CreateStatementError))
                 }
         }
@@ -203,9 +221,11 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                 .document(statementUuid)
                 .delete()
                 .addOnSuccessListener {
+                    Timber.d("Statement $statementUuid removed from retro $retroUuid")
                     continuation.resume(Either.right(Unit))
                 }
                 .addOnFailureListener {
+                    Timber.e(it, "Statement $statementUuid could not be removed from retro $retroUuid")
                     continuation.resume(Either.left(Failure.parse(it)))
                 }
         }
@@ -226,8 +246,10 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                 retroRef.update(FirestoreField.RETRO_USERS, FieldValue.arrayUnion(userRef)),
                 userRef.update(FirestoreField.USER_RETROS, FieldValue.arrayUnion(retroRef))
             ).addOnSuccessListener {
+                Timber.d("User $userEmail joined retro $retroUuid")
                 continuation.resume(Either.right(Unit))
             }.addOnFailureListener {
+                Timber.e(it, "User $userEmail could not join retro $retroUuid")
                 continuation.resume(Either.left(Failure.parse(it)))
             }
         }
