@@ -6,6 +6,7 @@ import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.Statement
 import com.easyretro.data.mapper.StatementRemoteToDomainMapper
 import com.easyretro.data.mapper.UserRemoteToDomainMapper
+import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.firestore.StatementRemote
 import com.easyretro.domain.BoardRepository
@@ -21,15 +22,16 @@ import timber.log.Timber
 import java.util.*
 
 class BoardRepositoryImpl(
-    val localDataStore: LocalDataStore,
-    val remoteDataStore: RemoteDataStore,
-    val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
-    val userRemoteToDomainMapper: UserRemoteToDomainMapper,
-    val dispatchers: CoroutineDispatcherProvider
+    private val localDataStore: LocalDataStore,
+    private val remoteDataStore: RemoteDataStore,
+    private val authDataStore: AuthDataStore,
+    private val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
+    private val userRemoteToDomainMapper: UserRemoteToDomainMapper,
+    private val dispatchers: CoroutineDispatcherProvider
 ) : BoardRepository {
 
     private val userEmail: String
-        get() = FirebaseAuth.getInstance().currentUser?.email.orEmpty()
+        get() = authDataStore.getCurrentUserEmail()
 
     override suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>> {
         return when (statementType) {

@@ -72,5 +72,6 @@ dependencies {
 
 
     testImplementation(TestLibraries.junit)
+    testImplementation(TestLibraries.mockito_kotlin)
     androidTestImplementation(TestLibraries.androidx_test_espresso_core)
 }

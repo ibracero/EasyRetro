@@ -6,6 +6,7 @@ import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.Retro
 import com.easyretro.data.mapper.RetroRemoteToDomainMapper
+import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.domain.Failure
 import com.easyretro.domain.RetroRepository
@@ -17,12 +18,13 @@ import kotlinx.coroutines.flow.flowOn
 class RetroRepositoryImpl(
     private val localDataStore: LocalDataStore,
     private val remoteDataStore: RemoteDataStore,
+    private val authDataStore: AuthDataStore,
     private val retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
     private val dispatchers: CoroutineDispatcherProvider
 ) : RetroRepository {
 
     private val userEmail: String
-        get() = FirebaseAuth.getInstance().currentUser?.email.orEmpty()
+        get() = authDataStore.getCurrentUserEmail()
 
     override suspend fun createRetro(title: String): Either<Failure, Retro> =
         withContext(dispatchers.io) {
