@@ -23,6 +23,7 @@ sealed class Failure constructor(message: String? = null) {
     }
     object UnknownError : Failure()
     object CreateRetroError : Failure()
+    object RetroNotFoundError : Failure()
     object CreateStatementError : Failure()
     object RemoveStatementError : Failure()
 

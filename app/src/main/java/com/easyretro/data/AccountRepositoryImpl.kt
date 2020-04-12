@@ -1,9 +1,7 @@
 package com.easyretro.data
 
 import arrow.core.Either
-import com.easyretro.common.ConnectionManager
 import com.easyretro.common.CoroutineDispatcherProvider
-import com.easyretro.common.NetworkStatus
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.remote.AuthDataStore
@@ -12,12 +10,7 @@ import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.Failure
 import com.easyretro.domain.UserStatus
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.withContext
-import timber.log.Timber
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class AccountRepositoryImpl(
     private val remoteDataStore: RemoteDataStore,
@@ -28,12 +21,12 @@ class AccountRepositoryImpl(
 ) : AccountRepository {
 
     override suspend fun getUserStatus(): Either<Failure, UserStatus> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             reloadUser()
         }
 
     override suspend fun signWithGoogleAccount(account: GoogleSignInAccount): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             authDataStore.signInWithToken(token = account.idToken)
             val signInEither = authDataStore.signInWithToken(token = account.idToken)
 
@@ -42,7 +35,7 @@ class AccountRepositoryImpl(
         }
 
     override suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             authDataStore.signInWithEmailAndPassword(email = email, password = password)
                 .map { userStatus ->
                     sessionSharedPrefsManager.setSessionStarted()
@@ -51,22 +44,22 @@ class AccountRepositoryImpl(
         }
 
     override suspend fun signUpWithEmail(email: String, password: String): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             authDataStore.signUpWithEmailAndPassword(email = email, password = password)
         }
 
     override suspend fun resetPassword(email: String): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             authDataStore.resetPassword(email = email)
         }
 
     override suspend fun resendVerificationEmail(): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             authDataStore.resendVerificationEmail()
         }
 
     override suspend fun logOut(): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             try {
                 sessionSharedPrefsManager.setSessionEnded()
                 authDataStore.logOut()
@@ -78,7 +71,7 @@ class AccountRepositoryImpl(
         }
 
     private suspend fun reloadUser(): Either<Failure, UserStatus> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             authDataStore.reloadUser(isSessionStarted = sessionSharedPrefsManager.isSessionStarted())
         }
 

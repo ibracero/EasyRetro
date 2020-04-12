@@ -70,7 +70,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
     suspend fun observeStatements(
         userEmail: String,
         retroUuid: String
-    ) = callbackFlow<Either<Failure, List<StatementRemote>>> {
+    ) = callbackFlow {
         val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
             .collection(FirestoreCollection.COLLECTION_STATEMENTS)

@@ -1,7 +1,6 @@
 package com.easyretro.data
 
 import arrow.core.Either
-import com.google.firebase.auth.FirebaseAuth
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.Retro
@@ -10,10 +9,10 @@ import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.domain.Failure
 import com.easyretro.domain.RetroRepository
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 class RetroRepositoryImpl(
     private val localDataStore: LocalDataStore,
@@ -27,19 +26,21 @@ class RetroRepositoryImpl(
         get() = authDataStore.getCurrentUserEmail()
 
     override suspend fun createRetro(title: String): Either<Failure, Retro> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
                 .map { retroRemoteToDomainMapper.map(it) }
         }
 
     override suspend fun joinRetro(uuid: String): Either<Failure, Unit> =
-        withContext(dispatchers.io) {
+        withContext(dispatchers.io()) {
             remoteDataStore.joinRetro(userEmail = userEmail, retroUuid = uuid)
         }
 
     override suspend fun getRetro(retroUuid: String): Either<Failure, Retro> =
-        withContext(dispatchers.io) {
-            Either.right(localDataStore.getRetro(retroUuid))
+        withContext(dispatchers.io()) {
+            val retro = localDataStore.getRetro(retroUuid)
+            if (retro == null) Either.left(Failure.RetroNotFoundError)
+            else Either.right(retro)
         }
 
     override suspend fun getRetros(): Flow<Either<Failure, List<Retro>>> {
@@ -54,6 +55,6 @@ class RetroRepositoryImpl(
                     retros
                 }
             emit(remoteEither)
-        }.flowOn(dispatchers.io)
+        }.flowOn(dispatchers.io())
     }
 }

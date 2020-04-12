@@ -73,5 +73,8 @@ dependencies {
 
     testImplementation(TestLibraries.junit)
     testImplementation(TestLibraries.mockito_kotlin)
+    testImplementation(TestLibraries.mockito_inline)
+    testImplementation(TestLibraries.coroutines_test)
+
     androidTestImplementation(TestLibraries.androidx_test_espresso_core)
 }

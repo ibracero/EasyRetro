@@ -50,6 +50,7 @@
 	<string name="error_token_expired">For safety reasons, we need you to login again.</string>
 	<string name="error_user_collision">The user you provided already exists. Do you want to sign in?</string>
 	<string name="error_too_many_requests">Too many requests. We have blocked them due to unusual activity. Please, try again later.</string>
+	<string name="error_retro_not_found">Something went wrong! Please, try again later.</string>
 
 	<!--Confirmations-->
 	<string name="confirmation_email_sent">We have just sent a new confirmation link to your email</string>

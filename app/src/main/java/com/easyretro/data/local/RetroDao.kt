@@ -10,10 +10,10 @@ interface RetroDao {
     fun getUserRetros(): List<Retro>
 
     @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
-    fun getRetro(retroUuid: String): Retro
+    fun getRetro(retroUuid: String): Retro?
 
     @Update
-    fun updateRetro(retroUuid: Retro)
+    fun updateRetro(retro: Retro)
 
     @Query("SELECT * FROM $TABLE_STATEMENT WHERE retroUuid == :retroUuid AND type == 'POSITIVE' ORDER BY timestamp DESC")
     fun getPositiveStatements(retroUuid: String): Flow<List<Statement>>

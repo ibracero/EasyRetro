@@ -16,6 +16,7 @@ class FailureMessage {
                 Failure.TokenExpiredFailure -> R.string.error_token_expired
                 Failure.UserCollisionFailure -> R.string.error_user_collision
                 Failure.TooManyRequestsFailure -> R.string.error_too_many_requests
+                Failure.RetroNotFoundError -> R.string.error_retro_not_found
                 Failure.CreateRetroError -> TODO()
                 Failure.CreateStatementError -> TODO()
                 Failure.RemoveStatementError -> TODO()

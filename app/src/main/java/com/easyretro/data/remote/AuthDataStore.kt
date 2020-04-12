@@ -93,11 +93,9 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
         return suspendCoroutine { sendEmailVerification(it) }
     }
 
-    suspend fun logOut() = suspendCoroutine<Unit> { firebaseAuth.signOut() }
-
     suspend fun reloadUser(isSessionStarted: Boolean): Either<Failure, UserStatus> {
         val currentUser = firebaseAuth.currentUser ?: return Either.left(Failure.UnknownError)
-        return suspendCoroutine<Either<Failure, UserStatus>> { continuation ->
+        return suspendCoroutine { continuation ->
             currentUser.reload()
                 .addOnCompleteListener { task ->
                     val sessionStarted =
@@ -113,6 +111,8 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
                 }
         }
     }
+
+    suspend fun logOut() = suspendCoroutine<Unit> { firebaseAuth.signOut() }
 
     private fun sendEmailVerification(continuation: Continuation<Either<Failure, Unit>>) {
         firebaseAuth.currentUser?.sendEmailVerification()

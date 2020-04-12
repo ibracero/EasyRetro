@@ -1,9 +1,12 @@
 package com.easyretro.common
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 
-class CoroutineDispatcherProvider {
-    val main: CoroutineContext = Dispatchers.Main
-    val io: CoroutineContext = Dispatchers.IO
+interface CoroutineDispatcherProvider {
+    fun main(): CoroutineDispatcher = Dispatchers.Main
+    fun io(): CoroutineDispatcher = Dispatchers.IO
 }
+
+class DefaultCoroutineDispatcher : CoroutineDispatcherProvider

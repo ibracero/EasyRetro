@@ -17,6 +17,7 @@ import Libraries.Versions.room_version
 import Libraries.Versions.timber_version
 import TestLibraries.Versions.espresso_version
 import TestLibraries.Versions.junit_version
+import TestLibraries.Versions.mockito_inline_version
 import TestLibraries.Versions.mockito_version
 
 const val kotlin_version = "1.3.71"
@@ -98,8 +99,11 @@ object TestLibraries {
         const val junit_version = "4.13"
         const val espresso_version = "3.1.1"
         const val mockito_version = "2.2.0"
+        const val mockito_inline_version = "2.27.0"
     }
     const val junit = "junit:junit:$junit_version"
     const val mockito_kotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_version"
+    const val mockito_inline = "org.mockito:mockito-inline:$mockito_inline_version"
+    const val coroutines_test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     const val androidx_test_espresso_core = "androidx.test.espresso:espresso-core:$espresso_version"
 }

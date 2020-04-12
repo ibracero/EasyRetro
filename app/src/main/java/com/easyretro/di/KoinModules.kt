@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.common.ConnectionManager
+import com.easyretro.common.DefaultCoroutineDispatcher
 import com.easyretro.data.AccountRepositoryImpl
 import com.easyretro.data.BoardRepositoryImpl
 import com.easyretro.data.RetroRepositoryImpl
@@ -63,7 +64,7 @@ val appModule = module {
 
     single { EasyRetroDatabase.getDatabase(androidApplication()).retroDao() }
 
-    single { CoroutineDispatcherProvider() }
+    single<CoroutineDispatcherProvider> { DefaultCoroutineDispatcher() }
 
 }
 
