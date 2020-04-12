@@ -13,6 +13,7 @@ import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.mapper.RetroRemoteToDomainMapper
 import com.easyretro.data.mapper.StatementRemoteToDomainMapper
 import com.easyretro.data.mapper.UserRemoteToDomainMapper
+import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.BoardRepository
@@ -35,6 +36,7 @@ val appModule = module {
         BoardRepositoryImpl(
             localDataStore = get(),
             remoteDataStore = get(),
+            authDataStore = get(),
             dispatchers = get(),
             statementRemoteToDomainMapper = get(),
             userRemoteToDomainMapper = get()
@@ -45,12 +47,15 @@ val appModule = module {
         RetroRepositoryImpl(
             localDataStore = get(),
             remoteDataStore = get(),
+            authDataStore = get(),
             retroRemoteToDomainMapper = get(),
             dispatchers = get()
         )
     }
 
     single { RemoteDataStore(get()) }
+
+    single { AuthDataStore(get()) }
 
     single { ConnectionManager(androidApplication().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) }
 
@@ -59,6 +64,7 @@ val appModule = module {
     single { EasyRetroDatabase.getDatabase(androidApplication()).retroDao() }
 
     single { CoroutineDispatcherProvider() }
+
 }
 
 val viewModelModule = module {
