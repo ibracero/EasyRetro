@@ -4,7 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.OffsetListAdapter
-import com.easyretro.data.local.Retro
+import com.easyretro.domain.model.Retro
 import com.easyretro.ui.AddItemViewHolder
 import com.easyretro.ui.Payload
 import com.easyretro.ui.retros.adapter.RetroViewHolder

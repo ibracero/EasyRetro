@@ -1,9 +1,9 @@
 package com.easyretro.data.local
 
 import androidx.room.TypeConverter
+import com.easyretro.domain.model.StatementType
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.easyretro.domain.StatementType
 import java.lang.reflect.Type
 
 class RoomTypeConverters {
@@ -23,13 +23,13 @@ class RoomTypeConverters {
     fun stringToStatementType(statementTypeString: String): StatementType = StatementType.valueOf(statementTypeString)
 
     @TypeConverter
-    fun userListToString(userList: List<User>): String = gson.toJson(userList)
+    fun userListToString(userList: List<UserDb>): String = gson.toJson(userList)
 
     @TypeConverter
-    fun stringToUserList(userListString: String): List<User> {
+    fun stringToUserList(userListString: String): List<UserDb> {
         return if (userListString.isEmpty()) emptyList()
         else {
-            val listType: Type = object : TypeToken<List<User?>?>() {}.type
+            val listType: Type = object : TypeToken<List<UserDb?>?>() {}.type
             gson.fromJson(userListString, listType)
         }
     }

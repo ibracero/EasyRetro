@@ -1,7 +1,9 @@
 package com.easyretro.domain
 
 import arrow.core.Either
-import com.easyretro.data.local.Statement
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.Statement
+import com.easyretro.domain.model.StatementType
 import kotlinx.coroutines.flow.Flow
 
 interface BoardRepository {

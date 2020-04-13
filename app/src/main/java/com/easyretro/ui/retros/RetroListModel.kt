@@ -1,7 +1,7 @@
 package com.easyretro.ui.retros
 
 import androidx.annotation.StringRes
-import com.easyretro.data.local.Retro
+import com.easyretro.domain.model.Retro
 
 data class RetroListViewState(val fetchRetrosStatus: FetchRetrosStatus, val retroCreationStatus: RetroCreationStatus)
 

@@ -3,11 +3,10 @@ package com.easyretro.data.remote
 import arrow.core.Either
 import com.easyretro.common.ConnectionManager
 import com.easyretro.common.NetworkStatus
-import com.easyretro.domain.Failure
-import com.easyretro.domain.UserStatus
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.UserStatus
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume

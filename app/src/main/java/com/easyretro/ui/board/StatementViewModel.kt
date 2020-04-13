@@ -3,9 +3,9 @@ package com.easyretro.ui.board
 import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
-import com.easyretro.data.local.Statement
 import com.easyretro.domain.BoardRepository
-import com.easyretro.domain.StatementType
+import com.easyretro.domain.model.Statement
+import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.FailureMessage
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch

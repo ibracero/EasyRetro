@@ -10,8 +10,8 @@ import com.easyretro.R
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.common.extensions.showErrorSnackbar
-import com.easyretro.data.local.Statement
-import com.easyretro.domain.StatementType
+import com.easyretro.domain.model.Statement
+import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.Payload
 import kotlinx.android.synthetic.main.fragment_statements.*
 import org.koin.android.viewmodel.ext.android.viewModel

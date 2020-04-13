@@ -9,36 +9,18 @@
 		android:id="@+id/navigation_positive"
 		android:name="com.easyretro.ui.board.positive.PositiveFragment"
 		android:label="@string/title_positive"
-		tools:layout="@layout/fragment_statements">
-
-		<argument
-			android:name="arg_retro"
-			app:argType="com.easyretro.data.local.Retro" />
-
-	</fragment>
+		tools:layout="@layout/fragment_statements" />
 
 	<fragment
 		android:id="@+id/navigation_negative"
 		android:name="com.easyretro.ui.board.negative.NegativeFragment"
 		android:label="@string/title_negative"
-		tools:layout="@layout/fragment_statements">
-
-		<argument
-			android:name="arg_retro"
-			app:argType="com.easyretro.data.local.Retro" />
-
-	</fragment>
+		tools:layout="@layout/fragment_statements" />
 
 	<fragment
 		android:id="@+id/navigation_actions"
 		android:name="com.easyretro.ui.board.action.ActionsFragment"
 		android:label="@string/title_actions"
-		tools:layout="@layout/fragment_statements">
-
-		<argument
-			android:name="arg_retro"
-			app:argType="com.easyretro.data.local.Retro" />
-
-	</fragment>
+		tools:layout="@layout/fragment_statements" />
 
 </navigation>

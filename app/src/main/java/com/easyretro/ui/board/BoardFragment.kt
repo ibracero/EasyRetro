@@ -21,7 +21,6 @@ import com.easyretro.ui.board.action.ActionsFragment
 import com.easyretro.ui.board.negative.NegativeFragment
 import com.easyretro.ui.board.positive.PositiveFragment
 import com.easyretro.ui.board.users.UserListAdapter
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_board.*
 import org.koin.android.viewmodel.ext.android.viewModel
 import kotlin.math.min
@@ -42,16 +41,6 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private val userListAdapter = UserListAdapter()
-
-    private val offlineSnackbar by lazy {
-        Snackbar.make(
-            board_root,
-            R.string.offline_message,
-            Snackbar.LENGTH_INDEFINITE
-        ).apply {
-            view.setBackgroundResource(R.color.colorAccent)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

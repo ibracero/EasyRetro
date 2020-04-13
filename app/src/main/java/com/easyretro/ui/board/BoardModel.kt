@@ -2,7 +2,7 @@ package com.easyretro.ui.board
 
 import android.net.Uri
 import androidx.annotation.StringRes
-import com.easyretro.data.local.Retro
+import com.easyretro.domain.model.Retro
 
 data class BoardViewState(val retro: Retro)
 

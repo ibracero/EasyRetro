@@ -5,7 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-@Database(entities = [User::class, Retro::class, Statement::class], version = 1)
+
+@Database(entities = [UserDb::class, RetroDb::class, StatementDb::class], version = 1)
 @TypeConverters(RoomTypeConverters::class)
 abstract class EasyRetroDatabase : RoomDatabase() {
 

@@ -2,23 +2,21 @@ package com.easyretro.ui.retros
 
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.easyretro.R
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.common.extensions.showErrorSnackbar
-import com.easyretro.common.extensions.showSnackBar
-import com.easyretro.data.local.Retro
+import com.easyretro.domain.model.Retro
 import com.easyretro.ui.Payload
 import com.easyretro.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.android.synthetic.main.fragment_retro_list.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -100,8 +98,8 @@ class RetroListFragment :
         }
     }
 
-    private fun showRetros(it: List<Retro>?) {
-        retroListAdapter.submitList(it)
+    private fun showRetros(retros: List<Retro>?) {
+        retroListAdapter.submitList(retros)
     }
 
     private fun initUi() {

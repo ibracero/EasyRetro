@@ -10,7 +10,7 @@ import arrow.core.Either
 import com.easyretro.R
 import com.easyretro.common.extensions.addTextWatcher
 import com.easyretro.common.extensions.hasValidText
-import com.easyretro.domain.Failure
+import com.easyretro.domain.model.Failure
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -27,7 +27,7 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
 
         initUi(arguments?.getString(ARG_EMAIL).orEmpty())
 
-        resetPasswordViewModel.resetPasswordLiveData.observe(this, Observer {
+        resetPasswordViewModel.resetPasswordLiveData.observe(viewLifecycleOwner, Observer {
             processResetPasswordResponse(it)
         })
     }

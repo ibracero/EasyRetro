@@ -1,7 +1,8 @@
 package com.easyretro.domain
 
 import arrow.core.Either
-import com.easyretro.data.local.Retro
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.Retro
 import kotlinx.coroutines.flow.Flow
 
 interface RetroRepository {

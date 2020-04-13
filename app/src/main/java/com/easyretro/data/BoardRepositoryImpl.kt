@@ -3,16 +3,17 @@ package com.easyretro.data
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
-import com.easyretro.data.local.Statement
-import com.easyretro.data.mapper.StatementRemoteToDomainMapper
-import com.easyretro.data.mapper.UserRemoteToDomainMapper
+import com.easyretro.data.local.mapper.StatementDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.firestore.StatementRemote
+import com.easyretro.data.remote.mapper.StatementRemoteToDbMapper
+import com.easyretro.data.remote.mapper.UserRemoteToDbMapper
 import com.easyretro.domain.BoardRepository
-import com.easyretro.domain.Failure
-import com.easyretro.domain.StatementType
-import com.easyretro.domain.StatementType.*
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.Statement
+import com.easyretro.domain.model.StatementType
+import com.easyretro.domain.model.StatementType.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -24,8 +25,9 @@ class BoardRepositoryImpl(
     private val localDataStore: LocalDataStore,
     private val remoteDataStore: RemoteDataStore,
     private val authDataStore: AuthDataStore,
-    private val statementRemoteToDomainMapper: StatementRemoteToDomainMapper,
-    private val userRemoteToDomainMapper: UserRemoteToDomainMapper,
+    private val statementRemoteToDbMapper: StatementRemoteToDbMapper,
+    private val statementDbToDomainMapper: StatementDbToDomainMapper,
+    private val userRemoteToDbMapper: UserRemoteToDbMapper,
     private val dispatchers: CoroutineDispatcherProvider
 ) : BoardRepository {
 
@@ -33,11 +35,13 @@ class BoardRepositoryImpl(
         get() = authDataStore.getCurrentUserEmail()
 
     override suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>> {
-        return when (statementType) {
+        val localStatements = when (statementType) {
             POSITIVE -> localDataStore.getPositiveStatements(retroUuid)
             NEGATIVE -> localDataStore.getNegativeStatements(retroUuid)
             ACTION_POINT -> localDataStore.getActionPoints(retroUuid)
-        }.flowOn(dispatchers.io())
+        }
+        return localStatements.map { it.map(statementDbToDomainMapper::map) }
+            .flowOn(dispatchers.io())
     }
 
     override suspend fun addStatement(
@@ -69,7 +73,7 @@ class BoardRepositoryImpl(
         return remoteDataStore.observeStatements(userEmail, retroUuid)
             .map { either ->
                 either.map { statements ->
-                    localDataStore.saveStatements(statements.map(statementRemoteToDomainMapper::map))
+                    localDataStore.saveStatements(statements.map(statementRemoteToDbMapper::map))
                 }
             }.flowOn(dispatchers.io())
     }
@@ -79,7 +83,7 @@ class BoardRepositoryImpl(
         return remoteDataStore.observeRetroUsers(retroUuid)
             .map { either ->
                 either.map { users ->
-                    localDataStore.updateRetroUsers(retroUuid, users.map(userRemoteToDomainMapper::map))
+                    localDataStore.updateRetroUsers(retroUuid, users.map(userRemoteToDbMapper::map))
                 }
             }.flowOn(dispatchers.io())
     }

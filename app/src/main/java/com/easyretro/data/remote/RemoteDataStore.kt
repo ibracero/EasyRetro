@@ -1,18 +1,17 @@
 package com.easyretro.data.remote
 
 import arrow.core.Either
-import arrow.core.left
 import com.easyretro.common.ConnectionManager
 import com.easyretro.common.NetworkStatus
-import com.google.android.gms.tasks.Tasks
-import com.google.firebase.firestore.*
 import com.easyretro.data.remote.firestore.CloudFireStore.FirestoreCollection
 import com.easyretro.data.remote.firestore.CloudFireStore.FirestoreField
 import com.easyretro.data.remote.firestore.CloudFireStore.FirestoreTable
 import com.easyretro.data.remote.firestore.RetroRemote
 import com.easyretro.data.remote.firestore.StatementRemote
 import com.easyretro.data.remote.firestore.UserRemote
-import com.easyretro.domain.Failure
+import com.easyretro.domain.model.Failure
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.firestore.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -26,6 +25,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
 
     private val db = FirebaseFirestore.getInstance()
 
+    @Suppress("UNCHECKED_CAST")
     @ExperimentalCoroutinesApi
     suspend fun observeRetroUsers(retroUuid: String) =
         callbackFlow<Either<Failure, List<UserRemote>>> {

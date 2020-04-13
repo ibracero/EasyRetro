@@ -1,4 +1,4 @@
-package com.easyretro.domain
+package com.easyretro.domain.model
 
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.FirebaseTooManyRequestsException
@@ -7,7 +7,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
-sealed class Failure constructor(message: String? = null) {
+sealed class Failure {
     companion object {
         fun parse(exception: Exception): Failure {
             return when (exception) {
@@ -21,6 +21,7 @@ sealed class Failure constructor(message: String? = null) {
             }
         }
     }
+
     object UnknownError : Failure()
     object CreateRetroError : Failure()
     object RetroNotFoundError : Failure()

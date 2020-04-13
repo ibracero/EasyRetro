@@ -2,20 +2,23 @@ package com.easyretro.di
 
 import android.content.Context
 import android.net.ConnectivityManager
-import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.common.ConnectionManager
+import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.common.DefaultCoroutineDispatcher
 import com.easyretro.data.AccountRepositoryImpl
 import com.easyretro.data.BoardRepositoryImpl
 import com.easyretro.data.RetroRepositoryImpl
-import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.EasyRetroDatabase
+import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.SessionSharedPrefsManager
-import com.easyretro.data.mapper.RetroRemoteToDomainMapper
-import com.easyretro.data.mapper.StatementRemoteToDomainMapper
-import com.easyretro.data.mapper.UserRemoteToDomainMapper
+import com.easyretro.data.local.mapper.RetroDbToDomainMapper
+import com.easyretro.data.local.mapper.StatementDbToDomainMapper
+import com.easyretro.data.local.mapper.UserDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
+import com.easyretro.data.remote.mapper.RetroRemoteToDbMapper
+import com.easyretro.data.remote.mapper.StatementRemoteToDbMapper
+import com.easyretro.data.remote.mapper.UserRemoteToDbMapper
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
@@ -39,8 +42,9 @@ val appModule = module {
             remoteDataStore = get(),
             authDataStore = get(),
             dispatchers = get(),
-            statementRemoteToDomainMapper = get(),
-            userRemoteToDomainMapper = get()
+            statementDbToDomainMapper = get(),
+            statementRemoteToDbMapper = get(),
+            userRemoteToDbMapper = get()
         )
     }
 
@@ -49,7 +53,8 @@ val appModule = module {
             localDataStore = get(),
             remoteDataStore = get(),
             authDataStore = get(),
-            retroRemoteToDomainMapper = get(),
+            retroDbToDomainMapper = get(),
+            retroRemoteToDbMapper = get(),
             dispatchers = get()
         )
     }
@@ -86,11 +91,17 @@ val viewModelModule = module {
 }
 
 val mapperModule = module {
-    factory { RetroRemoteToDomainMapper(get()) }
+    factory { RetroRemoteToDbMapper(get()) }
 
-    factory { StatementRemoteToDomainMapper() }
+    factory { StatementRemoteToDbMapper() }
 
-    factory { UserRemoteToDomainMapper() }
+    factory { UserRemoteToDbMapper() }
+
+    factory { RetroDbToDomainMapper(get()) }
+
+    factory { StatementDbToDomainMapper() }
+
+    factory { UserDbToDomainMapper() }
 }
 
 val accountModule = module {

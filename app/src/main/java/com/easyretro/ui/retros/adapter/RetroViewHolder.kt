@@ -4,7 +4,7 @@ import android.view.ViewGroup
 import com.easyretro.R
 import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.extensions.inflate
-import com.easyretro.data.local.Retro
+import com.easyretro.domain.model.Retro
 import kotlinx.android.synthetic.main.item_retro.*
 
 class RetroViewHolder(

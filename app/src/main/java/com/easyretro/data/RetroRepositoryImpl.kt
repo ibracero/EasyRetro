@@ -3,12 +3,13 @@ package com.easyretro.data
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
-import com.easyretro.data.local.Retro
-import com.easyretro.data.mapper.RetroRemoteToDomainMapper
+import com.easyretro.data.local.mapper.RetroDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
-import com.easyretro.domain.Failure
+import com.easyretro.data.remote.mapper.RetroRemoteToDbMapper
 import com.easyretro.domain.RetroRepository
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.Retro
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -18,7 +19,8 @@ class RetroRepositoryImpl(
     private val localDataStore: LocalDataStore,
     private val remoteDataStore: RemoteDataStore,
     private val authDataStore: AuthDataStore,
-    private val retroRemoteToDomainMapper: RetroRemoteToDomainMapper,
+    private val retroRemoteToDbMapper: RetroRemoteToDbMapper,
+    private val retroDbToDomainMapper: RetroDbToDomainMapper,
     private val dispatchers: CoroutineDispatcherProvider
 ) : RetroRepository {
 
@@ -28,7 +30,8 @@ class RetroRepositoryImpl(
     override suspend fun createRetro(title: String): Either<Failure, Retro> =
         withContext(dispatchers.io()) {
             remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
-                .map { retroRemoteToDomainMapper.map(it) }
+                .map(retroRemoteToDbMapper::map)
+                .map(retroDbToDomainMapper::map)
         }
 
     override suspend fun joinRetro(uuid: String): Either<Failure, Unit> =
@@ -40,19 +43,19 @@ class RetroRepositoryImpl(
         withContext(dispatchers.io()) {
             val retro = localDataStore.getRetro(retroUuid)
             if (retro == null) Either.left(Failure.RetroNotFoundError)
-            else Either.right(retro)
+            else Either.right(retroDbToDomainMapper.map(retro))
         }
 
     override suspend fun getRetros(): Flow<Either<Failure, List<Retro>>> {
         return flow {
-            val localRetros = localDataStore.getRetros()
+            val localRetros = localDataStore.getRetros().map(retroDbToDomainMapper::map)
             if (localRetros.isNotEmpty()) emit(Either.right(localRetros))
 
             val remoteEither = remoteDataStore.getUserRetros(userEmail)
                 .map {
-                    val retros = it.map(retroRemoteToDomainMapper::map)
+                    val retros = it.map(retroRemoteToDbMapper::map)
                     localDataStore.saveRetros(retros)
-                    retros
+                    retros.map(retroDbToDomainMapper::map)
                 }
             emit(remoteEither)
         }.flowOn(dispatchers.io())

@@ -6,8 +6,8 @@ import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.extensions.getColor
 import com.easyretro.common.extensions.inflate
 import com.easyretro.common.extensions.visibleOrGone
-import com.easyretro.data.local.Statement
-import com.easyretro.domain.StatementType
+import com.easyretro.domain.model.Statement
+import com.easyretro.domain.model.StatementType
 import kotlinx.android.synthetic.main.item_statement.*
 
 class StatementViewHolder(

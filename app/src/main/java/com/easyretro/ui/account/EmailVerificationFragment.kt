@@ -9,13 +9,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
-import com.google.android.material.snackbar.Snackbar
 import com.easyretro.R
 import com.easyretro.common.extensions.showErrorSnackbar
 import com.easyretro.common.extensions.showSuccessSnackbar
-import com.easyretro.domain.Failure
-import com.easyretro.domain.UserStatus
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_email_verification.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -35,7 +35,7 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
 
         initUi()
 
-        viewModel.sendVerificationLiveData.observe(this, Observer { processResendEmailResult(it) })
+        viewModel.sendVerificationLiveData.observe(viewLifecycleOwner, Observer { processResendEmailResult(it) })
     }
 
     override fun onStart() {

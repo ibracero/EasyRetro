@@ -1,6 +1,8 @@
 package com.easyretro.domain
 
 import arrow.core.Either
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.UserStatus
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 
 interface AccountRepository {

@@ -2,7 +2,7 @@ package com.easyretro.ui
 
 import androidx.annotation.StringRes
 import com.easyretro.R
-import com.easyretro.domain.Failure
+import com.easyretro.domain.model.Failure
 
 class FailureMessage {
     companion object {

@@ -1,13 +1,13 @@
-package com.easyretro.data.mapper
+package com.easyretro.data.remote.mapper
 
 import com.easyretro.common.Mapper
-import com.easyretro.data.local.User
+import com.easyretro.data.local.UserDb
 import com.easyretro.data.remote.firestore.UserRemote
 
-class UserRemoteToDomainMapper : Mapper<UserRemote, User> {
+class UserRemoteToDbMapper : Mapper<UserRemote, UserDb> {
 
-    override fun map(from: UserRemote): User =
-        User(
+    override fun map(from: UserRemote): UserDb =
+        UserDb(
             email = from.email.orEmpty(),
             firstName = from.firstName.orEmpty(),
             lastName = from.lastName.orEmpty(),

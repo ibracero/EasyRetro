@@ -7,8 +7,8 @@ import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.domain.AccountRepository
-import com.easyretro.domain.Failure
-import com.easyretro.domain.UserStatus
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.UserStatus
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import kotlinx.coroutines.withContext
 

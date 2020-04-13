@@ -1,7 +1,7 @@
 package com.easyretro.ui.board.positive
 
 import android.os.Bundle
-import com.easyretro.domain.StatementType
+import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.board.BoardFragment
 import com.easyretro.ui.board.StatementFragment
 

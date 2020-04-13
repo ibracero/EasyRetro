@@ -1,15 +1,15 @@
-package com.easyretro.data.mapper
+package com.easyretro.data.remote.mapper
 
 import com.easyretro.common.Mapper
-import com.easyretro.data.local.Statement
+import com.easyretro.data.local.StatementDb
 import com.easyretro.data.remote.firestore.StatementRemote
-import com.easyretro.domain.StatementType
+import com.easyretro.domain.model.StatementType
 import java.util.*
 
-class StatementRemoteToDomainMapper : Mapper<StatementRemote, Statement> {
+class StatementRemoteToDbMapper : Mapper<StatementRemote, StatementDb> {
 
-    override fun map(from: StatementRemote): Statement =
-        Statement(
+    override fun map(from: StatementRemote): StatementDb =
+        StatementDb(
             uuid = from.uuid.orEmpty(),
             retroUuid = from.retroUuid.orEmpty(),
             userEmail = from.userEmail,

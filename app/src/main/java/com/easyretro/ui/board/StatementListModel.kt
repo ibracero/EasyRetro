@@ -1,8 +1,8 @@
 package com.easyretro.ui.board
 
 import androidx.annotation.StringRes
-import com.easyretro.data.local.Statement
-import com.easyretro.domain.StatementType
+import com.easyretro.domain.model.Statement
+import com.easyretro.domain.model.StatementType
 
 data class StatementListViewState(val statements: List<Statement>, val addState: StatementAddState)
 

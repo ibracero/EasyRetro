@@ -4,9 +4,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
-import com.easyretro.domain.Failure
 import com.easyretro.domain.AccountRepository
-import com.easyretro.domain.UserStatus
+import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.UserStatus
 import kotlinx.coroutines.launch
 
 class AccountViewModel(
