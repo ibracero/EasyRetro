@@ -14,6 +14,7 @@ class RetroDbToDomainMapper(
             title = from.title,
             timestamp = from.timestamp,
             ownerEmail = from.ownerEmail,
+            locked = from.locked,
             users = from.users.map(userDbToDomainMapper::map)
         )
 }

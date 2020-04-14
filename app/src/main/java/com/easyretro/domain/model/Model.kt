@@ -12,6 +12,7 @@ data class Retro(
     val title: String,
     val timestamp: Long,
     val ownerEmail: String,
+    val locked: Boolean,
     val users: List<User>
 )
 

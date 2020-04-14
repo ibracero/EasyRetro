@@ -60,13 +60,15 @@ class RetroRepositoryImpl(
             }
             .flowOn(dispatchers.io())
 
-    override suspend fun lockRetro(retroUuid: String): Either<Failure, Unit> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun lockRetro(retroUuid: String): Either<Failure, Unit> =
+        withContext(dispatchers.io()) {
+            remoteDataStore.updateRetroLock(retroUuid = retroUuid, locked = true)
+        }
 
-    override suspend fun unlockRetro(retroUuid: String): Either<Failure, Unit> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun unlockRetro(retroUuid: String): Either<Failure, Unit> =
+        withContext(dispatchers.io()) {
+            remoteDataStore.updateRetroLock(retroUuid = retroUuid, locked = false)
+        }
 
     private suspend fun observeLocalRetro(retroUuid: String): Flow<Either<Failure, Retro>> {
         return flow {

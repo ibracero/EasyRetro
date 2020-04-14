@@ -18,6 +18,8 @@
 	<string name="password">Password</string>
 	<string name="confirm_password">Confirm password</string>
 	<string name="invite">Invite</string>
+	<string name="lock">Lock</string>
+	<string name="unlock">Unlock</string>
 	<string name="logout">Log out</string>
 	<string name="confirm_logout">Confirm exit</string>
 	<string name="confirm_logout_message">Do you really want to close your current session?</string>

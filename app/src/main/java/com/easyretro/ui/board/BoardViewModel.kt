@@ -33,6 +33,8 @@ class BoardViewModel(
             is BoardViewEvent.JoinRetro -> joinRetro(retroUuid = viewEvent.retroUuid)
             is BoardViewEvent.ShareRetroLink -> shareRetroLink(link = viewEvent.link)
             is BoardViewEvent.SubscribeRetroDetails -> startObservingRetro(retroUuid = viewEvent.retroUuid)
+            is BoardViewEvent.LockRetro -> lockRetro(retroUuid = viewEvent.retroUuid)
+            is BoardViewEvent.UnlockRetro ->  unlockRetro(retroUuid = viewEvent.retroUuid)
             BoardViewEvent.UnsubscribeRetroDetails -> stopObservingRetro()
         }.exhaustive
     }
@@ -80,6 +82,18 @@ class BoardViewModel(
         viewEffect = link.shortLink?.let { shortLink ->
             BoardViewEffect.ShowShareSheet(retroTitle = retroTitle, shortLink = shortLink)
         } ?: BoardViewEffect.ShowSnackBar(R.string.error_generic)
+    }
+
+    private fun unlockRetro(retroUuid: String) {
+        viewModelScope.launch {
+            retroRepository.unlockRetro(retroUuid = retroUuid)
+        }
+    }
+
+    private fun lockRetro(retroUuid: String) {
+        viewModelScope.launch {
+            retroRepository.lockRetro(retroUuid = retroUuid)
+        }
     }
 
     private fun startObservingRetro(retroUuid: String) {

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation.findNavController
@@ -41,6 +42,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private val userListAdapter = UserListAdapter()
+    private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,27 +74,48 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.board_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
+        this.menu = menu
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val retroUuid = getRetroUuidArgument()
+        return when (item.itemId) {
             android.R.id.home -> {
                 navigateToRetroList()
                 true
             }
             R.id.action_invite -> {
-                getRetroUuidArgument()?.let { uuid ->
-                    viewModel.process(
-                        BoardViewEvent.ShareRetroLink(
-                            retroUuid = uuid,
-                            link = getString(R.string.retro_join_link_format, uuid)
-                        )
-                    )
-                }
+                retroUuid?.let { onInviteClicked(it) }
+                true
+            }
+            R.id.action_lock -> {
+                retroUuid?.let { onLockClicked(it) }
+                true
+            }
+            R.id.action_unlock -> {
+                retroUuid?.let { onUnlockClicked(it) }
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun onUnlockClicked(retroUuid: String) {
+        viewModel.process(BoardViewEvent.UnlockRetro(retroUuid = retroUuid))
+    }
+
+    private fun onLockClicked(retroUuid: String) {
+        viewModel.process(BoardViewEvent.LockRetro(retroUuid = retroUuid))
+    }
+
+    private fun onInviteClicked(uuid: String) {
+        viewModel.process(
+            BoardViewEvent.ShareRetroLink(
+                retroUuid = uuid,
+                link = getString(R.string.retro_join_link_format, uuid)
+            )
+        )
+    }
 
     override fun onStart() {
         super.onStart()
@@ -116,6 +139,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     override fun renderViewState(viewState: BoardViewState) {
         initToolbar(viewState.retro.title)
         userListAdapter.submitList(viewState.retro.users)
+        setupLockMode(isRetroLocked = viewState.retro.locked)
     }
 
     @Suppress("IMPLICIT_CAST_TO_ANY")
@@ -129,7 +153,12 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
 
     private fun initToolbar(title: String?) {
         board_toolbar.title = title
-        (requireActivity() as AppCompatActivity).setSupportActionBar(board_toolbar)
+        (activity as AppCompatActivity).setSupportActionBar(board_toolbar)
+    }
+
+    private fun setupLockMode(isRetroLocked: Boolean) {
+        menu?.get(1)?.isVisible = isRetroLocked
+        menu?.get(2)?.isVisible = !isRetroLocked
     }
 
     private fun initPortraitUi() {
