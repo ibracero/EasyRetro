@@ -10,8 +10,8 @@
 
 	<TextView
 		android:id="@+id/user_label"
-		android:layout_width="40dp"
-		android:layout_height="40dp"
+		android:layout_width="32dp"
+		android:layout_height="32dp"
 		android:background="@drawable/light_grey_circle"
 		android:gravity="center"
 		android:textStyle="bold"
@@ -19,7 +19,7 @@
 
 	<ImageView
 		android:id="@+id/user_image"
-		android:layout_width="40dp"
-		android:layout_height="40dp" />
+		android:layout_width="32dp"
+		android:layout_height="32dp" />
 
 </FrameLayout>

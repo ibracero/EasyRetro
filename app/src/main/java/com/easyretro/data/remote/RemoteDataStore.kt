@@ -27,9 +27,8 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
 
     @Suppress("UNCHECKED_CAST")
     @ExperimentalCoroutinesApi
-    suspend fun observeRetroUsers(retroUuid: String) =
-        callbackFlow<Either<Failure, List<UserRemote>>> {
-
+    suspend fun observeRetro(retroUuid: String) =
+        callbackFlow<Either<Failure, RetroRemote>> {
             val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
                 .document(retroUuid)
                 .addSnapshotListener { snapshot, exception ->
@@ -38,8 +37,10 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
 
                     val userDocs =
                         (snapshot?.get(FirestoreField.RETRO_USERS) as List<DocumentReference>?) ?: emptyList()
+
                     Tasks.whenAllComplete(userDocs.map { it.get() })
                         .addOnSuccessListener { tasks ->
+
                             val users =
                                 tasks.filter { it.isSuccessful }
                                     .mapNotNull {
@@ -52,15 +53,22 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                                             photoUrl = (values?.get(FirestoreField.USER_PHOTO_URL) as String?).orEmpty()
                                         )
                                     }
-                            if (!users.isNullOrEmpty() && snapshot?.metadata?.hasPendingWrites() == false) {
-                                Timber.d("Users update $users")
-                                offer(Either.right(users))
-                            }
+
+                            val retro = RetroRemote(
+                                uuid = retroUuid,
+                                title = (snapshot?.data?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty(),
+                                locked = (snapshot?.data?.get(FirestoreField.RETRO_LOCKED) as Boolean?) ?: false,
+                                ownerEmail = (snapshot?.data?.get(FirestoreField.RETRO_OWNER_EMAIL) as String?).orEmpty(),
+                                users = users
+                            )
+
+                            offer(Either.right(retro))
+                            Timber.d("Retro update $retro")
                         }
                 }
 
             awaitClose {
-                Timber.d("Stop observing retro $retroUuid users")
+                Timber.d("Stop observing retro $retroUuid")
                 registrationObserver.remove()
                 cancel()
             }
@@ -104,6 +112,43 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         }
     }
 
+    @ExperimentalCoroutinesApi
+    suspend fun observeRetroLock(retroUuid: String) = callbackFlow {
+        val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
+            .document(retroUuid)
+            .addSnapshotListener { snapshot, exception ->
+                if (exception != null)
+                    offer(Either.left(Failure.parse(exception)))
+
+                snapshot?.data?.let { values ->
+                    offer(Either.right((values[FirestoreField.RETRO_LOCKED] as Boolean?) ?: false))
+                } ?: offer(Either.left(Failure.UnknownError))
+            }
+
+        awaitClose {
+            Timber.d("Stop observing retro $retroUuid properties")
+            registrationObserver.remove()
+            cancel()
+        }
+    }
+
+    suspend fun updateRetroLock(retroUuid: String, locked: Boolean): Either<Failure, Unit> {
+        if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
+            return Either.left(Failure.UnavailableNetwork)
+
+        return suspendCoroutine { continuation ->
+            db.collection(FirestoreTable.TABLE_RETROS)
+                .document(retroUuid)
+                .update(mapOf(FirestoreField.RETRO_LOCKED to locked))
+                .addOnSuccessListener {
+                    continuation.resume(Either.right(Unit))
+                }
+                .addOnFailureListener {
+                    continuation.resume(Either.left(Failure.parse(it)))
+                }
+        }
+    }
+
     suspend fun createRetro(userEmail: String, retroTitle: String): Either<Failure, RetroRemote> {
         if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
             return Either.left(Failure.UnavailableNetwork)
@@ -113,6 +158,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         val retroValues = hashMapOf(
             FirestoreField.RETRO_TITLE to retroTitle,
             FirestoreField.RETRO_CREATED to FieldValue.serverTimestamp(),
+            FirestoreField.RETRO_OWNER_EMAIL to userEmail,
             FirestoreField.RETRO_USERS to FieldValue.arrayUnion(userRef)
         )
 
@@ -143,7 +189,15 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                 .update(FirestoreField.USER_RETROS, FieldValue.arrayUnion(retroRef))
                 .addOnSuccessListener {
                     Timber.d("Retro $retroUuid added to user: $userEmail ")
-                    continuation.resume(Either.right(RetroRemote(uuid = retroUuid, title = retroTitle)))
+                    continuation.resume(
+                        Either.right(
+                            RetroRemote(
+                                uuid = retroUuid,
+                                title = retroTitle,
+                                ownerEmail = userEmail
+                            )
+                        )
+                    )
                 }
                 .addOnFailureListener {
                     Timber.e(it, "Couldn't add retro $retroUuid to user: $userEmail")
@@ -169,7 +223,8 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                                         val values = documentSnapshot.data
                                         RetroRemote(
                                             uuid = documentSnapshot.id,
-                                            title = (values?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty()
+                                            title = (values?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty(),
+                                            ownerEmail = (values?.get(FirestoreField.RETRO_OWNER_EMAIL) as String?).orEmpty()
                                         )
                                     }
                             Timber.d("Get retros request SUCCESS")

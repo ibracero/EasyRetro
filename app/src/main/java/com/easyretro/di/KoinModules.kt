@@ -44,7 +44,8 @@ val appModule = module {
             dispatchers = get(),
             statementDbToDomainMapper = get(),
             statementRemoteToDbMapper = get(),
-            userRemoteToDbMapper = get()
+            userRemoteToDbMapper = get(),
+            userDbToDomainMapper = get()
         )
     }
 
@@ -93,13 +94,13 @@ val viewModelModule = module {
 val mapperModule = module {
     factory { RetroRemoteToDbMapper(get()) }
 
-    factory { StatementRemoteToDbMapper() }
-
-    factory { UserRemoteToDbMapper() }
-
     factory { RetroDbToDomainMapper(get()) }
 
+    factory { StatementRemoteToDbMapper() }
+
     factory { StatementDbToDomainMapper() }
+
+    factory { UserRemoteToDbMapper() }
 
     factory { UserDbToDomainMapper() }
 }

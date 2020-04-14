@@ -1,6 +1,7 @@
 package com.easyretro.data.local
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import timber.log.Timber
 
 class LocalDataStore(private val retroDao: RetroDao) {
@@ -17,18 +18,19 @@ class LocalDataStore(private val retroDao: RetroDao) {
         retroDao.dropStatementsAndInsert(statements)
     }
 
-    fun getPositiveStatements(retroUuid: String): Flow<List<StatementDb>> = retroDao.getPositiveStatements(retroUuid)
+    fun observePositiveStatements(retroUuid: String): Flow<List<StatementDb>> =
+        retroDao.getPositiveStatements(retroUuid)
 
-    fun getNegativeStatements(retroUuid: String): Flow<List<StatementDb>> = retroDao.getNegativeStatements(retroUuid)
+    fun observeNegativeStatements(retroUuid: String): Flow<List<StatementDb>> =
+        retroDao.getNegativeStatements(retroUuid)
 
-    fun getActionPoints(retroUuid: String): Flow<List<StatementDb>> = retroDao.getActionPoints(retroUuid)
+    fun observeActionPoints(retroUuid: String): Flow<List<StatementDb>> = retroDao.getActionPoints(retroUuid)
 
     fun getRetro(retroUuid: String): RetroDb? = retroDao.getRetro(retroUuid)
 
-    fun updateRetroUsers(retroUuid: String, users: List<UserDb>) {
-        retroDao.getRetro(retroUuid)?.let {
-            retroDao.updateRetro(it.copy(users = users))
-        }
+    fun updateRetro(retro: RetroDb) {
+        Timber.d("Updating retro $retro")
+        retroDao.updateRetro(retro)
     }
 
     fun clearAll() {

@@ -11,6 +11,7 @@ data class Retro(
     val uuid: String,
     val title: String,
     val timestamp: Long,
+    val ownerEmail: String,
     val users: List<User>
 )
 

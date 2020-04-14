@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.easyretro.R
 import com.easyretro.common.BaseViewModel
-import com.easyretro.common.ConnectionManager
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
@@ -40,13 +39,15 @@ class BoardViewModel(
 
     private fun getRetroInfo(retroUuid: String) {
         viewModelScope.launch {
-            retroRepository.getRetro(retroUuid).fold(
-                {
-                    viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
-                }, {
-                    viewState = BoardViewState(retro = it)
-                }
-            )
+            retroRepository.observeRetro(retroUuid).collect { either ->
+                either.fold(
+                    {
+                        viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
+                    }, {
+                        viewState = BoardViewState(retro = it)
+                    }
+                )
+            }
         }
     }
 
@@ -85,7 +86,6 @@ class BoardViewModel(
         statementObserverJob?.cancel()
         statementObserverJob = viewModelScope.launch {
             boardRepository.startObservingStatements(retroUuid).collect()
-            boardRepository.startObservingRetroUsers(retroUuid).collect()
         }
     }
 

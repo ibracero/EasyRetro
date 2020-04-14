@@ -4,6 +4,7 @@ import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.mapper.StatementDbToDomainMapper
+import com.easyretro.data.local.mapper.UserDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.firestore.StatementRemote
@@ -14,6 +15,7 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Statement
 import com.easyretro.domain.model.StatementType
 import com.easyretro.domain.model.StatementType.*
+import com.easyretro.domain.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -28,6 +30,7 @@ class BoardRepositoryImpl(
     private val statementRemoteToDbMapper: StatementRemoteToDbMapper,
     private val statementDbToDomainMapper: StatementDbToDomainMapper,
     private val userRemoteToDbMapper: UserRemoteToDbMapper,
+    private val userDbToDomainMapper: UserDbToDomainMapper,
     private val dispatchers: CoroutineDispatcherProvider
 ) : BoardRepository {
 
@@ -36,9 +39,9 @@ class BoardRepositoryImpl(
 
     override suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>> {
         val localStatements = when (statementType) {
-            POSITIVE -> localDataStore.getPositiveStatements(retroUuid)
-            NEGATIVE -> localDataStore.getNegativeStatements(retroUuid)
-            ACTION_POINT -> localDataStore.getActionPoints(retroUuid)
+            POSITIVE -> localDataStore.observePositiveStatements(retroUuid)
+            NEGATIVE -> localDataStore.observeNegativeStatements(retroUuid)
+            ACTION_POINT -> localDataStore.observeActionPoints(retroUuid)
         }
         return localStatements.map { it.map(statementDbToDomainMapper::map) }
             .flowOn(dispatchers.io())
@@ -74,16 +77,6 @@ class BoardRepositoryImpl(
             .map { either ->
                 either.map { statements ->
                     localDataStore.saveStatements(statements.map(statementRemoteToDbMapper::map))
-                }
-            }.flowOn(dispatchers.io())
-    }
-
-    override suspend fun startObservingRetroUsers(retroUuid: String): Flow<Either<Failure, Unit>> {
-        Timber.d("Start observing users for $retroUuid")
-        return remoteDataStore.observeRetroUsers(retroUuid)
-            .map { either ->
-                either.map { users ->
-                    localDataStore.updateRetroUsers(retroUuid, users.map(userRemoteToDbMapper::map))
                 }
             }.flowOn(dispatchers.io())
     }

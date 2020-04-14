@@ -12,6 +12,9 @@ interface RetroDao {
     @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
     fun getRetro(retroUuid: String): RetroDb?
 
+    @Query("SELECT * FROM $TABLE_RETRO WHERE uuid = :retroUuid")
+    fun observeRetro(retroUuid: String): Flow<RetroDb>
+
     @Update
     fun updateRetro(retro: RetroDb)
 

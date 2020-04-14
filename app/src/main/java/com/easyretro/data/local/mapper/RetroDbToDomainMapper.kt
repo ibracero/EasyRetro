@@ -13,6 +13,7 @@ class RetroDbToDomainMapper(
             uuid = from.uuid,
             title = from.title,
             timestamp = from.timestamp,
+            ownerEmail = from.ownerEmail,
             users = from.users.map(userDbToDomainMapper::map)
         )
 }

@@ -11,7 +11,11 @@ interface RetroRepository {
 
     suspend fun joinRetro(uuid: String): Either<Failure, Unit>
 
-    suspend fun getRetro(retroUuid: String): Either<Failure, Retro>
+    suspend fun observeRetro(retroUuid: String): Flow<Either<Failure, Retro>>
 
     suspend fun getRetros(): Flow<Either<Failure, List<Retro>>>
+
+    suspend fun lockRetro(retroUuid: String): Either<Failure, Unit>
+
+    suspend fun unlockRetro(retroUuid: String): Either<Failure, Unit>
 }

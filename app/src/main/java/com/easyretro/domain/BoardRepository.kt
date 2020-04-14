@@ -4,6 +4,7 @@ import arrow.core.Either
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Statement
 import com.easyretro.domain.model.StatementType
+import com.easyretro.domain.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface BoardRepository {
@@ -15,6 +16,4 @@ interface BoardRepository {
     suspend fun removeStatement(statement: Statement): Either<Failure, Unit>
 
     suspend fun startObservingStatements(retroUuid: String): Flow<Either<Failure, Unit>>
-
-    suspend fun startObservingRetroUsers(retroUuid: String): Flow<Either<Failure, Unit>>
 }

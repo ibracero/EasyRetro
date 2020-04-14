@@ -10,10 +10,9 @@ import com.easyretro.data.remote.mapper.RetroRemoteToDbMapper
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Retro
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class RetroRepositoryImpl(
     private val localDataStore: LocalDataStore,
@@ -39,13 +38,6 @@ class RetroRepositoryImpl(
             remoteDataStore.joinRetro(userEmail = userEmail, retroUuid = uuid)
         }
 
-    override suspend fun getRetro(retroUuid: String): Either<Failure, Retro> =
-        withContext(dispatchers.io()) {
-            val retro = localDataStore.getRetro(retroUuid)
-            if (retro == null) Either.left(Failure.RetroNotFoundError)
-            else Either.right(retroDbToDomainMapper.map(retro))
-        }
-
     override suspend fun getRetros(): Flow<Either<Failure, List<Retro>>> {
         return flow {
             val localRetros = localDataStore.getRetros().map(retroDbToDomainMapper::map)
@@ -59,5 +51,41 @@ class RetroRepositoryImpl(
                 }
             emit(remoteEither)
         }.flowOn(dispatchers.io())
+    }
+
+    override suspend fun observeRetro(retroUuid: String): Flow<Either<Failure, Retro>> =
+        observeLocalRetro(retroUuid)
+            .onCompletion {
+                emitAll(observeRemoteRetro(retroUuid))
+            }
+            .flowOn(dispatchers.io())
+
+    override suspend fun lockRetro(retroUuid: String): Either<Failure, Unit> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun unlockRetro(retroUuid: String): Either<Failure, Unit> {
+        TODO("Not yet implemented")
+    }
+
+    private suspend fun observeLocalRetro(retroUuid: String): Flow<Either<Failure, Retro>> {
+        return flow {
+            Timber.d("Observing local retro $retroUuid")
+            val localRetro = localDataStore.getRetro(retroUuid)
+            if (localRetro != null) emit(Either.right(retroDbToDomainMapper.map(localRetro)))
+            else Either.left(Failure.RetroNotFoundError)
+        }
+    }
+
+    private suspend fun observeRemoteRetro(retroUuid: String): Flow<Either<Failure, Retro>> {
+        Timber.d("Observing remote retro $retroUuid")
+        return remoteDataStore.observeRetro(retroUuid)
+            .map {
+                it.map { remoteRetro ->
+                    val dbRetro = retroRemoteToDbMapper.map(remoteRetro)
+                    localDataStore.updateRetro(dbRetro)
+                    retroDbToDomainMapper.map(dbRetro)
+                }
+            }
     }
 }
