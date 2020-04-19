@@ -86,7 +86,7 @@ class RetroRepositoryImpl(
                 it.map { remoteRetro ->
                     val dbRetro = retroRemoteToDbMapper.map(remoteRetro)
                     localDataStore.updateRetro(dbRetro)
-                    retroDbToDomainMapper.map(dbRetro)
+                    retroDbToDomainMapper.map(dbRetro, userEmail)
                 }
             }
     }

@@ -2,7 +2,7 @@ package com.easyretro.ui.board
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
+import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.OffsetListAdapter
 import com.easyretro.domain.model.Statement
 import com.easyretro.ui.AddItemViewHolder
@@ -11,7 +11,7 @@ import com.easyretro.ui.Payload
 class StatementListAdapter(
     private val onAddClicked: (String) -> Unit,
     private val onRemoveClick: (Statement) -> Unit
-) : OffsetListAdapter<Statement, RecyclerView.ViewHolder>(StatementDiffCallback()) {
+) : OffsetListAdapter<Statement, BaseViewHolder>(StatementDiffCallback()) {
 
     companion object {
         private const val VIEW_TYPE_ADD = 1
@@ -25,27 +25,31 @@ class StatementListAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         return when (viewType) {
             VIEW_TYPE_ADD -> AddItemViewHolder(parent, onAddClicked, AddItemViewHolder.ItemType.STATEMENT)
             else -> StatementViewHolder(parent, onRemoveClick)
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         when (holder) {
             is StatementViewHolder -> holder.bindTo(getItem(position))
             else -> Unit
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isEmpty()) onBindViewHolder(holder, position)
 
         payloads.forEach {
             when (it) {
                 is Payload.CreateStatementPayload -> (holder as AddItemViewHolder).bindResult(success = it.success)
-                is Payload.DescriptionPayload -> (holder as StatementViewHolder).onDescriptionChanged(it.description)
+                is Payload.StatementContentPayload ->
+                    (holder as StatementViewHolder).onContentChanged(
+                        descriptionText = it.description,
+                        isRemovable = it.isRemovable
+                    )
             }
         }
     }
@@ -57,7 +61,8 @@ class StatementListAdapter(
         override fun areContentsTheSame(oldItem: Statement, newItem: Statement): Boolean =
             oldItem.hashCode() == newItem.hashCode()
 
-        override fun getChangePayload(oldItem: Statement, newItem: Statement): Payload? =
-            Payload.DescriptionPayload(description = newItem.description)
+        override fun getChangePayload(oldItem: Statement, newItem: Statement): Payload? {
+            return Payload.StatementContentPayload(description = newItem.description, isRemovable = newItem.removable)
+        }
     }
 }

@@ -1,13 +1,13 @@
 package com.easyretro.ui.board
 
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.get
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation.findNavController
@@ -16,6 +16,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.easyretro.R
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.exhaustive
+import com.easyretro.common.extensions.gone
 import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.common.extensions.showErrorSnackbar
 import com.easyretro.ui.board.action.ActionsFragment
@@ -42,12 +43,6 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private val userListAdapter = UserListAdapter()
-    private var menu: Menu? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_board, container, false)
@@ -62,6 +57,11 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
             viewModel.process(BoardViewEvent.JoinRetro(retroUuid = uuid))
             viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid = uuid))
         }
+
+        dismiss_protected_message_button.setOnClickListener {
+            protected_message.gone()
+            dismiss_protected_message_button.gone()
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -69,35 +69,6 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
 
         if (!isPortraitMode() && isTablet()) initLandscapeUi()
         else initPortraitUi()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.board_menu, menu)
-        super.onCreateOptionsMenu(menu, inflater)
-        this.menu = menu
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val retroUuid = getRetroUuidArgument()
-        return when (item.itemId) {
-            android.R.id.home -> {
-                navigateToRetroList()
-                true
-            }
-            R.id.action_invite -> {
-                retroUuid?.let { onInviteClicked(it) }
-                true
-            }
-            R.id.action_lock -> {
-                retroUuid?.let { onLockClicked(it) }
-                true
-            }
-            R.id.action_unlock -> {
-                retroUuid?.let { onUnlockClicked(it) }
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     private fun onUnlockClicked(retroUuid: String) {
@@ -137,9 +108,9 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     override fun renderViewState(viewState: BoardViewState) {
-        initToolbar(viewState.retro.title)
+        initToolbar(retroUuid = viewState.retro.uuid, retroTitle = viewState.retro.title)
         userListAdapter.submitList(viewState.retro.users)
-        setupLockMode(isRetroLocked = viewState.retro.locked)
+        setupLockMode(isRetroLocked = viewState.retro.locked, lockingAllowed = viewState.retro.lockingAllowed)
     }
 
     @Suppress("IMPLICIT_CAST_TO_ANY")
@@ -151,14 +122,26 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         }.exhaustive
     }
 
-    private fun initToolbar(title: String?) {
-        board_toolbar.title = title
-        (activity as AppCompatActivity).setSupportActionBar(board_toolbar)
+    private fun initToolbar(retroUuid: String, retroTitle: String?) {
+        board_toolbar?.run {
+            title = retroTitle
+            setNavigationOnClickListener { backPressedCallback.handleOnBackPressed() }
+            setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.action_invite -> onInviteClicked(retroUuid)
+                    R.id.action_lock -> context?.let { createLockConfirmationDialog(it, retroUuid).show() }
+                    R.id.action_unlock -> onUnlockClicked(retroUuid)
+                }
+                true
+            }
+        }
     }
 
-    private fun setupLockMode(isRetroLocked: Boolean) {
-        menu?.get(1)?.isVisible = isRetroLocked
-        menu?.get(2)?.isVisible = !isRetroLocked
+    private fun setupLockMode(isRetroLocked: Boolean, lockingAllowed: Boolean) {
+        if (lockingAllowed) {
+            board_toolbar.menu.findItem(R.id.action_lock).isVisible = !isRetroLocked
+            board_toolbar.menu.findItem(R.id.action_unlock).isVisible = isRetroLocked
+        }
     }
 
     private fun initPortraitUi() {
@@ -259,5 +242,17 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         val widthDp = metrics.widthPixels / metrics.density
         val heightDp = metrics.heightPixels / metrics.density
         return min(widthDp, heightDp) >= 720
+    }
+
+    private fun createLockConfirmationDialog(context: Context, retroUuid: String): AlertDialog {
+        return AlertDialog.Builder(context)
+            .setCancelable(true)
+            .setTitle(R.string.lock_confirmation_title)
+            .setMessage(R.string.lock_confirmation_message)
+            .setPositiveButton(R.string.lock) { _, _ ->
+                onLockClicked(retroUuid = retroUuid)
+            }
+            .setNegativeButton(R.string.action_no) { dialogInterface, _ -> dialogInterface.dismiss() }
+            .create()
     }
 }

@@ -6,6 +6,8 @@
 	<string name="add_retro_hint">Put a name to your retro…</string>
 	<string name="add_statement_hint">What would you like to point out?</string>
 	<string name="remove_confirmation_title">Remove item?</string>
+	<string name="lock_confirmation_title">Disable editing?</string>
+	<string name="lock_confirmation_message">This action will disable editing for all the users participating in this retro. You will be able to enable it back using the "Unlock" option</string>
 	<string name="action_yes">Yes</string>
 	<string name="action_no">No</string>
 	<string name="offline_message">Your connection seems unavailable. Some features might be disabled</string>
@@ -58,5 +60,7 @@
 	<string name="confirmation_email_sent">We have just sent a new confirmation link to your email</string>
 	<string name="confirmation_user_verified">Your user has been verified successfully!</string>
 	<string name="welcome_message">Welcome to\nEasyRetro</string>
+	<string name="protected_message">This retro has been protected by the owner. You will not be able to edit.</string>
+	<string name="ok">OK</string>
 
 </resources>

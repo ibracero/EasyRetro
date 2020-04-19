@@ -62,9 +62,8 @@ abstract class StatementFragment :
 
     override fun renderViewEffect(viewEffect: StatementListViewEffect) {
         when (viewEffect) {
-            is StatementListViewEffect.ShowSnackBar ->
-                statement_list_root.showErrorSnackbar(message = viewEffect.errorMessage)
-        }.exhaustive
+            is StatementListViewEffect.ShowSnackBar -> statement_list_root.showErrorSnackbar(viewEffect.errorMessage)
+        }
     }
 
     private fun getRetroUuidArgument() = arguments?.getString(BoardFragment.ARGUMENT_RETRO_UUID)
@@ -85,10 +84,10 @@ abstract class StatementFragment :
 
     private fun onRemoveClicked(statement: Statement) {
         val safeContext = context ?: return
-        createAlertDialog(safeContext, statement).show()
+        createRemoveStatementConfirmationDialog(safeContext, statement).show()
     }
 
-    private fun createAlertDialog(context: Context, statement: Statement): AlertDialog {
+    private fun createRemoveStatementConfirmationDialog(context: Context, statement: Statement): AlertDialog {
         return AlertDialog.Builder(context)
             .setCancelable(true)
             .setTitle(R.string.remove_confirmation_title)

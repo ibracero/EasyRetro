@@ -13,8 +13,11 @@ class RetroDbToDomainMapper(
             uuid = from.uuid,
             title = from.title,
             timestamp = from.timestamp,
-            ownerEmail = from.ownerEmail,
             locked = from.locked,
-            users = from.users.map(userDbToDomainMapper::map)
+            users = from.users.map(userDbToDomainMapper::map),
+            lockingAllowed = false
         )
+
+    fun map(from: RetroDb, currentUserEmail: String) =
+        map(from).copy(lockingAllowed = from.ownerEmail == currentUserEmail)
 }

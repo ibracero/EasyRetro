@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
+import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Statement
 import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.FailureMessage

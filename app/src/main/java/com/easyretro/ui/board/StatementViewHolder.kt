@@ -27,7 +27,8 @@ class StatementViewHolder(
         }
     }
 
-    fun onDescriptionChanged(descriptionText: String) {
+    fun onContentChanged(descriptionText: String, isRemovable: Boolean) {
         description.text = descriptionText
+        action_delete.visibleOrGone(isRemovable)
     }
 }

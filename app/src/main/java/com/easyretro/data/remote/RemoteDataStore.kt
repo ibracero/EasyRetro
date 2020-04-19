@@ -141,9 +141,11 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                 .document(retroUuid)
                 .update(mapOf(FirestoreField.RETRO_LOCKED to locked))
                 .addOnSuccessListener {
+                    Timber.d("Retro lock updated => locked : $locked")
                     continuation.resume(Either.right(Unit))
                 }
                 .addOnFailureListener {
+                    Timber.e(it, "Retro lock couldn't be updated")
                     continuation.resume(Either.left(Failure.parse(it)))
                 }
         }

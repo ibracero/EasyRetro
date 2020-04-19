@@ -29,11 +29,43 @@
 		android:paddingStart="16dp"
 		android:paddingEnd="16dp"
 		app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-		app:layout_constraintBottom_toTopOf="@id/board_root"
+		app:layout_constraintBottom_toTopOf="@id/protected_message"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/board_toolbar"
 		tools:listitem="@layout/item_user" />
+
+	<TextView
+		android:id="@+id/protected_message"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:background="@color/warningColor"
+		android:drawableStart="@drawable/ic_lock_closed"
+		android:drawablePadding="8dp"
+		android:padding="8dp"
+		android:text="@string/protected_message"
+		android:textColor="@color/primaryTextColor"
+		android:visibility="gone"
+		app:layout_constraintBottom_toTopOf="@id/board_root"
+		app:layout_constraintEnd_toStartOf="@id/dismiss_protected_message_button"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/users_recyclerview"
+		tools:visibility="visible" />
+
+	<TextView
+		android:id="@+id/dismiss_protected_message_button"
+		android:layout_width="wrap_content"
+		android:layout_height="0dp"
+		android:background="@color/warningColor"
+		android:gravity="center"
+		android:padding="16dp"
+		android:text="@string/ok"
+		android:textColor="@color/primaryTextColor"
+		android:textStyle="bold"
+		app:layout_constraintBottom_toBottomOf="@id/protected_message"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/protected_message"
+		app:layout_constraintTop_toTopOf="@id/protected_message" />
 
 	<androidx.fragment.app.FragmentContainerView
 		android:id="@+id/positive_container"
@@ -42,7 +74,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toStartOf="@id/guideline_1"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/users_recyclerview" />
+		app:layout_constraintTop_toBottomOf="@id/protected_message" />
 
 	<androidx.fragment.app.FragmentContainerView
 		android:id="@+id/negative_container"
@@ -51,7 +83,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toStartOf="@id/guideline_2"
 		app:layout_constraintStart_toStartOf="@id/guideline_1"
-		app:layout_constraintTop_toBottomOf="@id/users_recyclerview" />
+		app:layout_constraintTop_toBottomOf="@id/protected_message" />
 
 	<androidx.fragment.app.FragmentContainerView
 		android:id="@+id/actions_container"
@@ -60,7 +92,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toEndOf="@id/guideline_2"
-		app:layout_constraintTop_toBottomOf="@id/users_recyclerview" />
+		app:layout_constraintTop_toBottomOf="@id/protected_message" />
 
 	<androidx.coordinatorlayout.widget.CoordinatorLayout
 		android:id="@+id/board_root"
@@ -69,7 +101,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/users_recyclerview" />
+		app:layout_constraintTop_toBottomOf="@id/protected_message" />
 
 	<androidx.constraintlayout.widget.Guideline
 		android:id="@+id/guideline_1"

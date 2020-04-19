@@ -43,9 +43,7 @@ val appModule = module {
             authDataStore = get(),
             dispatchers = get(),
             statementDbToDomainMapper = get(),
-            statementRemoteToDbMapper = get(),
-            userRemoteToDbMapper = get(),
-            userDbToDomainMapper = get()
+            statementRemoteToDbMapper = get()
         )
     }
 

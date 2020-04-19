@@ -5,7 +5,7 @@ data class RetroRemote(
     val title: String,
     val timestamp: Long? = null,
     val ownerEmail: String? = null,
-    val locked: Boolean? = false,
+    val locked: Boolean = false,
     val users: List<UserRemote>? = emptyList()
 )
 

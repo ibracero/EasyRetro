@@ -28,6 +28,10 @@ class LocalDataStore(private val retroDao: RetroDao) {
 
     fun getRetro(retroUuid: String): RetroDb? = retroDao.getRetro(retroUuid)
 
+    fun observeRetro(retroUuid: String): Flow<RetroDb?> {
+        return retroDao.observeRetro(retroUuid)
+    }
+
     fun updateRetro(retro: RetroDb) {
         Timber.d("Updating retro $retro")
         retroDao.updateRetro(retro)

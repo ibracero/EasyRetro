@@ -9,15 +9,17 @@
 		app:showAsAction="ifRoom" />
 
 	<item
-		android:id="@+id/action_lock"
+		android:id="@+id/action_unlock"
 		android:icon="@drawable/ic_lock_open"
-		android:title="@string/lock"
+		android:title="@string/unlock"
+		android:visible="false"
 		app:showAsAction="ifRoom" />
 
 	<item
-		android:id="@+id/action_unlock"
+		android:id="@+id/action_lock"
 		android:icon="@drawable/ic_lock_closed"
-		android:title="@string/unlock"
+		android:title="@string/lock"
+		android:visible="false"
 		app:showAsAction="ifRoom" />
 
 </menu>

@@ -13,4 +13,5 @@
 	<color name="actionsBackgroundColor">#8191e6</color>
 	<color name="errorColor">#FF553E</color>
 	<color name="successColor">#62E7F8</color>
+	<color name="warningColor">#D5A61B</color>
 </resources>

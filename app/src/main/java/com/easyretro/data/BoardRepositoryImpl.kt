@@ -3,22 +3,20 @@ package com.easyretro.data
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
+import com.easyretro.data.local.RetroDb
+import com.easyretro.data.local.StatementDb
 import com.easyretro.data.local.mapper.StatementDbToDomainMapper
 import com.easyretro.data.local.mapper.UserDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
+import com.easyretro.data.remote.firestore.RetroRemote
 import com.easyretro.data.remote.firestore.StatementRemote
 import com.easyretro.data.remote.mapper.StatementRemoteToDbMapper
 import com.easyretro.data.remote.mapper.UserRemoteToDbMapper
 import com.easyretro.domain.BoardRepository
-import com.easyretro.domain.model.Failure
-import com.easyretro.domain.model.Statement
-import com.easyretro.domain.model.StatementType
+import com.easyretro.domain.model.*
 import com.easyretro.domain.model.StatementType.*
-import com.easyretro.domain.model.User
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.*
@@ -29,8 +27,6 @@ class BoardRepositoryImpl(
     private val authDataStore: AuthDataStore,
     private val statementRemoteToDbMapper: StatementRemoteToDbMapper,
     private val statementDbToDomainMapper: StatementDbToDomainMapper,
-    private val userRemoteToDbMapper: UserRemoteToDbMapper,
-    private val userDbToDomainMapper: UserDbToDomainMapper,
     private val dispatchers: CoroutineDispatcherProvider
 ) : BoardRepository {
 
@@ -43,8 +39,13 @@ class BoardRepositoryImpl(
             NEGATIVE -> localDataStore.observeNegativeStatements(retroUuid)
             ACTION_POINT -> localDataStore.observeActionPoints(retroUuid)
         }
-        return localStatements.map { it.map(statementDbToDomainMapper::map) }
-            .flowOn(dispatchers.io())
+        return combine(localDataStore.observeRetro(retroUuid), localStatements) { retroDb, statementsDb ->
+            if (retroDb != null && retroDb.locked) {
+                statementsDb.map { it.copy(removable = false) }
+            } else statementsDb
+        }.map {
+            it.map(statementDbToDomainMapper::map)
+        }.flowOn(dispatchers.io())
     }
 
     override suspend fun addStatement(
