@@ -22,7 +22,7 @@ data class RetroDb(
     val title: String,
     val timestamp: Long,
     val ownerEmail: String,
-    val locked: Boolean,
+    val isProtected: Boolean,
     val users: List<UserDb>
 )
 

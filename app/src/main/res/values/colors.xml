@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="colorPrimary">#616161</color>
-	<color name="colorPrimaryDark">#373737</color>
-	<color name="colorAccent">#FFA000</color>
-	<color name="primaryTextColor">#ffffff</color>
-	<color name="primaryTextColorTranslucent">#99ffffff</color>
-	<color name="secondaryTextColor">#fafafa</color>
-	<color name="lightGreyColor">#eeeeee</color>
-	<color name="colorPrimaryTranslucent">#99616161</color>
-	<color name="positiveBackgroundColor">#4ea37c</color>
-	<color name="negativeBackgroundColor">#c27969</color>
-	<color name="actionsBackgroundColor">#8191e6</color>
-	<color name="errorColor">#FF553E</color>
-	<color name="successColor">#62E7F8</color>
-	<color name="warningColor">#D5A61B</color>
+    <color name="colorPrimary">#616161</color>
+    <color name="colorPrimaryDark">#373737</color>
+    <!--	<color name="colorPrimary">#ffca28</color>
+    <color name="colorPrimaryDark">#c79a00</color>-->
+    <color name="colorAccent">#FFA000</color>
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="primaryTextColorTranslucent">#99ffffff</color>
+    <color name="secondaryTextColor">#fafafa</color>
+    <color name="lightGreyColor">#eeeeee</color>
+    <color name="colorPrimaryTranslucent">#99616161</color>
+    <color name="positiveBackgroundColor">#4ea37c</color>
+    <color name="negativeBackgroundColor">#c27969</color>
+    <color name="actionsBackgroundColor">#8191e6</color>
+    <color name="errorColor">#FF553E</color>
+    <color name="successColor">#62E7F8</color>
+    <color name="warningColor">#D5A61B</color>
 </resources>

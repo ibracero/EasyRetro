@@ -57,7 +57,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                             val retro = RetroRemote(
                                 uuid = retroUuid,
                                 title = (snapshot?.data?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty(),
-                                locked = (snapshot?.data?.get(FirestoreField.RETRO_LOCKED) as Boolean?) ?: false,
+                                locked = (snapshot?.data?.get(FirestoreField.RETRO_PROTECTED) as Boolean?) ?: false,
                                 ownerEmail = (snapshot?.data?.get(FirestoreField.RETRO_OWNER_EMAIL) as String?).orEmpty(),
                                 users = users
                             )
@@ -112,36 +112,16 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         }
     }
 
-    @ExperimentalCoroutinesApi
-    suspend fun observeRetroLock(retroUuid: String) = callbackFlow {
-        val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
-            .document(retroUuid)
-            .addSnapshotListener { snapshot, exception ->
-                if (exception != null)
-                    offer(Either.left(Failure.parse(exception)))
-
-                snapshot?.data?.let { values ->
-                    offer(Either.right((values[FirestoreField.RETRO_LOCKED] as Boolean?) ?: false))
-                } ?: offer(Either.left(Failure.UnknownError))
-            }
-
-        awaitClose {
-            Timber.d("Stop observing retro $retroUuid properties")
-            registrationObserver.remove()
-            cancel()
-        }
-    }
-
-    suspend fun updateRetroLock(retroUuid: String, locked: Boolean): Either<Failure, Unit> {
+    suspend fun updateRetroProtection(retroUuid: String, protected: Boolean): Either<Failure, Unit> {
         if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
             return Either.left(Failure.UnavailableNetwork)
 
         return suspendCoroutine { continuation ->
             db.collection(FirestoreTable.TABLE_RETROS)
                 .document(retroUuid)
-                .update(mapOf(FirestoreField.RETRO_LOCKED to locked))
+                .update(mapOf(FirestoreField.RETRO_PROTECTED to protected))
                 .addOnSuccessListener {
-                    Timber.d("Retro lock updated => locked : $locked")
+                    Timber.d("Retro lock updated => locked : $protected")
                     continuation.resume(Either.right(Unit))
                 }
                 .addOnFailureListener {

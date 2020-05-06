@@ -8,6 +8,7 @@ data class StatementListViewState(val statements: List<Statement>, val addState:
 
 sealed class StatementListViewEvent {
     data class FetchStatements(val retroUuid: String, val type: StatementType) : StatementListViewEvent()
+    data class CheckRetroLock(val retroUuid: String) : StatementListViewEvent()
     data class RemoveStatement(val statement: Statement) : StatementListViewEvent()
     data class AddStatement(
         val retroUuid: String,
@@ -18,10 +19,11 @@ sealed class StatementListViewEvent {
 
 sealed class StatementListViewEffect {
     data class ShowSnackBar(@StringRes val errorMessage: Int) : StatementListViewEffect()
+    object CreateItemSuccess : StatementListViewEffect()
+    object CreateItemFailed : StatementListViewEffect()
 }
 
 sealed class StatementAddState {
-    object None : StatementAddState()
-    object Added : StatementAddState()
-    object NotAdded : StatementAddState()
+    object Shown : StatementAddState()
+    object Hidden : StatementAddState()
 }

@@ -1,15 +1,14 @@
 package com.easyretro.domain
 
 import arrow.core.Either
-import com.easyretro.domain.model.Failure
-import com.easyretro.domain.model.Statement
-import com.easyretro.domain.model.StatementType
-import com.easyretro.domain.model.User
+import com.easyretro.domain.model.*
 import kotlinx.coroutines.flow.Flow
 
 interface BoardRepository {
 
     suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>>
+
+    suspend fun getRetroStatus(retroUuid: String): Flow<RetroStatus>
 
     suspend fun addStatement(retroUuid: String, description: String, type: StatementType): Either<Failure, Unit>
 

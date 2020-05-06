@@ -4,10 +4,13 @@ import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
 import android.widget.EditText
+import androidx.recyclerview.widget.RecyclerView
 import com.easyretro.R
-import com.easyretro.common.*
+import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.extensions.*
 import kotlinx.android.synthetic.main.item_add.*
+import timber.log.Timber
+
 
 class AddItemViewHolder(
     parent: ViewGroup,
@@ -40,6 +43,15 @@ class AddItemViewHolder(
         if (success) add_title.setText("")
     }
 
+    fun bindLockMode(retroLocked: Boolean) {
+        Timber.d("Retro lock update: $retroLocked")
+        if (retroLocked) itemView.layoutParams = RecyclerView.LayoutParams(0, 0)
+        else itemView.layoutParams =
+            RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        containerView.visibleOrGone(!retroLocked)
+    }
+
     private fun setupVariant(type: ItemType, hasMoreItems: Boolean?) {
         val hint = if (type == ItemType.RETRO) containerView.context.getString(R.string.add_retro_hint)
         else containerView.context.getString(R.string.add_statement_hint)
@@ -48,6 +60,7 @@ class AddItemViewHolder(
         create_label.visibleOrGone(type == ItemType.RETRO)
         welcome_label.visibleOrGone(type == ItemType.RETRO)
         choose_label.visibleOrGone(type == ItemType.RETRO && hasMoreItems == true)
+        if (type == ItemType.STATEMENT) itemView.layoutParams = RecyclerView.LayoutParams(0, 0)
     }
 
     private fun showTitleInput() {

@@ -3,16 +3,12 @@ package com.easyretro.data
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
-import com.easyretro.data.local.RetroDb
 import com.easyretro.data.local.StatementDb
 import com.easyretro.data.local.mapper.StatementDbToDomainMapper
-import com.easyretro.data.local.mapper.UserDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
-import com.easyretro.data.remote.firestore.RetroRemote
 import com.easyretro.data.remote.firestore.StatementRemote
 import com.easyretro.data.remote.mapper.StatementRemoteToDbMapper
-import com.easyretro.data.remote.mapper.UserRemoteToDbMapper
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.model.*
 import com.easyretro.domain.model.StatementType.*
@@ -21,6 +17,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.*
 
+@Suppress("EXPERIMENTAL_API_USAGE")
 class BoardRepositoryImpl(
     private val localDataStore: LocalDataStore,
     private val remoteDataStore: RemoteDataStore,
@@ -34,18 +31,21 @@ class BoardRepositoryImpl(
         get() = authDataStore.getCurrentUserEmail()
 
     override suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>> {
-        val localStatements = when (statementType) {
-            POSITIVE -> localDataStore.observePositiveStatements(retroUuid)
-            NEGATIVE -> localDataStore.observeNegativeStatements(retroUuid)
-            ACTION_POINT -> localDataStore.observeActionPoints(retroUuid)
-        }
+        val localStatements = getLocalStatements(statementType, retroUuid)
         return combine(localDataStore.observeRetro(retroUuid), localStatements) { retroDb, statementsDb ->
-            if (retroDb != null && retroDb.locked) {
+            if (retroDb != null && retroDb.isProtected) {
                 statementsDb.map { it.copy(removable = false) }
             } else statementsDb
         }.map {
             it.map(statementDbToDomainMapper::map)
         }.flowOn(dispatchers.io())
+    }
+
+    override suspend fun getRetroStatus(retroUuid: String): Flow<RetroStatus> {
+        return localDataStore.observeRetro(retroUuid)
+            .map { retroDb -> if (retroDb?.isProtected == false) RetroStatus.EDITABLE else RetroStatus.PROTECTED }
+            .distinctUntilChanged()
+            .flowOn(dispatchers.io())
     }
 
     override suspend fun addStatement(
@@ -80,5 +80,13 @@ class BoardRepositoryImpl(
                     localDataStore.saveStatements(statements.map(statementRemoteToDbMapper::map))
                 }
             }.flowOn(dispatchers.io())
+    }
+
+    private fun getLocalStatements(statementType: StatementType, retroUuid: String): Flow<List<StatementDb>> {
+        return when (statementType) {
+            POSITIVE -> localDataStore.observePositiveStatements(retroUuid)
+            NEGATIVE -> localDataStore.observeNegativeStatements(retroUuid)
+            ACTION_POINT -> localDataStore.observeActionPoints(retroUuid)
+        }
     }
 }

@@ -17,7 +17,7 @@ object CloudFireStore {
         const val RETRO_CREATED = "created"
         const val RETRO_USERS = "users"
         const val RETRO_OWNER_EMAIL = "owner_email"
-        const val RETRO_LOCKED = "locked"
+        const val RETRO_PROTECTED = "protected"
         const val USER_FIRST_NAME = "first_name"
         const val USER_LAST_NAME = "last_name"
         const val USER_PHOTO_URL = "photo_url"

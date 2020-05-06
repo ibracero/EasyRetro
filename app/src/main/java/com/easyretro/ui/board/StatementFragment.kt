@@ -15,13 +15,14 @@ import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.Payload
 import kotlinx.android.synthetic.main.fragment_statements.*
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 
 abstract class StatementFragment :
     BaseFragment<StatementListViewState, StatementListViewEffect, StatementListViewEvent, StatementViewModel>() {
 
     override val viewModel: StatementViewModel by viewModel()
 
-    private val adapter = StatementListAdapter(::onAddClicked, ::onRemoveClicked)
+    private val adapter by lazy { StatementListAdapter(::onAddClicked, ::onRemoveClicked) }
 
     abstract val statementType: StatementType
 
@@ -36,34 +37,31 @@ abstract class StatementFragment :
 
     override fun onStart() {
         super.onStart()
-        fetchStatements()
-    }
-
-    private fun fetchStatements() {
-        viewModel.process(
-            StatementListViewEvent.FetchStatements(
-                retroUuid = getRetroUuidArgument().orEmpty(),
-                type = statementType
-            )
-        )
-    }
-
-    private fun initUi() {
-        statement_recycler_view.adapter = adapter
+        val retroUuid = getRetroUuidArgument().orEmpty()
+        viewModel.process(StatementListViewEvent.FetchStatements(retroUuid = retroUuid, type = statementType))
+        viewModel.process(StatementListViewEvent.CheckRetroLock(retroUuid = retroUuid))
     }
 
     override fun renderViewState(viewState: StatementListViewState) {
         adapter.submitList(viewState.statements)
+        Timber.d("Render viewState $viewState")
         when (viewState.addState) {
-            StatementAddState.None, StatementAddState.Added -> resetAddItem(success = true)
-            StatementAddState.NotAdded -> resetAddItem(success = false)
+            StatementAddState.Shown -> showAddItem()
+            StatementAddState.Hidden -> hideAddItem()
         }.exhaustive
     }
 
+    @Suppress("IMPLICIT_CAST_TO_ANY")
     override fun renderViewEffect(viewEffect: StatementListViewEffect) {
         when (viewEffect) {
             is StatementListViewEffect.ShowSnackBar -> statement_list_root.showErrorSnackbar(viewEffect.errorMessage)
-        }
+            StatementListViewEffect.CreateItemSuccess -> resetAddItem(success = true)
+            StatementListViewEffect.CreateItemFailed -> resetAddItem(success = false)
+        }.exhaustive
+    }
+
+    private fun initUi() {
+        statement_recycler_view.adapter = adapter
     }
 
     private fun getRetroUuidArgument() = arguments?.getString(BoardFragment.ARGUMENT_RETRO_UUID)
@@ -80,6 +78,14 @@ abstract class StatementFragment :
 
     private fun resetAddItem(success: Boolean) {
         adapter.notifyItemChanged(0, Payload.CreateStatementPayload(success = success))
+    }
+
+    private fun showAddItem() {
+        adapter.notifyItemChanged(0, Payload.RetroLockPayload(retroLocked = false))
+    }
+
+    private fun hideAddItem() {
+        adapter.notifyItemChanged(0, Payload.RetroLockPayload(retroLocked = true))
     }
 
     private fun onRemoveClicked(statement: Statement) {

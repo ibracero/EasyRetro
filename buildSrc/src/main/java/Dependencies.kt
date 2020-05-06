@@ -20,7 +20,7 @@ import TestLibraries.Versions.junit_version
 import TestLibraries.Versions.mockito_inline_version
 import TestLibraries.Versions.mockito_version
 
-const val kotlin_version = "1.3.71"
+const val kotlin_version = "1.3.72"
 
 object AndroidSdk {
     const val min = 21
@@ -48,17 +48,17 @@ object Libraries {
         const val androidx_constraint_layout_version = "1.1.3"
         const val androidx_lifecycle_version = "2.2.0"
         const val google_material_version = "1.0.0"
-        const val firebase_firestore_version = "21.4.1"
-        const val firebase_analytics_version = "17.2.3"
+        const val firebase_firestore_version = "21.4.3"
+        const val firebase_analytics_version = "17.4.0"
         const val firebase_dynamic_links_version = "19.1.0"
-        const val firebase_auth_version = "19.3.0"
+        const val firebase_auth_version = "19.3.1"
         const val coroutines_version = "1.3.5"
         const val koin_version = "2.1.5"
         const val timber_version = "4.7.1"
         const val room_version = "2.2.5"
         const val room_debugger_version = "1.0.6"
         const val arrow_version = "0.10.3"
-        const val play_services_auth_version = "17.0.0"
+        const val play_services_auth_version = "18.0.0"
         const val glide_version = "4.11.0"
     }
 
