@@ -43,13 +43,12 @@ class AddItemViewHolder(
         if (success) add_title.setText("")
     }
 
-    fun bindLockMode(retroLocked: Boolean) {
-        Timber.d("Retro lock update: $retroLocked")
-        if (retroLocked) itemView.layoutParams = RecyclerView.LayoutParams(0, 0)
+    fun bindLockMode(retroProtected: Boolean) {
+        containerView.visibleOrGone(!retroProtected)
+
+        if (retroProtected) itemView.layoutParams = RecyclerView.LayoutParams(0, 0)
         else itemView.layoutParams =
             RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        containerView.visibleOrGone(!retroLocked)
     }
 
     private fun setupVariant(type: ItemType, hasMoreItems: Boolean?) {

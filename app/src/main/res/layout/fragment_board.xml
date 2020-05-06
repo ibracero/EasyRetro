@@ -1,107 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:animateLayoutChanges="true"
-	android:background="@color/lightGreyColor">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/lightGreyColor">
 
-	<androidx.appcompat.widget.Toolbar
-		android:id="@+id/board_toolbar"
-		android:layout_width="0dp"
-		android:layout_height="?android:actionBarSize"
-		android:background="@color/colorPrimaryDark"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent"
-		app:menu="@menu/board_menu"
-		app:navigationIcon="@drawable/ic_arrow_back"
-		app:titleTextColor="@color/primaryTextColor"
-		tools:title="Retro title" />
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/board_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?android:actionBarSize"
+        android:background="@color/colorPrimaryDark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/board_menu"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:titleTextColor="@color/primaryTextColor"
+        tools:title="Retro title" />
 
-	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/users_recyclerview"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:background="@color/colorPrimaryDark"
-		android:orientation="horizontal"
-		android:paddingStart="16dp"
-		android:paddingEnd="16dp"
-		app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-		app:layout_constraintBottom_toTopOf="@id/protected_message"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/board_toolbar"
-		tools:listitem="@layout/item_user" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/users_recyclerview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@id/protected_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/board_toolbar"
+        tools:listitem="@layout/item_user" />
 
-	<TextView
-		android:id="@+id/protected_message"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:background="@color/warningColor"
-		android:drawableStart="@drawable/ic_lock_closed"
-		android:drawablePadding="8dp"
-		android:padding="8dp"
-		android:text="@string/protected_message"
-		android:textColor="@color/primaryTextColor"
-		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@id/bottom_nav_host_fragment"
-		app:layout_constraintEnd_toStartOf="@id/dismiss_protected_message_button"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/users_recyclerview"
-		tools:visibility="visible" />
+    <TextView
+        android:id="@+id/protected_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/warningColor"
+        android:drawableStart="@drawable/ic_lock_closed"
+        android:drawablePadding="8dp"
+        android:padding="8dp"
+        android:text="@string/protected_message"
+        android:textColor="@color/primaryTextColor"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav_host_fragment"
+        app:layout_constraintEnd_toStartOf="@id/dismiss_protected_message_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/users_recyclerview"
+        tools:visibility="visible" />
 
-	<TextView
-		android:id="@+id/dismiss_protected_message_button"
-		android:layout_width="wrap_content"
-		android:layout_height="0dp"
-		android:background="@color/warningColor"
-		android:gravity="center"
-		android:padding="16dp"
-		android:text="@string/ok"
-		android:textColor="@color/primaryTextColor"
-		android:textStyle="bold"
-		app:layout_constraintBottom_toBottomOf="@id/protected_message"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toEndOf="@id/protected_message"
-		app:layout_constraintTop_toTopOf="@id/protected_message" />
+    <TextView
+        android:id="@+id/dismiss_protected_message_button"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:background="@color/warningColor"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="@string/ok"
+        android:textColor="@color/primaryTextColor"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/protected_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/protected_message"
+        app:layout_constraintTop_toTopOf="@id/protected_message"
+        tools:visibility="visible" />
 
-	<androidx.coordinatorlayout.widget.CoordinatorLayout
-		android:id="@+id/board_root"
-		android:layout_width="0dp"
-		android:layout_height="0dp"
-		app:layout_constraintBottom_toTopOf="@id/nav_view"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/protected_message" />
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/board_root"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/nav_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/protected_message" />
 
-	<fragment
-		android:id="@+id/bottom_nav_host_fragment"
-		android:name="androidx.navigation.fragment.NavHostFragment"
-		android:layout_width="0dp"
-		android:layout_height="0dp"
-		app:defaultNavHost="true"
-		app:layout_constraintBottom_toTopOf="@id/nav_view"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/protected_message"
-		app:navGraph="@navigation/board_nav_graph" />
+    <fragment
+        android:id="@+id/bottom_nav_host_fragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@id/nav_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/protected_message"
+        app:navGraph="@navigation/board_nav_graph" />
 
-	<com.google.android.material.bottomnavigation.BottomNavigationView
-		android:id="@+id/nav_view"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_marginStart="0dp"
-		android:layout_marginEnd="0dp"
-		android:background="@color/colorPrimary"
-		app:itemIconTint="@color/primaryTextColor"
-		app:itemTextAppearanceActive="@style/TextAppearance.AppCompat.Menu"
-		app:itemTextColor="@color/primaryTextColor"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/bottom_nav_host_fragment"
-		app:menu="@menu/bottom_nav_menu" />
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:background="@color/colorPrimary"
+        app:itemIconTint="@color/primaryTextColor"
+        app:itemTextAppearanceActive="@style/TextAppearance.AppCompat.Menu"
+        app:itemTextColor="@color/primaryTextColor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bottom_nav_host_fragment"
+        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

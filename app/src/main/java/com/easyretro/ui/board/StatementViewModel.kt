@@ -58,10 +58,12 @@ class StatementViewModel(
     private fun addStatement(retroUuid: String, description: String, type: StatementType) {
         viewModelScope.launch {
             boardRepository.addStatement(retroUuid = retroUuid, description = description, type = type)
-                .mapLeft {
+                .fold({
                     viewEffect = StatementListViewEffect.ShowSnackBar(FailureMessage.parse(it))
                     viewEffect = StatementListViewEffect.CreateItemFailed
-                }
+                }, {
+                    viewEffect = StatementListViewEffect.CreateItemSuccess
+                })
         }
     }
 

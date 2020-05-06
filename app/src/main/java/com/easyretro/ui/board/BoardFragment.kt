@@ -15,10 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.easyretro.R
 import com.easyretro.common.BaseFragment
-import com.easyretro.common.extensions.exhaustive
-import com.easyretro.common.extensions.gone
-import com.easyretro.common.extensions.hideKeyboard
-import com.easyretro.common.extensions.showErrorSnackbar
+import com.easyretro.common.extensions.*
 import com.easyretro.ui.board.action.ActionsFragment
 import com.easyretro.ui.board.negative.NegativeFragment
 import com.easyretro.ui.board.positive.PositiveFragment
@@ -110,7 +107,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     override fun renderViewState(viewState: BoardViewState) {
         initToolbar(retroUuid = viewState.retro.uuid, retroTitle = viewState.retro.title)
         userListAdapter.submitList(viewState.retro.users)
-        setupLockMode(isRetroLocked = viewState.retro.locked, lockingAllowed = viewState.retro.lockingAllowed)
+        setupLockMode(retroProtected = viewState.retro.protected, lockingAllowed = viewState.retro.lockingAllowed)
     }
 
     @Suppress("IMPLICIT_CAST_TO_ANY")
@@ -137,11 +134,13 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         }
     }
 
-    private fun setupLockMode(isRetroLocked: Boolean, lockingAllowed: Boolean) {
+    private fun setupLockMode(retroProtected: Boolean, lockingAllowed: Boolean) {
         if (lockingAllowed) {
-            board_toolbar.menu.findItem(R.id.action_lock).isVisible = !isRetroLocked
-            board_toolbar.menu.findItem(R.id.action_unlock).isVisible = isRetroLocked
+            board_toolbar.menu.findItem(R.id.action_lock).isVisible = !retroProtected
+            board_toolbar.menu.findItem(R.id.action_unlock).isVisible = retroProtected
         }
+        protected_message.visibleOrGone(retroProtected && !lockingAllowed)
+        dismiss_protected_message_button.visibleOrGone(retroProtected && !lockingAllowed)
     }
 
     private fun initPortraitUi() {

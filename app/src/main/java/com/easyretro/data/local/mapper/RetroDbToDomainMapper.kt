@@ -13,7 +13,7 @@ class RetroDbToDomainMapper(
             uuid = from.uuid,
             title = from.title,
             timestamp = from.timestamp,
-            locked = from.isProtected,
+            protected = from.isProtected,
             users = from.users.map(userDbToDomainMapper::map),
             lockingAllowed = false
         )

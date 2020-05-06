@@ -45,7 +45,7 @@ class StatementListAdapter(
         payloads.forEach {
             when (it) {
                 is Payload.CreateStatementPayload -> (holder as AddItemViewHolder).bindResult(success = it.success)
-                is Payload.RetroLockPayload -> (holder as AddItemViewHolder).bindLockMode(retroLocked = it.retroLocked)
+                is Payload.RetroLockPayload -> (holder as AddItemViewHolder).bindLockMode(retroProtected = it.retroLocked)
                 is Payload.StatementContentPayload ->
                     (holder as StatementViewHolder).onContentChanged(
                         descriptionText = it.description,

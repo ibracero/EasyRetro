@@ -38,13 +38,15 @@ class BoardRepositoryImpl(
             } else statementsDb
         }.map {
             it.map(statementDbToDomainMapper::map)
-        }.flowOn(dispatchers.io())
+        }.distinctUntilChanged()
+            .flowOn(dispatchers.io())
     }
 
     override suspend fun getRetroStatus(retroUuid: String): Flow<RetroStatus> {
         return localDataStore.observeRetro(retroUuid)
             .map { retroDb -> if (retroDb?.isProtected == false) RetroStatus.EDITABLE else RetroStatus.PROTECTED }
             .distinctUntilChanged()
+            .debounce(300)
             .flowOn(dispatchers.io())
     }
 
