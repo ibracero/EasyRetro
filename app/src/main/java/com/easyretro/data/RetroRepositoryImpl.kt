@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
+@Suppress("EXPERIMENTAL_API_USAGE")
 class RetroRepositoryImpl(
     private val localDataStore: LocalDataStore,
     private val remoteDataStore: RemoteDataStore,
@@ -54,9 +55,10 @@ class RetroRepositoryImpl(
     }
 
     override suspend fun observeRetro(retroUuid: String): Flow<Either<Failure, Retro>> =
-        observeLocalRetro(retroUuid)
-            .onCompletion {
-                emitAll(observeRemoteRetro(retroUuid))
+        localDataStore.observeRetro(retroUuid)
+            .map { localRetro ->
+                if (localRetro != null) Either.right(retroDbToDomainMapper.map(localRetro, userEmail))
+                else Either.left(Failure.RetroNotFoundError)
             }
             .flowOn(dispatchers.io())
 
@@ -70,24 +72,14 @@ class RetroRepositoryImpl(
             remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = false)
         }
 
-    private suspend fun observeLocalRetro(retroUuid: String): Flow<Either<Failure, Retro>> {
-        return flow {
-            Timber.d("Observing local retro $retroUuid")
-            val localRetro = localDataStore.getRetro(retroUuid)
-            if (localRetro != null) emit(Either.right(retroDbToDomainMapper.map(localRetro)))
-            else Either.left(Failure.RetroNotFoundError)
-        }
-    }
-
-    private suspend fun observeRemoteRetro(retroUuid: String): Flow<Either<Failure, Retro>> {
-        Timber.d("Observing remote retro $retroUuid")
+    override suspend fun startObservingRetroDetails(retroUuid: String): Flow<Either<Failure, Unit>> {
+        Timber.d("Start observing remote retro $retroUuid")
         return remoteDataStore.observeRetro(retroUuid)
             .map {
                 it.map { remoteRetro ->
                     val dbRetro = retroRemoteToDbMapper.map(remoteRetro)
                     localDataStore.updateRetro(dbRetro)
-                    retroDbToDomainMapper.map(dbRetro, userEmail)
                 }
-            }
+            }.flowOn(dispatchers.io())
     }
 }

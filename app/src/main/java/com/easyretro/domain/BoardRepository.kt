@@ -8,8 +8,6 @@ interface BoardRepository {
 
     suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>>
 
-    suspend fun getRetroStatus(retroUuid: String): Flow<RetroStatus>
-
     suspend fun addStatement(retroUuid: String, description: String, type: StatementType): Either<Failure, Unit>
 
     suspend fun removeStatement(statement: Statement): Either<Failure, Unit>

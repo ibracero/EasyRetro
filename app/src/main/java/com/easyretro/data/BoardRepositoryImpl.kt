@@ -33,21 +33,11 @@ class BoardRepositoryImpl(
     override suspend fun getStatements(retroUuid: String, statementType: StatementType): Flow<List<Statement>> {
         val localStatements = getLocalStatements(statementType, retroUuid)
         return combine(localDataStore.observeRetro(retroUuid), localStatements) { retroDb, statementsDb ->
-            if (retroDb != null && retroDb.isProtected) {
-                statementsDb.map { it.copy(removable = false) }
-            } else statementsDb
+            if (retroDb == null || !retroDb.isProtected) statementsDb
+            else statementsDb.map { it.copy(removable = false) }
         }.map {
             it.map(statementDbToDomainMapper::map)
-        }.distinctUntilChanged()
-            .flowOn(dispatchers.io())
-    }
-
-    override suspend fun getRetroStatus(retroUuid: String): Flow<RetroStatus> {
-        return localDataStore.observeRetro(retroUuid)
-            .map { retroDb -> if (retroDb?.isProtected == false) RetroStatus.EDITABLE else RetroStatus.PROTECTED }
-            .distinctUntilChanged()
-            .debounce(300)
-            .flowOn(dispatchers.io())
+        }.flowOn(dispatchers.io())
     }
 
     override suspend fun addStatement(
@@ -56,7 +46,6 @@ class BoardRepositoryImpl(
         type: StatementType
     ): Either<Failure, Unit> {
         return withContext(dispatchers.io()) {
-            Timber.d("Adding statement $description")
             remoteDataStore.addStatementToBoard(
                 retroUuid = retroUuid,
                 statementRemote = StatementRemote(
@@ -70,7 +59,6 @@ class BoardRepositoryImpl(
 
     override suspend fun removeStatement(statement: Statement): Either<Failure, Unit> =
         withContext(dispatchers.io()) {
-            Timber.d("Removing statement ${statement.description}")
             remoteDataStore.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
         }
 

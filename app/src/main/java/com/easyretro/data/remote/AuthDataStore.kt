@@ -28,7 +28,7 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
             firebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Timber.d("signInWithCredential:success")
+                        Timber.d("User signed in with token (Google Account)")
                         val user = firebaseAuth.currentUser
                         if (user != null) continuation.resume(Either.right(Unit))
                         else continuation.resume(Either.left(Failure.InvalidUserFailure))
@@ -45,7 +45,7 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
             firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Timber.d("signInWithEmail:success")
+                        Timber.d("User signed in with email")
                         firebaseAuth.currentUser?.isEmailVerified?.let { verified ->
                             val userStatus =
                                 if (verified) UserStatus.VERIFIED
@@ -64,8 +64,10 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
         return suspendCoroutine { continuation ->
             firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
-                    if (task.isSuccessful) sendEmailVerification(continuation)
-                    else continuation.parseExceptionAndResume(task.exception)
+                    if (task.isSuccessful) {
+                        Timber.d("User signed up with email and password")
+                        sendEmailVerification(continuation)
+                    } else continuation.parseExceptionAndResume(task.exception)
                 }
         }
     }
@@ -78,7 +80,7 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
             firebaseAuth.sendPasswordResetEmail(email)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Timber.d("resetPasswordEmail:success")
+                        Timber.d("Password email reset sent")
                         continuation.resume(Either.right(Unit))
                     } else continuation.parseExceptionAndResume(task.exception)
                 }
@@ -111,13 +113,16 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
         }
     }
 
-    suspend fun logOut() = suspendCoroutine<Unit> { firebaseAuth.signOut() }
+    suspend fun logOut() = suspendCoroutine<Unit> {
+        firebaseAuth.signOut()
+        Timber.d("User signed out")
+    }
 
     private fun sendEmailVerification(continuation: Continuation<Either<Failure, Unit>>) {
         firebaseAuth.currentUser?.sendEmailVerification()
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Timber.d("sendEmailVerification:success")
+                    Timber.d("User verification email sent")
                     continuation.resume(Either.right(Unit))
                 } else continuation.parseExceptionAndResume(task.exception)
             }

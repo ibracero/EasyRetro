@@ -18,4 +18,6 @@ interface RetroRepository {
     suspend fun lockRetro(retroUuid: String): Either<Failure, Unit>
 
     suspend fun unlockRetro(retroUuid: String): Either<Failure, Unit>
+
+    suspend fun startObservingRetroDetails(retroUuid: String): Flow<Either<Failure, Unit>>
 }

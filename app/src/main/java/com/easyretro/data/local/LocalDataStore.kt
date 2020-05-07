@@ -1,41 +1,39 @@
 package com.easyretro.data.local
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import timber.log.Timber
 
 class LocalDataStore(private val retroDao: RetroDao) {
 
-    fun getRetros() = retroDao.getUserRetros()
+    fun getRetros(): List<RetroDb> = retroDao.getRetros()
 
     fun saveRetros(retros: List<RetroDb>) {
-        Timber.d("Updating retros ${retros.joinToString(",") { it.title }}")
+        Timber.d("Updating local retros ${retros.joinToString(",") { it.title }}")
         retroDao.insertRetros(retros)
     }
 
     fun saveStatements(statements: List<StatementDb>) {
-        Timber.d("Updating statements ${statements.size}")
+        Timber.d("Updating local statements ${statements.size}")
         retroDao.dropStatementsAndInsert(statements)
     }
 
     fun observePositiveStatements(retroUuid: String): Flow<List<StatementDb>> =
-        retroDao.getPositiveStatements(retroUuid)
+        retroDao.observePositiveStatements(retroUuid)
 
     fun observeNegativeStatements(retroUuid: String): Flow<List<StatementDb>> =
-        retroDao.getNegativeStatements(retroUuid)
+        retroDao.observeNegativeStatements(retroUuid)
 
-    fun observeActionPoints(retroUuid: String): Flow<List<StatementDb>> = retroDao.getActionPoints(retroUuid)
-
-    fun getRetro(retroUuid: String): RetroDb? = retroDao.getRetro(retroUuid)
+    fun observeActionPoints(retroUuid: String): Flow<List<StatementDb>> = retroDao.observeActionPoints(retroUuid)
 
     fun observeRetro(retroUuid: String): Flow<RetroDb?> = retroDao.observeRetro(retroUuid)
 
     fun updateRetro(retro: RetroDb) {
-        Timber.d("Updating retro $retro")
+        Timber.d("Updating local retro $retro")
         retroDao.updateRetro(retro)
     }
 
     fun clearAll() {
         retroDao.clearAll()
+        Timber.d("Database cleared")
     }
 }

@@ -11,12 +11,6 @@ class RoomTypeConverters {
     private val gson = Gson()
 
     @TypeConverter
-    fun stringListToString(stringList: List<String>): String = stringList.joinToString(separator = ",")
-
-    @TypeConverter
-    fun stringListFromString(string: String): List<String> = string.split(",")
-
-    @TypeConverter
     fun statementTypeToString(statementType: StatementType): String = statementType.toString()
 
     @TypeConverter

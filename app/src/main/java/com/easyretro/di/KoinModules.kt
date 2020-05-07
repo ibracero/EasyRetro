@@ -76,7 +76,7 @@ val viewModelModule = module {
 
     viewModel { RetroListViewModel(get(), get()) }
 
-    viewModel { StatementViewModel(get()) }
+    viewModel { StatementViewModel(get(), get()) }
 
     viewModel { BoardViewModel(get(), get()) }
 

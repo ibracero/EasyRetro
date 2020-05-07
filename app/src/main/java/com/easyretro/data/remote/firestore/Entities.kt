@@ -1,11 +1,11 @@
 package com.easyretro.data.remote.firestore
 
-data class RetroRemote(
+data class RetroRemote constructor(
     val uuid: String,
     val title: String,
     val timestamp: Long? = null,
     val ownerEmail: String? = null,
-    val locked: Boolean = false,
+    val protected: Boolean = false,
     val users: List<UserRemote>? = emptyList()
 )
 

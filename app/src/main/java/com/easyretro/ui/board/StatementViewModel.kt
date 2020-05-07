@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
-import com.easyretro.domain.model.RetroStatus
+import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Statement
 import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.FailureMessage
@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class StatementViewModel(
-    private val boardRepository: BoardRepository
+    private val boardRepository: BoardRepository,
+    private val retroRepository: RetroRepository
 ) : BaseViewModel<StatementListViewState, StatementListViewEffect, StatementListViewEvent>() {
 
     init {
@@ -37,7 +38,7 @@ class StatementViewModel(
 
     private fun fetchStatements(retroUuid: String, type: StatementType) {
         viewModelScope.launch {
-            boardRepository.getStatements(retroUuid, type)
+            boardRepository.getStatements(retroUuid = retroUuid, statementType = type)
                 .collect {
                     viewState = viewState.copy(statements = it)
                 }
@@ -46,11 +47,16 @@ class StatementViewModel(
 
     private fun checkRetroLock(retroUuid: String) {
         viewModelScope.launch {
-            boardRepository.getRetroStatus(retroUuid)
+            retroRepository.observeRetro(retroUuid = retroUuid)
                 .collect {
-                    viewState = viewState.copy(
-                        addState = if (it == RetroStatus.PROTECTED) StatementAddState.Hidden else StatementAddState.Shown
-                    )
+                    it.fold({
+
+                    }, { retro ->
+                        viewState = viewState.copy(
+                            addState = if (retro.protected) StatementAddState.Hidden else StatementAddState.Shown
+                        )
+                    })
+
                 }
         }
     }

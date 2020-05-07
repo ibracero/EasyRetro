@@ -57,7 +57,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                             val retro = RetroRemote(
                                 uuid = retroUuid,
                                 title = (snapshot?.data?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty(),
-                                locked = (snapshot?.data?.get(FirestoreField.RETRO_PROTECTED) as Boolean?) ?: false,
+                                protected = (snapshot?.data?.get(FirestoreField.RETRO_PROTECTED) as Boolean?) ?: false,
                                 ownerEmail = (snapshot?.data?.get(FirestoreField.RETRO_OWNER_EMAIL) as String?).orEmpty(),
                                 users = users
                             )
@@ -206,15 +206,17 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                                         RetroRemote(
                                             uuid = documentSnapshot.id,
                                             title = (values?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty(),
-                                            ownerEmail = (values?.get(FirestoreField.RETRO_OWNER_EMAIL) as String?).orEmpty()
+                                            ownerEmail = (values?.get(FirestoreField.RETRO_OWNER_EMAIL) as String?).orEmpty(),
+                                            protected = (values?.get(FirestoreField.RETRO_PROTECTED) as Boolean?)
+                                                ?: false
                                         )
                                     }
-                            Timber.d("Get retros request SUCCESS")
+                            Timber.d("Get retros request succeeded")
                             continuation.resume(Either.right(retros))
                         }
                 }
                 .addOnFailureListener {
-                    Timber.e(it, "Get retros request FAILED")
+                    Timber.e(it, "Get retros request failed")
                     continuation.resume(Either.left(Failure.parse(it)))
                 }
         }

@@ -14,6 +14,7 @@ import com.google.firebase.dynamiclinks.ShortDynamicLink
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class BoardViewModel(
     private val retroRepository: RetroRepository,
@@ -25,6 +26,7 @@ class BoardViewModel(
     }
 
     private var statementObserverJob: Job? = null
+    private var retroObserverJob: Job? = null
 
     override fun process(viewEvent: BoardViewEvent) {
         super.process(viewEvent)
@@ -34,7 +36,7 @@ class BoardViewModel(
             is BoardViewEvent.ShareRetroLink -> shareRetroLink(link = viewEvent.link)
             is BoardViewEvent.SubscribeRetroDetails -> startObservingRetro(retroUuid = viewEvent.retroUuid)
             is BoardViewEvent.LockRetro -> lockRetro(retroUuid = viewEvent.retroUuid)
-            is BoardViewEvent.UnlockRetro ->  unlockRetro(retroUuid = viewEvent.retroUuid)
+            is BoardViewEvent.UnlockRetro -> unlockRetro(retroUuid = viewEvent.retroUuid)
             BoardViewEvent.UnsubscribeRetroDetails -> stopObservingRetro()
         }.exhaustive
     }
@@ -98,12 +100,17 @@ class BoardViewModel(
 
     private fun startObservingRetro(retroUuid: String) {
         statementObserverJob?.cancel()
+        retroObserverJob?.cancel()
         statementObserverJob = viewModelScope.launch {
-            boardRepository.startObservingStatements(retroUuid).collect()
+            boardRepository.startObservingStatements(retroUuid).collect()//todo handle failure
+        }
+        retroObserverJob = viewModelScope.launch {
+            retroRepository.startObservingRetroDetails(retroUuid).collect()//todo handle failure
         }
     }
 
     private fun stopObservingRetro() {
         statementObserverJob?.cancel()
+        retroObserverJob?.cancel()
     }
 }

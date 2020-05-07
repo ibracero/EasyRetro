@@ -14,7 +14,7 @@ class RetroRemoteToDbMapper(
             title = from.title,
             timestamp = from.timestamp ?: 0,
             ownerEmail = from.ownerEmail.orEmpty(),
-            isProtected = from.locked ?: false,
+            isProtected = from.protected,
             users = from.users?.map(userRemoteToDbMapper::map) ?: emptyList()
         )
 }

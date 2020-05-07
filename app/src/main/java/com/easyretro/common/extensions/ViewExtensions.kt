@@ -69,7 +69,7 @@ fun View?.hideKeyboard() {
     try {
         imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     } catch (illegalStateException: IllegalStateException) {
-        Timber.d(illegalStateException)
+        Timber.e(illegalStateException)
     }
 
     imm?.hideSoftInputFromWindow(windowToken, 0);

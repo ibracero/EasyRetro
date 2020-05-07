@@ -44,7 +44,6 @@ abstract class StatementFragment :
 
     override fun renderViewState(viewState: StatementListViewState) {
         adapter.submitList(viewState.statements)
-        Timber.d("Render viewState $viewState")
         when (viewState.addState) {
             StatementAddState.Shown -> showAddItem()
             StatementAddState.Hidden -> hideAddItem()
