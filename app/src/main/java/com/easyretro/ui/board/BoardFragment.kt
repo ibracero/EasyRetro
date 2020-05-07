@@ -1,6 +1,5 @@
 package com.easyretro.ui.board
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -8,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation.findNavController
@@ -144,9 +144,8 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private fun initPortraitUi() {
-        val navController =
-            findNavController(requireActivity(), R.id.bottom_nav_host_fragment)
-                .apply { setGraph(R.navigation.board_nav_graph, arguments) }
+        val navController = findNavController(requireActivity(), R.id.bottom_nav_host_fragment)
+            .apply { setGraph(R.navigation.board_nav_graph, arguments) }
 
         nav_view?.setupWithNavController(navController)
         nav_view?.setOnNavigationItemSelectedListener { menuItem ->
@@ -248,7 +247,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
             .setCancelable(true)
             .setTitle(R.string.lock_confirmation_title)
             .setMessage(R.string.lock_confirmation_message)
-            .setPositiveButton(R.string.lock) { _, _ ->
+            .setPositiveButton(R.string.action_yes) { _, _ ->
                 onLockClicked(retroUuid = retroUuid)
             }
             .setNegativeButton(R.string.action_no) { dialogInterface, _ -> dialogInterface.dismiss() }

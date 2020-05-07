@@ -15,7 +15,6 @@ import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.Payload
 import kotlinx.android.synthetic.main.fragment_statements.*
 import org.koin.android.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 abstract class StatementFragment :
     BaseFragment<StatementListViewState, StatementListViewEffect, StatementListViewEvent, StatementViewModel>() {

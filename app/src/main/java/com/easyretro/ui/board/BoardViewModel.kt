@@ -89,12 +89,18 @@ class BoardViewModel(
     private fun unlockRetro(retroUuid: String) {
         viewModelScope.launch {
             retroRepository.unlockRetro(retroUuid = retroUuid)
+                .mapLeft {
+                    viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
+                }
         }
     }
 
     private fun lockRetro(retroUuid: String) {
         viewModelScope.launch {
             retroRepository.lockRetro(retroUuid = retroUuid)
+                .mapLeft {
+                    viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
+                }
         }
     }
 
