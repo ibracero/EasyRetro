@@ -9,7 +9,7 @@
 	android:layout_marginTop="8dp"
 	android:layout_marginEnd="8dp"
 	app:cardElevation="4dp"
-	tools:cardBackgroundColor="@color/actions_background_color">
+	tools:cardBackgroundColor="@color/actionsBackgroundColor">
 
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:layout_width="match_parent"
@@ -49,7 +49,7 @@
 			android:id="@+id/action_delete"
 			android:layout_width="wrap_content"
 			android:layout_height="0dp"
-			android:background="@color/colorPrimary"
+			android:background="@color/colorPrimaryTranslucent"
 			android:padding="8dp"
 			android:visibility="gone"
 			app:layout_constraintBottom_toBottomOf="parent"

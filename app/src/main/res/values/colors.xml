@@ -16,4 +16,6 @@
     <color name="errorColor">#FF553E</color>
     <color name="successColor">#62E7F8</color>
     <color name="warningColor">#D5A61B</color>
+    <color name="yellow">#ffd659</color>
+    <color name="orange">#ffbd54</color>
 </resources>

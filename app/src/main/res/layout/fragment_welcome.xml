@@ -1,115 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:id="@+id/welcome_root"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:animateLayoutChanges="true"
-	android:background="@color/colorPrimary">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/welcome_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/colorPrimary">
 
-	<ImageView
-		android:id="@+id/post_it_image"
-		android:layout_width="172dp"
-		android:layout_height="172dp"
-		app:layout_constraintBottom_toTopOf="@id/google_sign_in"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent"
-		app:layout_constraintVertical_chainStyle="packed"
-		app:srcCompat="@drawable/ic_post_it" />
+    <ImageView
+        android:id="@+id/post_it_image"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        app:layout_constraintBottom_toTopOf="@id/google_sign_in"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:srcCompat="@drawable/colorful_notes" />
 
-	<TextView
-		android:id="@+id/app_name_label"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:gravity="center"
-		android:paddingStart="24dp"
-		android:paddingTop="20dp"
-		android:rotation="-7"
-		android:text="@string/app_name"
-		android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-		android:textColor="@color/colorPrimaryDark"
-		android:textStyle="bold"
-		app:layout_constraintBottom_toBottomOf="@id/post_it_image"
-		app:layout_constraintEnd_toEndOf="@id/post_it_image"
-		app:layout_constraintStart_toStartOf="@id/post_it_image"
-		app:layout_constraintTop_toTopOf="@id/post_it_image"
-		tools:ignore="RtlSymmetry" />
+    <TextView
+        android:id="@+id/app_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingStart="2dp"
+        android:paddingTop="48dp"
+        android:rotation="-2"
+        android:text="@string/welcome_message"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:textColor="@color/primaryTextColor"
+        app:layout_constraintBottom_toBottomOf="@id/post_it_image"
+        app:layout_constraintEnd_toEndOf="@id/post_it_image"
+        app:layout_constraintStart_toStartOf="@id/post_it_image"
+        app:layout_constraintTop_toTopOf="@id/post_it_image"
+        app:layout_constraintVertical_bias="0.4"
+        tools:ignore="RtlSymmetry" />
 
-	<Button
-		android:id="@+id/google_sign_in"
-		android:layout_width="256dp"
-		android:layout_height="56dp"
-		android:layout_marginTop="132dp"
-		android:background="@color/colorPrimaryDark"
-		android:drawableStart="@drawable/googleg_standard_color_18"
-		android:paddingStart="16dp"
-		android:paddingEnd="16dp"
-		android:text="@string/sign_in_with_google"
-		android:textAllCaps="false"
-		android:textColor="@color/primaryTextColor"
-		android:textStyle="bold"
-		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@id/email_sign_in"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/post_it_image"
-		tools:visibility="visible" />
+    <Button
+        android:id="@+id/google_sign_in"
+        android:layout_width="@dimen/form_standard_width"
+        android:layout_height="@dimen/form_standard_height"
+        android:layout_marginTop="132dp"
+        android:drawableStart="@drawable/googleg_standard_color_18"
+        android:paddingStart="@dimen/standard_margin"
+        android:paddingEnd="@dimen/standard_margin"
+        android:text="@string/sign_in_with_google"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/email_sign_in"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/post_it_image"
+        tools:visibility="visible" />
 
-	<Button
-		android:id="@+id/email_sign_in"
-		android:layout_width="256dp"
-		android:layout_height="56dp"
-		android:layout_marginTop="16dp"
-		android:background="@color/colorPrimaryDark"
-		android:drawableStart="@drawable/ic_email"
-		android:paddingStart="16dp"
-		android:paddingEnd="16dp"
-		android:text="@string/sign_in_with_email"
-		android:textAllCaps="false"
-		android:textColor="@color/primaryTextColor"
-		android:textStyle="bold"
-		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@id/divider"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/google_sign_in"
-		app:layout_constraintVertical_chainStyle="packed"
-		tools:visibility="visible" />
+    <Button
+        android:id="@+id/email_sign_in"
+        android:layout_width="@dimen/form_standard_width"
+        android:layout_height="@dimen/form_standard_height"
+        android:layout_marginTop="@dimen/standard_margin"
+        android:drawableStart="@drawable/ic_email"
+        android:paddingStart="@dimen/standard_margin"
+        android:paddingEnd="@dimen/standard_margin"
+        android:text="@string/sign_in_with_email"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/google_sign_in"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:visibility="visible" />
 
-	<View
-		android:id="@+id/divider"
-		android:layout_width="0dp"
-		android:layout_height="1dp"
-		android:layout_marginTop="16dp"
-		android:background="@color/lightGreyColor"
-		app:layout_constraintBottom_toTopOf="@id/sign_up_button"
-		app:layout_constraintEnd_toEndOf="@id/email_sign_in"
-		app:layout_constraintStart_toStartOf="@id/email_sign_in"
-		app:layout_constraintTop_toBottomOf="@id/email_sign_in" />
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/standard_margin"
+        android:background="@color/lightGreyColor"
+        app:layout_constraintBottom_toTopOf="@id/sign_up_button"
+        app:layout_constraintEnd_toEndOf="@id/email_sign_in"
+        app:layout_constraintStart_toStartOf="@id/email_sign_in"
+        app:layout_constraintTop_toBottomOf="@id/email_sign_in" />
 
-	<TextView
-		android:id="@+id/sign_up_button"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:gravity="center"
-		android:padding="16dp"
-		android:text="@string/sign_up"
-		android:textColor="@color/primaryTextColor"
-		android:textStyle="bold"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="@id/divider"
-		app:layout_constraintStart_toStartOf="@id/divider"
-		app:layout_constraintTop_toBottomOf="@id/divider" />
+    <TextView
+        android:id="@+id/sign_up_button"
+        android:layout_width="@dimen/form_standard_width"
+        android:layout_height="@dimen/form_standard_height"
+        android:layout_marginTop="@dimen/standard_margin"
+        android:gravity="center"
+        android:padding="@dimen/standard_margin"
+        android:text="@string/sign_up"
+        android:textColor="@color/primaryTextColor"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/divider"
+        app:layout_constraintStart_toStartOf="@id/divider"
+        app:layout_constraintTop_toBottomOf="@id/divider" />
 
-	<androidx.constraintlayout.widget.Group
-		android:id="@+id/group_post_it"
-		android:layout_width="0dp"
-		android:layout_height="0dp"
-		android:visibility="gone"
-		app:constraint_referenced_ids="post_it_image,app_name_label"
-		tools:visibility="visible" />
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/post_it_image" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_post_it"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:constraint_referenced_ids="post_it_image,app_name_label"
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_buttons"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:constraint_referenced_ids="google_sign_in,email_sign_in,sign_up_button,divider" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

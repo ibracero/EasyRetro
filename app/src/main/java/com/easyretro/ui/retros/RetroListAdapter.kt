@@ -30,7 +30,12 @@ class RetroListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         return when (viewType) {
-            VIEW_TYPE_ADD -> AddItemViewHolder(parent, onAddClicked, AddItemViewHolder.ItemType.RETRO, itemCount > ADD_ITEM_OFFSET)
+            VIEW_TYPE_ADD -> AddItemViewHolder(
+                parent,
+                onAddClicked,
+                AddItemViewHolder.ItemType.RETRO,
+                itemCount > ADD_ITEM_OFFSET
+            )
             else -> RetroViewHolder(parent, onRetroClicked)
         }
     }
@@ -57,7 +62,7 @@ class RetroListAdapter(
             oldItem.uuid == newItem.uuid
 
         override fun areContentsTheSame(oldItem: Retro, newItem: Retro): Boolean =
-            oldItem.hashCode() == newItem.hashCode()
+            oldItem.title == newItem.title
     }
 }
 

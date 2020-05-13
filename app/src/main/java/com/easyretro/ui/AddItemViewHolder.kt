@@ -9,7 +9,6 @@ import com.easyretro.R
 import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.extensions.*
 import kotlinx.android.synthetic.main.item_add.*
-import timber.log.Timber
 
 
 class AddItemViewHolder(
@@ -27,7 +26,7 @@ class AddItemViewHolder(
     init {
         containerView.setOnClickListener { showTitleInput() }
 
-        (add_title as EditText).setOnEditorActionListener { p0, actionId, keyEvent ->
+        (add_title as EditText).setOnEditorActionListener { _, actionId, keyEvent ->
             if (actionId == IME_ACTION_DONE && keyEvent.keyCode == KEYCODE_ENTER) {
                 addItemIfFilled()
                 true

@@ -108,7 +108,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingTop="32dp"
-        android:text="@string/review_old_retros"
+        android:text="@string/your_retros"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"

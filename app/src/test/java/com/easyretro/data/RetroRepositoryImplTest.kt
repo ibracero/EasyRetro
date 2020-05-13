@@ -111,7 +111,7 @@ class RetroRepositoryImplTest {
     @Test
     fun `GIVEN a valid retroUuid WHEN getting retro info THEN return Right with the retro`() {
         runBlocking {
-            whenever(localDataStore.getRetro("valid-uuid")).thenReturn(dbRetro)
+            whenever(localDataStore.observeRetro("valid-uuid")).thenReturn(dbRetro)
 
             val actualValue = repository.getRetro("valid-uuid")
             val expectedValue = Either.right(retroDbToDomainMapper.map(dbRetro))

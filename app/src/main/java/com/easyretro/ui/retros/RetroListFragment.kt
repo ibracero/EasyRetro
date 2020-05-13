@@ -65,10 +65,6 @@ class RetroListFragment :
             else -> super.onOptionsItemSelected(item)
         }
 
-    private fun logoutFromGoogle() {
-        GoogleSignIn.getClient(requireActivity(), GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()
-    }
-
     override fun onStart() {
         super.onStart()
         handleDeepLink()
@@ -137,6 +133,10 @@ class RetroListFragment :
         logoutFromGoogle()
         navigateToLoginScreen()
         viewModel.process(viewEvent = RetroListViewEvent.LogoutClicked)
+    }
+
+    private fun logoutFromGoogle() {
+        GoogleSignIn.getClient(requireActivity(), GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()
     }
 
     private fun navigateToRetroBoard(retroUuid: String) {

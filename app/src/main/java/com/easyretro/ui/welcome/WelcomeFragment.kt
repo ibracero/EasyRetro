@@ -11,6 +11,8 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.easyretro.R
+import com.easyretro.common.extensions.gone
+import com.easyretro.common.extensions.invisible
 import com.easyretro.common.extensions.showErrorSnackbar
 import com.easyretro.common.extensions.visible
 import com.easyretro.domain.model.Failure
@@ -51,6 +53,8 @@ class WelcomeFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
             try {
+                group_buttons.invisible()
+                loading.visible()
                 val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                 val account = task?.getResult(ApiException::class.java)
                 welcomeViewModel.handleSignInResult(account)
@@ -80,6 +84,8 @@ class WelcomeFragment : Fragment() {
     private fun processGoogleSignInResponse(response: Either<Failure, Unit>) {
         response.fold({
             welcome_root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
+            loading.gone()
+            group_buttons.visible()
         }, {
             navigateToRetroList()
         })
