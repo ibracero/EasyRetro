@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import kotlinx.coroutines.launch
@@ -33,8 +34,18 @@ class WelcomeViewModel(
     }
 
     private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
+        val safeTokenId = account.idToken ?: return
+
         viewModelScope.launch {
-            val result = repository.signWithGoogleAccount(account)
+            val result = repository.signWithGoogleAccount(
+                idToken = safeTokenId,
+                user = User(
+                    email = account.email.orEmpty(),
+                    firstName = account.givenName.orEmpty(),
+                    lastName = account.familyName.orEmpty(),
+                    photoUrl = account.photoUrl?.toString().orEmpty()
+                )
+            )
             googleSignInLiveData.postValue(result)
         }
     }

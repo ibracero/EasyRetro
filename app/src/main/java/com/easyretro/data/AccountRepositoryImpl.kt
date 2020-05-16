@@ -6,10 +6,11 @@ import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
+import com.easyretro.data.remote.firestore.UserRemote
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import kotlinx.coroutines.withContext
 
 class AccountRepositoryImpl(
@@ -25,13 +26,13 @@ class AccountRepositoryImpl(
             reloadUser()
         }
 
-    override suspend fun signWithGoogleAccount(account: GoogleSignInAccount): Either<Failure, Unit> =
+    override suspend fun signWithGoogleAccount(idToken: String, user: User): Either<Failure, Unit> =
         withContext(dispatchers.io()) {
-            authDataStore.signInWithToken(token = account.idToken)
-            val signInEither = authDataStore.signInWithToken(token = account.idToken)
+            authDataStore.signInWithToken(token = idToken)
+            val signInEither = authDataStore.signInWithToken(token = idToken)
 
             if (signInEither.isLeft()) signInEither
-            else startUserSession(account)
+            else startUserSession(user)
         }
 
     override suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus> =
@@ -72,14 +73,22 @@ class AccountRepositoryImpl(
 
     private suspend fun reloadUser(): Either<Failure, UserStatus> =
         withContext(dispatchers.io()) {
-            authDataStore.reloadUser(isSessionStarted = sessionSharedPrefsManager.isSessionStarted())
+            authDataStore.isUserVerified()
+                .map { userVerified ->
+                    when (userVerified ?: sessionSharedPrefsManager.isSessionStarted()) {
+                        true -> UserStatus.VERIFIED
+                        false -> UserStatus.NON_VERIFIED
+                    }
+                }
         }
 
-    private suspend fun startUserSession(account: GoogleSignInAccount): Either<Failure, Unit> =
+    private suspend fun startUserSession(account: User): Either<Failure, Unit> =
         remoteDataStore.createUser(
-            email = account.email.orEmpty(),
-            firstName = account.givenName.orEmpty(),
-            lastName = account.familyName.orEmpty(),
-            photoUrl = account.photoUrl?.toString().orEmpty()
+            UserRemote(
+                email = account.email,
+                firstName = account.firstName,
+                lastName = account.lastName,
+                photoUrl = account.photoUrl
+            )
         ).map { sessionSharedPrefsManager.setSessionStarted() }
 }

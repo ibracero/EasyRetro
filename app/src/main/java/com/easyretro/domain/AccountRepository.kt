@@ -2,12 +2,12 @@ package com.easyretro.domain
 
 import arrow.core.Either
 import com.easyretro.domain.model.Failure
+import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 
 interface AccountRepository {
 
-    suspend fun signWithGoogleAccount(account: GoogleSignInAccount): Either<Failure, Unit>
+    suspend fun signWithGoogleAccount(idToken: String, user: User): Either<Failure, Unit>
 
     suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus>
 

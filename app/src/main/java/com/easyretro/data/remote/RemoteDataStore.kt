@@ -294,24 +294,22 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         }
     }
 
-    suspend fun createUser(
-        email: String,
-        firstName: String,
-        lastName: String,
-        photoUrl: String
-    ): Either<Failure, Unit> {
+    suspend fun createUser(remoteUser: UserRemote): Either<Failure, Unit> {
+        if (remoteUser.email == null)
+            return Either.left(Failure.InvalidUserFailure)
+
         if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
             return Either.left(Failure.UnavailableNetwork)
 
         val data = hashMapOf(
-            FirestoreField.USER_FIRST_NAME to firstName,
-            FirestoreField.USER_LAST_NAME to lastName,
-            FirestoreField.USER_PHOTO_URL to photoUrl
+            FirestoreField.USER_FIRST_NAME to remoteUser.firstName,
+            FirestoreField.USER_LAST_NAME to remoteUser.lastName,
+            FirestoreField.USER_PHOTO_URL to remoteUser.photoUrl
         )
 
         return suspendCoroutine { continuation ->
             db.collection(FirestoreTable.TABLE_USERS)
-                .document(email)
+                .document(remoteUser.email)
                 .set(data, SetOptions.merge())
                 .addOnSuccessListener {
                     continuation.resume(Either.right(Unit))

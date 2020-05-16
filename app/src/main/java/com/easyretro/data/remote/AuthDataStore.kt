@@ -94,21 +94,13 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
         return suspendCoroutine { sendEmailVerification(it) }
     }
 
-    suspend fun reloadUser(isSessionStarted: Boolean): Either<Failure, UserStatus> {
+    suspend fun isUserVerified(): Either<Failure, Boolean?> {
         val currentUser = firebaseAuth.currentUser ?: return Either.left(Failure.UnknownError)
         return suspendCoroutine { continuation ->
             currentUser.reload()
                 .addOnCompleteListener { task ->
-                    val sessionStarted =
-                        if (task.isSuccessful) firebaseAuth.currentUser?.isEmailVerified
-                        else isSessionStarted
-
-                    val status = when (sessionStarted) {
-                        true -> Either.right(UserStatus.VERIFIED)
-                        false -> Either.right(UserStatus.NON_VERIFIED)
-                        null -> Either.left(Failure.InvalidUserFailure)
-                    }
-                    continuation.resume(status)
+                    if (!task.isSuccessful) continuation.resume(Either.right(null))
+                    else continuation.resume(Either.right(firebaseAuth.currentUser?.isEmailVerified))
                 }
         }
     }
