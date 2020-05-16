@@ -7,6 +7,7 @@ plugins {
     id(Plugins.kotlinAndroidExtensions)
     id(Plugins.kotlinKapt)
     id(Plugins.googleServices)
+    id(Plugins.crashlytics)
 }
 
 android {
@@ -21,6 +22,7 @@ android {
     }
     buildTypes {
         getByName(DEBUG) {
+            applicationIdSuffix = ".debug"
             isMinifyEnabled = false
             isDebuggable = true
         }
@@ -67,9 +69,10 @@ dependencies {
     implementation(Libraries.arrow)
     implementation(Libraries.play_services_auth)
     implementation(Libraries.glide)
+    implementation(Libraries.crashlytics)
+
     debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
-
 
     testImplementation(TestLibraries.junit)
     testImplementation(TestLibraries.mockito_kotlin)

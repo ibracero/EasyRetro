@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "394285632810",
+    "firebase_url": "https://ibracero-retrum.firebaseio.com",
+    "project_id": "ibracero-retrum",
+    "storage_bucket": "ibracero-retrum.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:394285632810:android:13a32fac66c97feaf4e253",
+        "android_client_info": {
+          "package_name": "com.easyretro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "394285632810-el63hjlh9v8ueo2tp8jq7il697tgsjpu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.easyretro",
+            "certificate_hash": "c0dc97af81c7c3be60c01536f0c88475a56c8a8a"
+          }
+        },
+        {
+          "client_id": "394285632810-2muec7l1lvhj968ghglhb19rqh22j2bp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKhn-sAjCNWugzexElIs-HrKLXl6H_Fj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "394285632810-kd7kr2ct19adthdg94ai7phufprcq40l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:394285632810:android:ee3319c9ba0af01ff4e253",
+        "android_client_info": {
+          "package_name": "com.easyretro.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "394285632810-2muec7l1lvhj968ghglhb19rqh22j2bp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKhn-sAjCNWugzexElIs-HrKLXl6H_Fj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "394285632810-kd7kr2ct19adthdg94ai7phufprcq40l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,6 +4,7 @@ import Libraries.Versions.androidx_lifecycle_version
 import Libraries.Versions.androidx_navigation_version
 import Libraries.Versions.arrow_version
 import Libraries.Versions.coroutines_version
+import Libraries.Versions.crashlytics_version
 import Libraries.Versions.firebase_analytics_version
 import Libraries.Versions.firebase_auth_version
 import Libraries.Versions.firebase_dynamic_links_version
@@ -39,6 +40,7 @@ object Plugins {
     const val kotlinAndroidExtensions = "kotlin-android-extensions"
     const val googleServices = "com.google.gms.google-services"
     const val kotlinKapt = "kotlin-kapt"
+    const val crashlytics = "io.fabric"
 }
 
 object Libraries {
@@ -60,6 +62,7 @@ object Libraries {
         const val arrow_version = "0.10.3"
         const val play_services_auth_version = "18.0.0"
         const val glide_version = "4.11.0"
+        const val crashlytics_version = "2.10.1"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -92,6 +95,7 @@ object Libraries {
     const val firebase_auth = "com.google.firebase:firebase-auth:$firebase_auth_version"
     const val play_services_auth = "com.google.android.gms:play-services-auth:$play_services_auth_version"
     const val glide = "com.github.bumptech.glide:glide:$glide_version"
+    const val crashlytics = "com.crashlytics.sdk.android:crashlytics:$crashlytics_version"
 }
 
 object TestLibraries {
@@ -101,6 +105,7 @@ object TestLibraries {
         const val mockito_version = "2.2.0"
         const val mockito_inline_version = "2.27.0"
     }
+
     const val junit = "junit:junit:$junit_version"
     const val mockito_kotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_version"
     const val mockito_inline = "org.mockito:mockito-inline:$mockito_inline_version"
