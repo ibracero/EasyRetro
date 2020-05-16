@@ -14,7 +14,6 @@ import com.google.firebase.dynamiclinks.ShortDynamicLink
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class BoardViewModel(
     private val retroRepository: RetroRepository,
@@ -88,7 +87,7 @@ class BoardViewModel(
 
     private fun unlockRetro(retroUuid: String) {
         viewModelScope.launch {
-            retroRepository.unlockRetro(retroUuid = retroUuid)
+            retroRepository.unprotectRetro(retroUuid = retroUuid)
                 .mapLeft {
                     viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
                 }
@@ -97,7 +96,7 @@ class BoardViewModel(
 
     private fun lockRetro(retroUuid: String) {
         viewModelScope.launch {
-            retroRepository.lockRetro(retroUuid = retroUuid)
+            retroRepository.protectRetro(retroUuid = retroUuid)
                 .mapLeft {
                     viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
                 }

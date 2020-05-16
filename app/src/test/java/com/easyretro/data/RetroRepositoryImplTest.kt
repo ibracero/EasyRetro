@@ -17,7 +17,9 @@ import com.easyretro.domain.model.Retro
 import com.easyretro.domain.model.User
 import com.easyretro.test
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -56,6 +58,7 @@ class RetroRepositoryImplTest {
         initModelMocks()
     }
 
+    //region create retro
     @Test
     fun `GIVEN a success response from Firebase WHEN trying to create a retro THEN return Right with the retro`() {
         runBlocking {
@@ -63,8 +66,8 @@ class RetroRepositoryImplTest {
                 .thenReturn(Either.right(remoteRetro))
 
             val actualValue = repository.createRetro(retroTitle)
-            val expectedValue = Either.right(domainRetro)
 
+            val expectedValue = Either.right(domainRetro)
             assertEquals(expectedValue, actualValue)
         }
     }
@@ -76,12 +79,14 @@ class RetroRepositoryImplTest {
                 .thenReturn(Either.left(Failure.UnknownError))
 
             val actualValue = repository.createRetro(retroTitle)
-            val expectedValue = Either.left(Failure.UnknownError)
 
+            val expectedValue = Either.left(Failure.UnknownError)
             assertEquals(expectedValue, actualValue)
         }
     }
+    //endregion
 
+    //region join retro
     @Test
     fun `GIVEN a success response from Firebase WHEN trying to join a retro THEN return Right Unit`() {
         runBlocking {
@@ -89,8 +94,8 @@ class RetroRepositoryImplTest {
                 .thenReturn(Either.right(Unit))
 
             val actualValue = repository.joinRetro(retroUuid)
-            val expectedValue = Either.right(Unit)
 
+            val expectedValue = Either.right(Unit)
             assertEquals(expectedValue, actualValue)
         }
     }
@@ -102,36 +107,48 @@ class RetroRepositoryImplTest {
                 .thenReturn(Either.left(Failure.UnknownError))
 
             val actualValue = repository.joinRetro(retroUuid)
-            val expectedValue = Either.left(Failure.UnknownError)
 
+            val expectedValue = Either.left(Failure.UnknownError)
             assertEquals(expectedValue, actualValue)
         }
     }
+    //endregion
 
+    //region observe retro
     @Test
     fun `GIVEN a valid retroUuid WHEN getting retro info THEN return Right with the retro`() {
         runBlocking {
-            whenever(localDataStore.observeRetro("valid-uuid")).thenReturn(dbRetro)
+            whenever(localDataStore.observeRetro("valid-uuid"))
+                .thenReturn(flowOf(dbRetro))
 
-            val actualValue = repository.getRetro("valid-uuid")
-            val expectedValue = Either.right(retroDbToDomainMapper.map(dbRetro))
+            val flow = repository.observeRetro("valid-uuid")
 
-            assertEquals(expectedValue, actualValue)
+            flow.test {
+                val expectedValue = Either.right(retroDbToDomainMapper.map(dbRetro, userEmail))
+                assertEquals(expectedValue, expectItem())
+                expectComplete()
+            }
         }
     }
 
     @Test
     fun `GIVEN an invalid retroUuid WHEN getting retro info THEN return Left with the failure`() {
         runBlocking {
-            whenever(localDataStore.getRetro("invalid-uuid")).thenReturn(null)
+            whenever(localDataStore.observeRetro("invalid-uuid"))
+                .thenReturn(flowOf(null))
 
-            val actualValue = repository.getRetro("invalid-uuid")
-            val expectedValue = Either.left(Failure.RetroNotFoundError)
+            val flow = repository.observeRetro("invalid-uuid")
 
-            assertEquals(expectedValue, actualValue)
+            flow.test {
+                val expectedValue = Either.left(Failure.RetroNotFoundError)
+                assertEquals(expectedValue, expectItem())
+                expectComplete()
+            }
         }
     }
+    //endregion
 
+    //region get retros
     @Test
     fun `GIVEN local data WHEN getting retro list THEN flow emits first local data and then remote data`() {
         runBlocking {
@@ -169,7 +186,6 @@ class RetroRepositoryImplTest {
         }
     }
 
-
     @Test
     fun `GIVEN a remote error WHEN getting retro list THEN flow emits local data and the error`() {
         runBlocking {
@@ -186,6 +202,67 @@ class RetroRepositoryImplTest {
             }
         }
     }
+    //endregion
+
+    //region protect retro
+    @Test
+    fun `GIVEN a success response WHEN protecting a retro THEN return Unit`() {
+        runBlocking {
+            whenever(remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = true))
+                .thenReturn(Either.right(Unit))
+
+            val actualValue = repository.protectRetro(retroUuid)
+
+            val expectedValue = Either.right(Unit)
+            verify(remoteDataStore).updateRetroProtection(retroUuid = retroUuid, protected = true)
+            assertEquals(expectedValue, actualValue)
+        }
+    }
+
+    @Test
+    fun `GIVEN a failed response WHEN protecting a retro THEN return Failure`() {
+        runBlocking {
+            whenever(remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = true))
+                .thenReturn(Either.left(Failure.UnknownError))
+
+            val actualValue = repository.protectRetro(retroUuid)
+
+            val expectedValue = Either.left(Failure.UnknownError)
+            verify(remoteDataStore).updateRetroProtection(retroUuid = retroUuid, protected = true)
+            assertEquals(expectedValue, actualValue)
+        }
+    }
+    //endregion
+
+    //region unprotect retro
+    @Test
+    fun `GIVEN a success response WHEN unprotecting a retro THEN return Unit`() {
+        runBlocking {
+            whenever(remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = false))
+                .thenReturn(Either.right(Unit))
+
+            val actualValue = repository.unprotectRetro(retroUuid)
+
+            val expectedValue = Either.right(Unit)
+            verify(remoteDataStore).updateRetroProtection(retroUuid = retroUuid, protected = false)
+            assertEquals(expectedValue, actualValue)
+        }
+    }
+
+    @Test
+    fun `GIVEN a failed response WHEN unprotecting a retro THEN return Failure`() {
+        runBlocking {
+            whenever(remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = false))
+                .thenReturn(Either.left(Failure.UnknownError))
+
+            val actualValue = repository.unprotectRetro(retroUuid)
+
+            val expectedValue = Either.left(Failure.UnknownError)
+            verify(remoteDataStore).updateRetroProtection(retroUuid = retroUuid, protected = false)
+            assertEquals(expectedValue, actualValue)
+        }
+    }
+    //endregion
 
     private fun initModelMocks() {
         val retroTimestamp = 1586705438L
@@ -205,7 +282,9 @@ class RetroRepositoryImplTest {
             uuid = retroUuid,
             title = retroTitle,
             timestamp = retroTimestamp,
-            users = listOf(domainUserOne)
+            users = listOf(domainUserOne),
+            lockingAllowed = true,
+            protected = true
         )
 
         val remoteUserOne = UserRemote(
@@ -219,14 +298,18 @@ class RetroRepositoryImplTest {
             uuid = retroUuid,
             title = retroTitle,
             timestamp = retroTimestamp,
-            users = listOf(remoteUserOne)
+            users = listOf(remoteUserOne),
+            ownerEmail = userEmail,
+            protected = true
         )
 
         dbRetro = RetroDb(
             uuid = retroUuid,
             title = retroTitle,
             timestamp = 1000L,
-            users = emptyList()
+            users = emptyList(),
+            ownerEmail = userEmail,
+            isProtected = true
         )
     }
 }

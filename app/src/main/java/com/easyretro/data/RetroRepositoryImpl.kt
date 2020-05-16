@@ -31,7 +31,7 @@ class RetroRepositoryImpl(
         withContext(dispatchers.io()) {
             remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
                 .map(retroRemoteToDbMapper::map)
-                .map(retroDbToDomainMapper::map)
+                .map { retroDbToDomainMapper.map(it, userEmail) }
         }
 
     override suspend fun joinRetro(uuid: String): Either<Failure, Unit> =
@@ -62,12 +62,12 @@ class RetroRepositoryImpl(
             }
             .flowOn(dispatchers.io())
 
-    override suspend fun lockRetro(retroUuid: String): Either<Failure, Unit> =
+    override suspend fun protectRetro(retroUuid: String): Either<Failure, Unit> =
         withContext(dispatchers.io()) {
             remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = true)
         }
 
-    override suspend fun unlockRetro(retroUuid: String): Either<Failure, Unit> =
+    override suspend fun unprotectRetro(retroUuid: String): Either<Failure, Unit> =
         withContext(dispatchers.io()) {
             remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = false)
         }
