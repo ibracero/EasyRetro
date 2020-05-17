@@ -16,6 +16,7 @@ import Libraries.Versions.play_services_auth_version
 import Libraries.Versions.room_debugger_version
 import Libraries.Versions.room_version
 import Libraries.Versions.timber_version
+import TestLibraries.Versions.androidx_testing_version
 import TestLibraries.Versions.espresso_version
 import TestLibraries.Versions.junit_version
 import TestLibraries.Versions.mockito_inline_version
@@ -54,7 +55,7 @@ object Libraries {
         const val firebase_analytics_version = "17.4.0"
         const val firebase_dynamic_links_version = "19.1.0"
         const val firebase_auth_version = "19.3.1"
-        const val coroutines_version = "1.3.5"
+        const val coroutines_version = "1.3.6"
         const val koin_version = "2.1.5"
         const val timber_version = "4.7.1"
         const val room_version = "2.2.5"
@@ -104,11 +105,13 @@ object TestLibraries {
         const val espresso_version = "3.1.1"
         const val mockito_version = "2.2.0"
         const val mockito_inline_version = "2.27.0"
+        const val androidx_testing_version = "2.1.0"
     }
 
     const val junit = "junit:junit:$junit_version"
     const val mockito_kotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_version"
     const val mockito_inline = "org.mockito:mockito-inline:$mockito_inline_version"
     const val coroutines_test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
+    const val androidx_core_testing = "androidx.arch.core:core-testing:$androidx_testing_version"
     const val androidx_test_espresso_core = "androidx.test.espresso:espresso-core:$espresso_version"
 }

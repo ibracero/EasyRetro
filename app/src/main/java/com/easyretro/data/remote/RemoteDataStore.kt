@@ -23,13 +23,13 @@ import kotlin.coroutines.suspendCoroutine
 
 class RemoteDataStore(private val connectionManager: ConnectionManager) {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
 
     @Suppress("UNCHECKED_CAST")
     @ExperimentalCoroutinesApi
     suspend fun observeRetro(retroUuid: String) =
         callbackFlow<Either<Failure, RetroRemote>> {
-            val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
+            val registrationObserver = firestore.collection(FirestoreTable.TABLE_RETROS)
                 .document(retroUuid)
                 .addSnapshotListener { snapshot, exception ->
                     if (exception != null)
@@ -79,7 +79,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         userEmail: String,
         retroUuid: String
     ) = callbackFlow {
-        val registrationObserver = db.collection(FirestoreTable.TABLE_RETROS)
+        val registrationObserver = firestore.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
             .collection(FirestoreCollection.COLLECTION_STATEMENTS)
             .addSnapshotListener { snapshot, exception ->
@@ -117,7 +117,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
             return Either.left(Failure.UnavailableNetwork)
 
         return suspendCoroutine { continuation ->
-            db.collection(FirestoreTable.TABLE_RETROS)
+            firestore.collection(FirestoreTable.TABLE_RETROS)
                 .document(retroUuid)
                 .update(mapOf(FirestoreField.RETRO_PROTECTED to protected))
                 .addOnSuccessListener {
@@ -135,7 +135,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
             return Either.left(Failure.UnavailableNetwork)
 
-        val userRef = db.collection(FirestoreTable.TABLE_USERS).document(userEmail)
+        val userRef = firestore.collection(FirestoreTable.TABLE_USERS).document(userEmail)
 
         val retroValues = hashMapOf(
             FirestoreField.RETRO_TITLE to retroTitle,
@@ -146,7 +146,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
 
         val retroUuid = UUID.randomUUID().toString()
 
-        val retroRef = db.collection(FirestoreTable.TABLE_RETROS)
+        val retroRef = firestore.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
 
         //Create retro (retros table)
@@ -191,7 +191,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
     @Suppress("UNCHECKED_CAST")
     suspend fun getUserRetros(userEmail: String): Either<Failure, List<RetroRemote>> {
         return suspendCoroutine { continuation ->
-            db.collection(FirestoreTable.TABLE_USERS)
+            firestore.collection(FirestoreTable.TABLE_USERS)
                 .document(userEmail)
                 .get()
                 .addOnSuccessListener { snapshot ->
@@ -234,7 +234,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         )
 
         return suspendCoroutine { continuation ->
-            db.collection(FirestoreTable.TABLE_RETROS)
+            firestore.collection(FirestoreTable.TABLE_RETROS)
                 .document(retroUuid)
                 .collection(FirestoreCollection.COLLECTION_STATEMENTS)
                 .add(item)
@@ -254,7 +254,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
             return Either.left(Failure.UnavailableNetwork)
 
         return suspendCoroutine { continuation ->
-            db.collection(FirestoreTable.TABLE_RETROS)
+            firestore.collection(FirestoreTable.TABLE_RETROS)
                 .document(retroUuid)
                 .collection(FirestoreCollection.COLLECTION_STATEMENTS)
                 .document(statementUuid)
@@ -274,10 +274,10 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
             return Either.left(Failure.UnavailableNetwork)
 
-        val userRef = db.collection(FirestoreTable.TABLE_USERS)
+        val userRef = firestore.collection(FirestoreTable.TABLE_USERS)
             .document(userEmail)
 
-        val retroRef = db.collection(FirestoreTable.TABLE_RETROS)
+        val retroRef = firestore.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
 
         return suspendCoroutine { continuation ->
@@ -308,7 +308,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         )
 
         return suspendCoroutine { continuation ->
-            db.collection(FirestoreTable.TABLE_USERS)
+            firestore.collection(FirestoreTable.TABLE_USERS)
                 .document(remoteUser.email)
                 .set(data, SetOptions.merge())
                 .addOnSuccessListener {
