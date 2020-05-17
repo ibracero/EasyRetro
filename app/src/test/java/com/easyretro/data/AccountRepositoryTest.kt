@@ -17,7 +17,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-class AccountRepositoryImplTest {
+class AccountRepositoryTest {
 
     private val userEmail = "email@email.com"
     private val userPassword = "password"

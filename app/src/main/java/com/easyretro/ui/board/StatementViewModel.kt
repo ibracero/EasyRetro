@@ -75,7 +75,7 @@ class StatementViewModel(
 
     private fun removeStatement(statement: Statement) {
         viewModelScope.launch {
-            boardRepository.removeStatement(statement)
+            boardRepository.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
                 .mapLeft {
                     viewEffect = StatementListViewEffect.ShowSnackBar(FailureMessage.parse(it))
                 }

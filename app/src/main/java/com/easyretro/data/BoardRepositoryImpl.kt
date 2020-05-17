@@ -57,9 +57,9 @@ class BoardRepositoryImpl(
         }
     }
 
-    override suspend fun removeStatement(statement: Statement): Either<Failure, Unit> =
+    override suspend fun removeStatement(retroUuid: String, statementUuid: String): Either<Failure, Unit> =
         withContext(dispatchers.io()) {
-            remoteDataStore.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
+            remoteDataStore.removeStatement(retroUuid = retroUuid, statementUuid = statementUuid)
         }
 
     override suspend fun startObservingStatements(retroUuid: String): Flow<Either<Failure, Unit>> {
@@ -67,7 +67,8 @@ class BoardRepositoryImpl(
         return remoteDataStore.observeStatements(userEmail, retroUuid)
             .map { either ->
                 either.map { statements ->
-                    localDataStore.saveStatements(statements.map(statementRemoteToDbMapper::map))
+                    if (statements.isNotEmpty())
+                        localDataStore.saveStatements(statements.map(statementRemoteToDbMapper::map))
                 }
             }.flowOn(dispatchers.io())
     }

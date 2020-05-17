@@ -10,7 +10,7 @@ interface BoardRepository {
 
     suspend fun addStatement(retroUuid: String, description: String, type: StatementType): Either<Failure, Unit>
 
-    suspend fun removeStatement(statement: Statement): Either<Failure, Unit>
+    suspend fun removeStatement(retroUuid: String, statementUuid:String): Either<Failure, Unit>
 
     suspend fun startObservingStatements(retroUuid: String): Flow<Either<Failure, Unit>>
 }
