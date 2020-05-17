@@ -38,9 +38,11 @@ class AccountRepositoryImpl(
     override suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus> =
         withContext(dispatchers.io()) {
             authDataStore.signInWithEmailAndPassword(email = email, password = password)
-                .map { userStatus ->
-                    sessionSharedPrefsManager.setSessionStarted()
-                    userStatus
+                .map { isUserVerified ->
+                    when (isUserVerified) {
+                        true -> UserStatus.VERIFIED
+                        false -> UserStatus.NON_VERIFIED
+                    }
                 }
         }
 
@@ -59,16 +61,11 @@ class AccountRepositoryImpl(
             authDataStore.resendVerificationEmail()
         }
 
-    override suspend fun logOut(): Either<Failure, Unit> =
+    override suspend fun logOut(): Unit =
         withContext(dispatchers.io()) {
-            try {
-                sessionSharedPrefsManager.setSessionEnded()
-                authDataStore.logOut()
-                localDataStore.clearAll()
-                Either.right(Unit)
-            } catch (e: Exception) {
-                Either.left(Failure.parse(e))
-            }
+            authDataStore.logOut()
+            sessionSharedPrefsManager.setSessionEnded()
+            localDataStore.clearAll()
         }
 
     private suspend fun reloadUser(): Either<Failure, UserStatus> =

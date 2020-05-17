@@ -37,7 +37,7 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
         }
     }
 
-    suspend fun signInWithEmailAndPassword(email: String, password: String): Either<Failure, UserStatus> {
+    suspend fun signInWithEmailAndPassword(email: String, password: String): Either<Failure, Boolean> {
         if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
             return Either.left(Failure.UnavailableNetwork)
 
@@ -46,12 +46,9 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Timber.d("User signed in with email")
-                        firebaseAuth.currentUser?.isEmailVerified?.let { verified ->
-                            val userStatus =
-                                if (verified) UserStatus.VERIFIED
-                                else UserStatus.NON_VERIFIED
-                            continuation.resume(Either.right(userStatus))
-                        } ?: continuation.resume(Either.left(Failure.TokenExpiredFailure))
+                        val user = firebaseAuth.currentUser
+                        if (user != null) continuation.resume(Either.right(user.isEmailVerified))
+                        else continuation.resume(Either.left(Failure.InvalidUserFailure))
                     } else continuation.parseExceptionAndResume(task.exception)
                 }
         }
@@ -95,7 +92,7 @@ class AuthDataStore(private val connectionManager: ConnectionManager) {
     }
 
     suspend fun isUserVerified(): Either<Failure, Boolean?> {
-        val currentUser = firebaseAuth.currentUser ?: return Either.left(Failure.UnknownError)
+        val currentUser = firebaseAuth.currentUser ?: return Either.left(Failure.InvalidUserFailure)
         return suspendCoroutine { continuation ->
             currentUser.reload()
                 .addOnCompleteListener { task ->

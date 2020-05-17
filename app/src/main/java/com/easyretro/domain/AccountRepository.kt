@@ -13,7 +13,7 @@ interface AccountRepository {
 
     suspend fun signUpWithEmail(email: String, password: String): Either<Failure, Unit>
 
-    suspend fun logOut(): Either<Failure, Unit>
+    suspend fun logOut(): Unit
 
     suspend fun resetPassword(email: String): Either<Failure, Unit>
 
