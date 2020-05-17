@@ -1,9 +1,11 @@
 package com.easyretro.data
 
 import arrow.core.Either
-import arrow.core.extensions.option.semiring.empty
 import com.easyretro.CoroutineTestRule
 import com.easyretro.data.local.LocalDataStore
+import com.easyretro.data.local.RetroDb
+import com.easyretro.data.local.StatementDb
+import com.easyretro.data.local.UserDb
 import com.easyretro.data.local.mapper.StatementDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
@@ -21,11 +23,11 @@ import org.junit.Test
 
 class BoardRepositoryTest {
 
-    private val userEmail = "email@email.com"
-    private val retroUuid = "retro-uuid"
-
     @get:Rule
     var coroutinesTestRule = CoroutineTestRule()
+
+    private val userEmail = "email@email.com"
+    private val retroUuid = "retro-uuid"
 
     private val localDataStore = mock<LocalDataStore>()
     private val remoteDataStore = mock<RemoteDataStore>()
@@ -34,14 +36,99 @@ class BoardRepositoryTest {
     }
 
     private val statementRemoteToDbMapper = StatementRemoteToDbMapper()
+    private val statementDbToDomainMapper = StatementDbToDomainMapper()
+
     private val repository = BoardRepositoryImpl(
         localDataStore = localDataStore,
         remoteDataStore = remoteDataStore,
         authDataStore = authDataStore,
         statementRemoteToDbMapper = statementRemoteToDbMapper,
-        statementDbToDomainMapper = StatementDbToDomainMapper(),
+        statementDbToDomainMapper = statementDbToDomainMapper,
         dispatchers = coroutinesTestRule.testDispatcherProvider
     )
+
+    //region get statements
+    @Test
+    fun `GIVEN protected retro WHEN getting statement list THEN return statements not removable`() {
+        runBlocking {
+            whenever(localDataStore.observeRetro(retroUuid = retroUuid))
+                .thenReturn(flowOf(getMockLocalRetro().copy(isProtected = true)))
+            whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
+                .thenReturn(flowOf(getMockLocalStatementList()))
+
+            val resultFlow = repository.getStatements(retroUuid = retroUuid, statementType = StatementType.POSITIVE)
+
+            resultFlow.test {
+                val expected = getMockLocalStatementList()
+                    .map { it.copy(removable = false) }
+                    .map(statementDbToDomainMapper::map)
+                assertEquals(expected, expectItem())
+                expectComplete()
+            }
+        }
+    }
+
+    @Test
+    fun `GIVEN non-protected retro WHEN getting statement list THEN return statements original removable value`() {
+        runBlocking {
+            whenever(localDataStore.observeRetro(retroUuid = retroUuid))
+                .thenReturn(flowOf(getMockLocalRetro().copy(isProtected = false)))
+            whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
+                .thenReturn(flowOf(getMockLocalStatementList()))
+
+            val resultFlow = repository.getStatements(retroUuid = retroUuid, statementType = StatementType.POSITIVE)
+
+            resultFlow.test {
+                val expected = getMockLocalStatementList()
+                    .map(statementDbToDomainMapper::map)
+                assertEquals(expected, expectItem())
+                expectComplete()
+            }
+        }
+    }
+
+    @Test
+    fun `GIVEN positive type WHEN getting statement list THEN requests positive statements`() {
+        runBlocking {
+            whenever(localDataStore.observeRetro(retroUuid = retroUuid))
+                .thenReturn(flowOf(getMockLocalRetro()))
+            whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
+                .thenReturn(flowOf(emptyList()))
+
+            repository.getStatements(retroUuid = retroUuid, statementType = StatementType.POSITIVE)
+
+            verify(localDataStore).observePositiveStatements(retroUuid = retroUuid)
+        }
+    }
+
+    @Test
+    fun `GIVEN negative type WHEN getting statement list THEN requests negative statements`() {
+        runBlocking {
+            whenever(localDataStore.observeRetro(retroUuid = retroUuid))
+                .thenReturn(flowOf(getMockLocalRetro()))
+            whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
+                .thenReturn(flowOf(emptyList()))
+
+            repository.getStatements(retroUuid = retroUuid, statementType = StatementType.NEGATIVE)
+
+            verify(localDataStore).observeNegativeStatements(retroUuid = retroUuid)
+        }
+    }
+
+    @Test
+    fun `GIVEN actions type WHEN getting statement list THEN requests actions statements`() {
+        runBlocking {
+            whenever(localDataStore.observeRetro(retroUuid = retroUuid))
+                .thenReturn(flowOf(getMockLocalRetro()))
+            whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
+                .thenReturn(flowOf(emptyList()))
+
+            repository.getStatements(retroUuid = retroUuid, statementType = StatementType.ACTION_POINT)
+
+            verify(localDataStore).observeActionPoints(retroUuid = retroUuid)
+        }
+    }
+    //endregion
 
     //region add statement
     @Test
@@ -127,7 +214,7 @@ class BoardRepositoryTest {
         runBlocking {
             val serverFlow = flowOf(
                 Either.right(emptyList()),
-                Either.right(getMockStatementList())
+                Either.right(getMockRemoteStatementList())
             )
             whenever(remoteDataStore.observeStatements(userEmail, retroUuid))
                 .thenReturn(serverFlow)
@@ -137,7 +224,7 @@ class BoardRepositoryTest {
             resultFlow.test {
                 assertEquals(Either.right(Unit), expectItem())
                 assertEquals(Either.right(Unit), expectItem())
-                verify(localDataStore).saveStatements(getMockStatementList().map(statementRemoteToDbMapper::map))
+                verify(localDataStore).saveStatements(getMockRemoteStatementList().map(statementRemoteToDbMapper::map))
                 verifyNoMoreInteractions(localDataStore)
                 expectComplete()
             }
@@ -164,7 +251,7 @@ class BoardRepositoryTest {
     }
     //endregion
 
-    private fun getMockStatementList(): List<StatementRemote> {
+    private fun getMockRemoteStatementList(): List<StatementRemote> {
         return listOf(
             StatementRemote(
                 uuid = "statementUuid",
@@ -173,8 +260,56 @@ class BoardRepositoryTest {
                 description = "This is the description of the mock statement",
                 statementType = StatementType.POSITIVE.toString().toLowerCase(),
                 timestamp = 100012038L,
-                isRemovable = false
+                isRemovable = true
             )
+        )
+    }
+
+    private fun getMockLocalStatementList(): List<StatementDb> {
+        return listOf(
+            StatementDb(
+                uuid = "statementUuid",
+                retroUuid = retroUuid,
+                userEmail = userEmail,
+                description = "This is the description of the mock statement",
+                type = StatementType.POSITIVE,
+                timestamp = 100012038L,
+                removable = true
+            ),
+            StatementDb(
+                uuid = "statementUuid2",
+                retroUuid = retroUuid,
+                userEmail = userEmail,
+                description = "This is the description of the mock statement (second)",
+                type = StatementType.POSITIVE,
+                timestamp = 100012038L,
+                removable = false
+            )
+        )
+    }
+
+    private fun getMockLocalRetro(): RetroDb {
+        val retroUuid = "retro-uuid"
+        val retroTitle = "Retro title"
+        val userFirstName = "First name"
+        val userLastName = "Last name"
+        val userPhotoUrl = "photo.com/user1"
+        val retroTimestamp = 1586705438L
+
+        val dbUserOne = UserDb(
+            email = userEmail,
+            firstName = userFirstName,
+            lastName = userLastName,
+            photoUrl = userPhotoUrl
+        )
+
+        return RetroDb(
+            uuid = retroUuid,
+            title = retroTitle,
+            timestamp = retroTimestamp,
+            users = listOf(dbUserOne),
+            ownerEmail = userEmail,
+            isProtected = true
         )
     }
 }
