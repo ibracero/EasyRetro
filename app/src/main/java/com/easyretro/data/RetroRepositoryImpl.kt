@@ -1,8 +1,8 @@
 package com.easyretro.data
 
-import android.net.Uri
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
+import com.easyretro.common.UuidProvider
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.mapper.RetroDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
@@ -12,15 +12,12 @@ import com.easyretro.data.remote.mapper.RetroRemoteToDbMapper
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Retro
-import com.easyretro.ui.board.BoardViewModel
-import com.google.firebase.dynamiclinks.DynamicLink
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.util.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @Suppress("EXPERIMENTAL_API_USAGE")
 class RetroRepositoryImpl(
@@ -28,6 +25,7 @@ class RetroRepositoryImpl(
     private val remoteDataStore: RemoteDataStore,
     private val authDataStore: AuthDataStore,
     private val deepLinkDataStore: DeepLinkDataStore,
+    private val uuidProvider: UuidProvider,
     private val retroRemoteToDbMapper: RetroRemoteToDbMapper,
     private val retroDbToDomainMapper: RetroDbToDomainMapper,
     private val dispatchers: CoroutineDispatcherProvider
@@ -42,15 +40,16 @@ class RetroRepositoryImpl(
 
     override suspend fun createRetro(title: String): Either<Failure, Retro> =
         withContext(dispatchers.io()) {
-            val retroUuid = UUID.randomUUID().toString()
-            when (val deepLinkEither = deepLinkDataStore.generateDeepLink(DEEPLINK_FORMAT + retroUuid)) {
+            val retroUuid = uuidProvider.generateUuid()
+            when (val deepLinkEither =
+                deepLinkDataStore.generateDeepLink(DEEPLINK_FORMAT + retroUuid)) {
                 is Either.Left -> deepLinkEither
                 is Either.Right -> {
                     remoteDataStore.createRetro(
                         retroUuid = retroUuid,
                         userEmail = userEmail,
                         retroTitle = title,
-                        retroDeepLink = deepLinkEither.b.toString()
+                        retroDeepLink = deepLinkEither.b
                     )
                         .map(retroRemoteToDbMapper::map)
                         .map { retroDbToDomainMapper.map(it, userEmail) }
@@ -81,7 +80,12 @@ class RetroRepositoryImpl(
     override suspend fun observeRetro(retroUuid: String): Flow<Either<Failure, Retro>> =
         localDataStore.observeRetro(retroUuid)
             .map { localRetro ->
-                if (localRetro != null) Either.right(retroDbToDomainMapper.map(localRetro, userEmail))
+                if (localRetro != null) Either.right(
+                    retroDbToDomainMapper.map(
+                        localRetro,
+                        userEmail
+                    )
+                )
                 else Either.left(Failure.RetroNotFoundError)
             }
             .flowOn(dispatchers.io())

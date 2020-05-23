@@ -14,7 +14,7 @@ class DeepLinkDataStore() {
         private const val DEEPLINK_DOMAIN = "https://easyretro.page.link"
     }
 
-    suspend fun generateDeepLink(link: String): Either<Failure, Uri> {
+    suspend fun generateDeepLink(link: String): Either<Failure, String> {
         return suspendCoroutine { continuation ->
             FirebaseDynamicLinks.getInstance().createDynamicLink()
                 .setLink(Uri.parse(link))
@@ -24,7 +24,7 @@ class DeepLinkDataStore() {
                 .addOnSuccessListener { shortDynamicLink ->
                     val shortLink = shortDynamicLink.shortLink
                     if (shortLink == null) continuation.resume(Either.left(Failure.UnknownError))
-                    else continuation.resume(Either.right(shortLink))
+                    else continuation.resume(Either.right(shortLink.toString()))
                 }
                 .addOnFailureListener {
                     continuation.resume(Either.left(Failure.UnknownError))

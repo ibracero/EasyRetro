@@ -1,5 +1,6 @@
 package com.easyretro.data
 
+import android.net.Uri
 import arrow.core.Either
 import com.easyretro.CoroutineTestRule
 import com.easyretro.data.local.LocalDataStore
@@ -18,6 +19,7 @@ import com.nhaarman.mockitokotlin2.*
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,9 +33,7 @@ class BoardRepositoryTest {
 
     private val localDataStore = mock<LocalDataStore>()
     private val remoteDataStore = mock<RemoteDataStore>()
-    private val authDataStore = mock<AuthDataStore> {
-        on { getCurrentUserEmail() }.thenReturn(userEmail)
-    }
+    private val authDataStore = mock<AuthDataStore>()
 
     private val statementRemoteToDbMapper = StatementRemoteToDbMapper()
     private val statementDbToDomainMapper = StatementDbToDomainMapper()
@@ -47,6 +47,14 @@ class BoardRepositoryTest {
         dispatchers = coroutinesTestRule.testDispatcherProvider
     )
 
+    @Before
+    fun `Set up`() {
+        runBlocking {
+            whenever(authDataStore.getCurrentUserEmail())
+                .thenReturn(userEmail)
+        }
+    }
+
     //region get statements
     @Test
     fun `GIVEN protected retro WHEN getting statement list THEN return statements not removable`() {
@@ -56,7 +64,10 @@ class BoardRepositoryTest {
             whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
                 .thenReturn(flowOf(getMockLocalStatementList()))
 
-            val resultFlow = repository.getStatements(retroUuid = retroUuid, statementType = StatementType.POSITIVE)
+            val resultFlow = repository.getStatements(
+                retroUuid = retroUuid,
+                statementType = StatementType.POSITIVE
+            )
 
             resultFlow.test {
                 val expected = getMockLocalStatementList()
@@ -76,7 +87,10 @@ class BoardRepositoryTest {
             whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
                 .thenReturn(flowOf(getMockLocalStatementList()))
 
-            val resultFlow = repository.getStatements(retroUuid = retroUuid, statementType = StatementType.POSITIVE)
+            val resultFlow = repository.getStatements(
+                retroUuid = retroUuid,
+                statementType = StatementType.POSITIVE
+            )
 
             resultFlow.test {
                 val expected = getMockLocalStatementList()
@@ -123,7 +137,10 @@ class BoardRepositoryTest {
             whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
                 .thenReturn(flowOf(emptyList()))
 
-            repository.getStatements(retroUuid = retroUuid, statementType = StatementType.ACTION_POINT)
+            repository.getStatements(
+                retroUuid = retroUuid,
+                statementType = StatementType.ACTION_POINT
+            )
 
             verify(localDataStore).observeActionPoints(retroUuid = retroUuid)
         }
@@ -141,12 +158,21 @@ class BoardRepositoryTest {
                 description = statementDescription,
                 statementType = statementType.toString().toLowerCase()
             )
-            whenever(remoteDataStore.addStatementToBoard(retroUuid, statementToAdd)).thenReturn(Either.right(Unit))
+            whenever(remoteDataStore.addStatementToBoard(retroUuid, statementToAdd)).thenReturn(
+                Either.right(Unit)
+            )
 
             val result =
-                repository.addStatement(retroUuid = retroUuid, description = statementDescription, type = statementType)
+                repository.addStatement(
+                    retroUuid = retroUuid,
+                    description = statementDescription,
+                    type = statementType
+                )
 
-            verify(remoteDataStore).addStatementToBoard(retroUuid = retroUuid, statementRemote = statementToAdd)
+            verify(remoteDataStore).addStatementToBoard(
+                retroUuid = retroUuid,
+                statementRemote = statementToAdd
+            )
             verifyNoMoreInteractions(remoteDataStore)
             assertEquals(Either.right(Unit), result)
         }
@@ -166,9 +192,16 @@ class BoardRepositoryTest {
                 .thenReturn(Either.left(Failure.UnknownError))
 
             val result =
-                repository.addStatement(retroUuid = retroUuid, description = statementDescription, type = statementType)
+                repository.addStatement(
+                    retroUuid = retroUuid,
+                    description = statementDescription,
+                    type = statementType
+                )
 
-            verify(remoteDataStore).addStatementToBoard(retroUuid = retroUuid, statementRemote = statementToAdd)
+            verify(remoteDataStore).addStatementToBoard(
+                retroUuid = retroUuid,
+                statementRemote = statementToAdd
+            )
             verifyNoMoreInteractions(remoteDataStore)
             assertEquals(Either.left(Failure.UnknownError), result)
         }
@@ -180,12 +213,20 @@ class BoardRepositoryTest {
     fun `GIVEN success server response WHEN removing a statement THEN return EitherRight`() {
         runBlocking {
             val statementUuid = "statement-uuid"
-            whenever(remoteDataStore.removeStatement(retroUuid, statementUuid)).thenReturn(Either.right(Unit))
+            whenever(
+                remoteDataStore.removeStatement(
+                    retroUuid,
+                    statementUuid
+                )
+            ).thenReturn(Either.right(Unit))
 
             val result =
                 repository.removeStatement(retroUuid = retroUuid, statementUuid = statementUuid)
 
-            verify(remoteDataStore).removeStatement(retroUuid = retroUuid, statementUuid = statementUuid)
+            verify(remoteDataStore).removeStatement(
+                retroUuid = retroUuid,
+                statementUuid = statementUuid
+            )
             verifyNoMoreInteractions(remoteDataStore)
             assertEquals(Either.right(Unit), result)
         }
@@ -201,7 +242,10 @@ class BoardRepositoryTest {
             val result =
                 repository.removeStatement(retroUuid = retroUuid, statementUuid = statementUuid)
 
-            verify(remoteDataStore).removeStatement(retroUuid = retroUuid, statementUuid = statementUuid)
+            verify(remoteDataStore).removeStatement(
+                retroUuid = retroUuid,
+                statementUuid = statementUuid
+            )
             verifyNoMoreInteractions(remoteDataStore)
             assertEquals(Either.left(Failure.UnknownError), result)
         }
@@ -224,7 +268,11 @@ class BoardRepositoryTest {
             resultFlow.test {
                 assertEquals(Either.right(Unit), expectItem())
                 assertEquals(Either.right(Unit), expectItem())
-                verify(localDataStore).saveStatements(getMockRemoteStatementList().map(statementRemoteToDbMapper::map))
+                verify(localDataStore).saveStatements(
+                    getMockRemoteStatementList().map(
+                        statementRemoteToDbMapper::map
+                    )
+                )
                 verifyNoMoreInteractions(localDataStore)
                 expectComplete()
             }

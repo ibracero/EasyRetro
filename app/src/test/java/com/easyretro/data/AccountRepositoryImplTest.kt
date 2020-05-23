@@ -2,11 +2,12 @@ package com.easyretro.data
 
 import arrow.core.Either
 import com.easyretro.CoroutineTestRule
+import com.easyretro.data.local.SessionManager
 import com.easyretro.data.local.LocalDataStore
-import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.firestore.UserRemote
+import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
@@ -41,16 +42,16 @@ class AccountRepositoryImplTest {
 
     private val localDataStore = mock<LocalDataStore>()
     private val remoteDataStore = mock<RemoteDataStore>()
-    private val sessionSharedPrefsManager = mock<SessionSharedPrefsManager>()
+    private val sessionSharedPrefsManager = mock<SessionManager>()
     private val authDataStore = mock<AuthDataStore> {
         on { getCurrentUserEmail() }.thenReturn(userEmail)
     }
 
-    private val repository = AccountRepositoryImpl(
+    private val repository: AccountRepository = AccountRepositoryImpl(
         localDataStore = localDataStore,
         remoteDataStore = remoteDataStore,
         authDataStore = authDataStore,
-        sessionSharedPrefsManager = sessionSharedPrefsManager,
+        sessionManager = sessionSharedPrefsManager,
         dispatchers = coroutinesTestRule.testDispatcherProvider
     )
 
@@ -163,12 +164,20 @@ class AccountRepositoryImplTest {
     fun `GIVEN VERIFIED user WHEN signing with email THEN start session and return VERIFIED`() {
         runBlocking {
             val isUserVerifiedResponse = true
-            whenever(authDataStore.signInWithEmailAndPassword(email = userEmail, password = userPassword))
+            whenever(
+                authDataStore.signInWithEmailAndPassword(
+                    email = userEmail,
+                    password = userPassword
+                )
+            )
                 .thenReturn(Either.right(isUserVerifiedResponse))
 
             val result = repository.signWithEmail(email = userEmail, password = userPassword)
 
-            verify(authDataStore).signInWithEmailAndPassword(email = userEmail, password = userPassword)
+            verify(authDataStore).signInWithEmailAndPassword(
+                email = userEmail,
+                password = userPassword
+            )
             verifyNoMoreInteractions(authDataStore)
             assertEquals(Either.right(UserStatus.VERIFIED), result)
         }
@@ -178,12 +187,20 @@ class AccountRepositoryImplTest {
     fun `GIVEN NON VERIFIED user WHEN signing with email THEN start session and return VERIFIED`() {
         runBlocking {
             val isUserVerifiedResponse = false
-            whenever(authDataStore.signInWithEmailAndPassword(email = userEmail, password = userPassword))
+            whenever(
+                authDataStore.signInWithEmailAndPassword(
+                    email = userEmail,
+                    password = userPassword
+                )
+            )
                 .thenReturn(Either.right(isUserVerifiedResponse))
 
             val result = repository.signWithEmail(email = userEmail, password = userPassword)
 
-            verify(authDataStore).signInWithEmailAndPassword(email = userEmail, password = userPassword)
+            verify(authDataStore).signInWithEmailAndPassword(
+                email = userEmail,
+                password = userPassword
+            )
             verifyNoMoreInteractions(authDataStore)
             assertEquals(Either.right(UserStatus.NON_VERIFIED), result)
         }
@@ -194,12 +211,20 @@ class AccountRepositoryImplTest {
     @Test
     fun `GIVEN success server response WHEN signing up with email THEN return EitherRight`() {
         runBlocking {
-            whenever(authDataStore.signUpWithEmailAndPassword(email = userEmail, password = userPassword))
+            whenever(
+                authDataStore.signUpWithEmailAndPassword(
+                    email = userEmail,
+                    password = userPassword
+                )
+            )
                 .thenReturn(Either.right(Unit))
 
             val result = repository.signUpWithEmail(email = userEmail, password = userPassword)
 
-            verify(authDataStore).signUpWithEmailAndPassword(email = userEmail, password = userPassword)
+            verify(authDataStore).signUpWithEmailAndPassword(
+                email = userEmail,
+                password = userPassword
+            )
             verifyNoMoreInteractions(authDataStore)
             assertEquals(Either.right(Unit), result)
         }
@@ -208,12 +233,20 @@ class AccountRepositoryImplTest {
     @Test
     fun `GIVEN failed server response WHEN signing up with email THEN return EitherLeft`() {
         runBlocking {
-            whenever(authDataStore.signUpWithEmailAndPassword(email = userEmail, password = userPassword))
+            whenever(
+                authDataStore.signUpWithEmailAndPassword(
+                    email = userEmail,
+                    password = userPassword
+                )
+            )
                 .thenReturn(Either.left(Failure.UnknownError))
 
             val result = repository.signUpWithEmail(email = userEmail, password = userPassword)
 
-            verify(authDataStore).signUpWithEmailAndPassword(email = userEmail, password = userPassword)
+            verify(authDataStore).signUpWithEmailAndPassword(
+                email = userEmail,
+                password = userPassword
+            )
             verifyNoMoreInteractions(authDataStore)
             assertEquals(Either.left(Failure.UnknownError), result)
         }

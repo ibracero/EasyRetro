@@ -1,8 +1,8 @@
 package com.easyretro.data
 
-import android.net.Uri
 import arrow.core.Either
 import com.easyretro.CoroutineTestRule
+import com.easyretro.common.UuidProvider
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.RetroDb
 import com.easyretro.data.local.UserDb
@@ -24,6 +24,7 @@ import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -43,20 +44,24 @@ class RetroRepositoryImplTest {
 
     private val localDataStore = mock<LocalDataStore>()
     private val remoteDataStore = mock<RemoteDataStore>()
-    private val deepLinkDataStore = mock<DeepLinkDataStore>() {
-        on { runBlocking { generateDeepLink(any()) } }.thenReturn(Either.right(Uri.parse(retroDeepLink)))
-    }
-    private val retroRemoteToDbMapper = RetroRemoteToDbMapper(userRemoteToDbMapper = UserRemoteToDbMapper())
-    private val retroDbToDomainMapper = RetroDbToDomainMapper(userDbToDomainMapper = UserDbToDomainMapper())
-    private val authDataStore = mock<AuthDataStore> {
+    private val deepLinkDataStore = mock<DeepLinkDataStore>()
+    private val retroRemoteToDbMapper =
+        RetroRemoteToDbMapper(userRemoteToDbMapper = UserRemoteToDbMapper())
+    private val retroDbToDomainMapper =
+        RetroDbToDomainMapper(userDbToDomainMapper = UserDbToDomainMapper())
+    private val authDataStore = mock<AuthDataStore>() {
         on { getCurrentUserEmail() }.thenReturn(userEmail)
     }
+    private val uuidProvider = mock<UuidProvider>() {
+        on { generateUuid() }.thenReturn(retroUuid)
+    }
 
-    private val repository = RetroRepositoryImpl(
+    private val repository: RetroRepository = RetroRepositoryImpl(
         localDataStore = localDataStore,
         remoteDataStore = remoteDataStore,
         authDataStore = authDataStore,
         deepLinkDataStore = deepLinkDataStore,
+        uuidProvider = uuidProvider,
         retroRemoteToDbMapper = retroRemoteToDbMapper,
         retroDbToDomainMapper = retroDbToDomainMapper,
         dispatchers = coroutinesTestRule.testDispatcherProvider
@@ -64,6 +69,14 @@ class RetroRepositoryImplTest {
 
     init {
         initModelMocks()
+    }
+
+    @Before
+    fun `Set up`() {
+        runBlocking {
+            whenever(deepLinkDataStore.generateDeepLink(any()))
+                .thenReturn(Either.right(retroDeepLink))
+        }
     }
 
     //region create retro
@@ -101,6 +114,20 @@ class RetroRepositoryImplTest {
             val actualValue = repository.createRetro(retroTitle)
 
             val expectedValue = Either.left(Failure.UnknownError)
+            assertEquals(expectedValue, actualValue)
+        }
+    }
+
+    @Test
+    fun `GIVEN a failed response from Firebase WHEN trying to create a deeplink for the new retro THEN return Left with the failure`() {
+        runBlocking {
+            val expectedValue = Either.left(Failure.UnknownError)
+            whenever(deepLinkDataStore.generateDeepLink(any()))
+                .thenReturn(expectedValue)
+
+            val actualValue = repository.createRetro(retroTitle)
+
+            verifyZeroInteractions(remoteDataStore)
             assertEquals(expectedValue, actualValue)
         }
     }
@@ -180,8 +207,12 @@ class RetroRepositoryImplTest {
             val flow = repository.getRetros()
 
             flow.test {
-                val remoteToDomainRetros = remoteRetros.map(retroRemoteToDbMapper::map).map(retroDbToDomainMapper::map)
-                assertEquals(Either.Right(localRetros.map(retroDbToDomainMapper::map)), expectItem())
+                val remoteToDomainRetros =
+                    remoteRetros.map(retroRemoteToDbMapper::map).map(retroDbToDomainMapper::map)
+                assertEquals(
+                    Either.Right(localRetros.map(retroDbToDomainMapper::map)),
+                    expectItem()
+                )
                 assertEquals(Either.Right(remoteToDomainRetros), expectItem())
                 expectComplete()
             }
@@ -199,7 +230,8 @@ class RetroRepositoryImplTest {
             val flow = repository.getRetros()
 
             flow.test {
-                val remoteToDomainRetros = remoteRetros.map(retroRemoteToDbMapper::map).map(retroDbToDomainMapper::map)
+                val remoteToDomainRetros =
+                    remoteRetros.map(retroRemoteToDbMapper::map).map(retroDbToDomainMapper::map)
                 assertEquals(Either.Right(remoteToDomainRetros), expectItem())
                 expectComplete()
             }
@@ -216,7 +248,10 @@ class RetroRepositoryImplTest {
             val flow = repository.getRetros()
 
             flow.test {
-                assertEquals(Either.Right(localRetros.map(retroDbToDomainMapper::map)), expectItem())
+                assertEquals(
+                    Either.Right(localRetros.map(retroDbToDomainMapper::map)),
+                    expectItem()
+                )
                 assertEquals(Either.Left(Failure.UnknownError), expectItem())
                 expectComplete()
             }
@@ -258,7 +293,12 @@ class RetroRepositoryImplTest {
     @Test
     fun `GIVEN a success response WHEN unprotecting a retro THEN return Unit`() {
         runBlocking {
-            whenever(remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = false))
+            whenever(
+                remoteDataStore.updateRetroProtection(
+                    retroUuid = retroUuid,
+                    protected = false
+                )
+            )
                 .thenReturn(Either.right(Unit))
 
             val actualValue = repository.unprotectRetro(retroUuid)
@@ -272,8 +312,12 @@ class RetroRepositoryImplTest {
     @Test
     fun `GIVEN a failed response WHEN unprotecting a retro THEN return Failure`() {
         runBlocking {
-            whenever(remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = false))
-                .thenReturn(Either.left(Failure.UnknownError))
+            whenever(
+                remoteDataStore.updateRetroProtection(
+                    retroUuid = retroUuid,
+                    protected = false
+                )
+            ).thenReturn(Either.left(Failure.UnknownError))
 
             val actualValue = repository.unprotectRetro(retroUuid)
 
@@ -320,8 +364,6 @@ class RetroRepositoryImplTest {
 
     private fun initModelMocks() {
         val retroTimestamp = 1586705438L
-        val retroDeepLink = "deeplink.com/1p0o2"
-
         val userFirstName = "First name"
         val userLastName = "Last name"
         val userPhotoUrl = "photo.com/user1"
@@ -354,6 +396,7 @@ class RetroRepositoryImplTest {
             uuid = retroUuid,
             title = retroTitle,
             timestamp = retroTimestamp,
+            deepLink = retroDeepLink,
             users = listOf(remoteUserOne),
             ownerEmail = userEmail,
             protected = true

@@ -5,10 +5,12 @@ import android.net.ConnectivityManager
 import com.easyretro.common.ConnectionManager
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.common.DefaultCoroutineDispatcher
+import com.easyretro.common.UuidProvider
 import com.easyretro.data.AccountRepositoryImpl
 import com.easyretro.data.BoardRepositoryImpl
 import com.easyretro.data.RetroRepositoryImpl
 import com.easyretro.data.local.EasyRetroDatabase
+import com.easyretro.data.local.SessionManager
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.local.mapper.RetroDbToDomainMapper
@@ -54,6 +56,7 @@ val appModule = module {
             remoteDataStore = get(),
             authDataStore = get(),
             deepLinkDataStore = get(),
+            uuidProvider = get(),
             retroDbToDomainMapper = get(),
             retroRemoteToDbMapper = get(),
             dispatchers = get()
@@ -65,6 +68,8 @@ val appModule = module {
     single { RemoteDataStore(get()) }
 
     single { AuthDataStore(get()) }
+
+    single { UuidProvider() }
 
     single { ConnectionManager(androidApplication().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager) }
 
@@ -111,5 +116,5 @@ val accountModule = module {
 
     factory<AccountRepository> { AccountRepositoryImpl(get(), get(), get(), get(), get()) }
 
-    factory { SessionSharedPrefsManager(androidContext()) }
+    factory<SessionManager> { SessionSharedPrefsManager(androidContext()) }
 }

@@ -2,8 +2,8 @@ package com.easyretro.data
 
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
+import com.easyretro.data.local.SessionManager
 import com.easyretro.data.local.LocalDataStore
-import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.firestore.UserRemote
@@ -17,7 +17,7 @@ class AccountRepositoryImpl(
     private val remoteDataStore: RemoteDataStore,
     private val localDataStore: LocalDataStore,
     private val authDataStore: AuthDataStore,
-    private val sessionSharedPrefsManager: SessionSharedPrefsManager,
+    private val sessionManager: SessionManager,
     private val dispatchers: CoroutineDispatcherProvider
 ) : AccountRepository {
 
@@ -64,7 +64,7 @@ class AccountRepositoryImpl(
     override suspend fun logOut(): Unit =
         withContext(dispatchers.io()) {
             authDataStore.logOut()
-            sessionSharedPrefsManager.setSessionEnded()
+            sessionManager.setSessionEnded()
             localDataStore.clearAll()
         }
 
@@ -72,7 +72,7 @@ class AccountRepositoryImpl(
         withContext(dispatchers.io()) {
             authDataStore.isUserVerified()
                 .map { userVerified ->
-                    when (userVerified ?: sessionSharedPrefsManager.isSessionStarted()) {
+                    when (userVerified ?: sessionManager.isSessionStarted()) {
                         true -> UserStatus.VERIFIED
                         false -> UserStatus.NON_VERIFIED
                     }
@@ -87,5 +87,5 @@ class AccountRepositoryImpl(
                 lastName = account.lastName,
                 photoUrl = account.photoUrl
             )
-        ).map { sessionSharedPrefsManager.setSessionStarted() }
+        ).map { sessionManager.setSessionStarted() }
 }
