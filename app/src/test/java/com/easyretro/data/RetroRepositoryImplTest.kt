@@ -1,5 +1,6 @@
 package com.easyretro.data
 
+import android.net.Uri
 import arrow.core.Either
 import com.easyretro.CoroutineTestRule
 import com.easyretro.data.local.LocalDataStore
@@ -8,6 +9,7 @@ import com.easyretro.data.local.UserDb
 import com.easyretro.data.local.mapper.RetroDbToDomainMapper
 import com.easyretro.data.local.mapper.UserDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
+import com.easyretro.data.remote.DeepLinkDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.firestore.RetroRemote
 import com.easyretro.data.remote.firestore.UserRemote
@@ -18,17 +20,14 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Retro
 import com.easyretro.domain.model.User
 import com.easyretro.test
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
-import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-class RetroRepositoryTest {
+class RetroRepositoryImplTest {
 
     @get:Rule
     var coroutinesTestRule = CoroutineTestRule()
@@ -36,22 +35,28 @@ class RetroRepositoryTest {
     private val retroUuid = "retro-uuid"
     private val retroTitle = "Retro title"
     private val userEmail = "email@email.com"
+    private val retroDeepLink = "http://www.easyretro.com/join"
+
     private lateinit var domainRetro: Retro
     private lateinit var dbRetro: RetroDb
     private lateinit var remoteRetro: RetroRemote
 
     private val localDataStore = mock<LocalDataStore>()
     private val remoteDataStore = mock<RemoteDataStore>()
+    private val deepLinkDataStore = mock<DeepLinkDataStore>() {
+        on { runBlocking { generateDeepLink(any()) } }.thenReturn(Either.right(Uri.parse(retroDeepLink)))
+    }
     private val retroRemoteToDbMapper = RetroRemoteToDbMapper(userRemoteToDbMapper = UserRemoteToDbMapper())
     private val retroDbToDomainMapper = RetroDbToDomainMapper(userDbToDomainMapper = UserDbToDomainMapper())
     private val authDataStore = mock<AuthDataStore> {
         on { getCurrentUserEmail() }.thenReturn(userEmail)
     }
 
-    private val repository: RetroRepository = RetroRepositoryImpl(
+    private val repository = RetroRepositoryImpl(
         localDataStore = localDataStore,
         remoteDataStore = remoteDataStore,
         authDataStore = authDataStore,
+        deepLinkDataStore = deepLinkDataStore,
         retroRemoteToDbMapper = retroRemoteToDbMapper,
         retroDbToDomainMapper = retroDbToDomainMapper,
         dispatchers = coroutinesTestRule.testDispatcherProvider
@@ -65,8 +70,14 @@ class RetroRepositoryTest {
     @Test
     fun `GIVEN a success response from Firebase WHEN trying to create a retro THEN return Right with the retro`() {
         runBlocking {
-            whenever(remoteDataStore.createRetro(userEmail = userEmail, retroTitle = retroTitle))
-                .thenReturn(Either.right(remoteRetro))
+            whenever(
+                remoteDataStore.createRetro(
+                    retroUuid = retroUuid,
+                    userEmail = userEmail,
+                    retroTitle = retroTitle,
+                    retroDeepLink = retroDeepLink
+                )
+            ).thenReturn(Either.right(remoteRetro))
 
             val actualValue = repository.createRetro(retroTitle)
 
@@ -78,8 +89,14 @@ class RetroRepositoryTest {
     @Test
     fun `GIVEN a failed response from Firebase WHEN trying to create a retro THEN return Left with the failure`() {
         runBlocking {
-            whenever(remoteDataStore.createRetro(userEmail = userEmail, retroTitle = retroTitle))
-                .thenReturn(Either.left(Failure.UnknownError))
+            whenever(
+                remoteDataStore.createRetro(
+                    retroUuid = retroUuid,
+                    userEmail = userEmail,
+                    retroTitle = retroTitle,
+                    retroDeepLink = retroDeepLink
+                )
+            ).thenReturn(Either.left(Failure.UnknownError))
 
             val actualValue = repository.createRetro(retroTitle)
 
@@ -303,6 +320,7 @@ class RetroRepositoryTest {
 
     private fun initModelMocks() {
         val retroTimestamp = 1586705438L
+        val retroDeepLink = "deeplink.com/1p0o2"
 
         val userFirstName = "First name"
         val userLastName = "Last name"
@@ -319,6 +337,7 @@ class RetroRepositoryTest {
             uuid = retroUuid,
             title = retroTitle,
             timestamp = retroTimestamp,
+            deepLink = retroDeepLink,
             users = listOf(domainUserOne),
             lockingAllowed = true,
             protected = true
@@ -351,6 +370,7 @@ class RetroRepositoryTest {
             uuid = retroUuid,
             title = retroTitle,
             timestamp = retroTimestamp,
+            deepLink = retroDeepLink,
             users = listOf(dbUserOne),
             ownerEmail = userEmail,
             isProtected = true

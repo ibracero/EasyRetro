@@ -76,13 +76,8 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         viewModel.process(BoardViewEvent.LockRetro(retroUuid = retroUuid))
     }
 
-    private fun onInviteClicked(uuid: String) {
-        viewModel.process(
-            BoardViewEvent.ShareRetroLink(
-                retroUuid = uuid,
-                link = getString(R.string.retro_join_link_format, uuid)
-            )
-        )
+    private fun onInviteClicked() {
+        viewModel.process(BoardViewEvent.ShareRetroLink)
     }
 
     override fun onStart() {
@@ -115,7 +110,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         when (viewEffect) {
             is BoardViewEffect.ShowSnackBar -> board_root.showErrorSnackbar(message = viewEffect.errorMessage)
             is BoardViewEffect.ShowShareSheet ->
-                displayShareSheet(retroName = viewEffect.retroTitle, shortLink = viewEffect.shortLink)
+                displayShareSheet(retroName = viewEffect.retroTitle, shortLink = viewEffect.deepLink)
         }.exhaustive
     }
 
@@ -125,7 +120,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
             setNavigationOnClickListener { backPressedCallback.handleOnBackPressed() }
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
-                    R.id.action_invite -> onInviteClicked(retroUuid)
+                    R.id.action_invite -> onInviteClicked()
                     R.id.action_lock -> context?.let { createLockConfirmationDialog(it, retroUuid).show() }
                     R.id.action_unlock -> onUnlockClicked(retroUuid)
                 }
@@ -217,12 +212,12 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         findNavController().navigateUp()
     }
 
-    private fun displayShareSheet(shortLink: Uri?, retroName: String) {
+    private fun displayShareSheet(shortLink: String, retroName: String) {
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(
                 Intent.EXTRA_TEXT,
-                getString(R.string.retro_invitation_message, retroName, shortLink?.toString())
+                getString(R.string.retro_invitation_message, retroName, shortLink)
             )
             type = "text/plain"
         }

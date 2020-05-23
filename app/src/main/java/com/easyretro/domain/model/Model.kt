@@ -11,6 +11,7 @@ data class Retro(
     val uuid: String,
     val title: String,
     val timestamp: Long,
+    val deepLink: String,
     val lockingAllowed: Boolean,
     val protected: Boolean,
     val users: List<User>

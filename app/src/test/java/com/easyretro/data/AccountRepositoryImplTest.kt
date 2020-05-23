@@ -7,7 +7,6 @@ import com.easyretro.data.local.SessionSharedPrefsManager
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.firestore.UserRemote
-import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
@@ -17,7 +16,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
-class AccountRepositoryTest {
+class AccountRepositoryImplTest {
 
     private val userEmail = "email@email.com"
     private val userPassword = "password"
@@ -47,7 +46,7 @@ class AccountRepositoryTest {
         on { getCurrentUserEmail() }.thenReturn(userEmail)
     }
 
-    private val repository: AccountRepository = AccountRepositoryImpl(
+    private val repository = AccountRepositoryImpl(
         localDataStore = localDataStore,
         remoteDataStore = remoteDataStore,
         authDataStore = authDataStore,

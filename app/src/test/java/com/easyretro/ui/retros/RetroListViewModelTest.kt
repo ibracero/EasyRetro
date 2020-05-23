@@ -175,6 +175,7 @@ class RetroListViewModelTest {
                 uuid = "uuid-1",
                 title = "title 1",
                 timestamp = 1000000L,
+                deepLink = "deeplink.com/1",
                 lockingAllowed = true,
                 protected = true,
                 users = emptyList()
@@ -183,6 +184,7 @@ class RetroListViewModelTest {
                 uuid = "uuid-2",
                 title = "title 2",
                 timestamp = 1000001L,
+                deepLink = "deeplink.com/2",
                 lockingAllowed = true,
                 protected = true,
                 users = emptyList()
@@ -191,6 +193,7 @@ class RetroListViewModelTest {
                 uuid = "uuid-3",
                 title = "title 3",
                 timestamp = 1000002L,
+                deepLink = "deeplink.com/3",
                 lockingAllowed = true,
                 protected = true,
                 users = emptyList()

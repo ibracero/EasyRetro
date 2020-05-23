@@ -59,6 +59,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                                 title = (snapshot?.data?.get(FirestoreField.RETRO_TITLE) as String?).orEmpty(),
                                 protected = (snapshot?.data?.get(FirestoreField.RETRO_PROTECTED) as Boolean?) ?: false,
                                 ownerEmail = (snapshot?.data?.get(FirestoreField.RETRO_OWNER_EMAIL) as String?).orEmpty(),
+                                deepLink = (snapshot?.data?.get(FirestoreField.RETRO_DEEPLINK) as String?).orEmpty(),
                                 users = users
                             )
 
@@ -131,7 +132,12 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
         }
     }
 
-    suspend fun createRetro(userEmail: String, retroTitle: String): Either<Failure, RetroRemote> {
+    suspend fun createRetro(
+        retroUuid: String,
+        retroTitle: String,
+        retroDeepLink: String,
+        userEmail: String
+    ): Either<Failure, RetroRemote> {
         if (connectionManager.getNetworkStatus() == NetworkStatus.OFFLINE)
             return Either.left(Failure.UnavailableNetwork)
 
@@ -139,12 +145,11 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
 
         val retroValues = hashMapOf(
             FirestoreField.RETRO_TITLE to retroTitle,
+            FirestoreField.RETRO_DEEPLINK to retroDeepLink,
             FirestoreField.RETRO_CREATED to FieldValue.serverTimestamp(),
             FirestoreField.RETRO_OWNER_EMAIL to userEmail,
             FirestoreField.RETRO_USERS to FieldValue.arrayUnion(userRef)
         )
-
-        val retroUuid = UUID.randomUUID().toString()
 
         val retroRef = firestore.collection(FirestoreTable.TABLE_RETROS)
             .document(retroUuid)
@@ -176,6 +181,7 @@ class RemoteDataStore(private val connectionManager: ConnectionManager) {
                             RetroRemote(
                                 uuid = retroUuid,
                                 title = retroTitle,
+                                deepLink = retroDeepLink,
                                 ownerEmail = userEmail
                             )
                         )

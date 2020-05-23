@@ -1,37 +1,61 @@
 package com.easyretro.data
 
+import android.net.Uri
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.mapper.RetroDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
+import com.easyretro.data.remote.DeepLinkDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.mapper.RetroRemoteToDbMapper
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Retro
+import com.easyretro.ui.board.BoardViewModel
+import com.google.firebase.dynamiclinks.DynamicLink
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @Suppress("EXPERIMENTAL_API_USAGE")
 class RetroRepositoryImpl(
     private val localDataStore: LocalDataStore,
     private val remoteDataStore: RemoteDataStore,
     private val authDataStore: AuthDataStore,
+    private val deepLinkDataStore: DeepLinkDataStore,
     private val retroRemoteToDbMapper: RetroRemoteToDbMapper,
     private val retroDbToDomainMapper: RetroDbToDomainMapper,
     private val dispatchers: CoroutineDispatcherProvider
 ) : RetroRepository {
+
+    companion object {
+        private const val DEEPLINK_FORMAT = "https://easyretro.page.link/join/"
+    }
 
     private val userEmail: String
         get() = authDataStore.getCurrentUserEmail()
 
     override suspend fun createRetro(title: String): Either<Failure, Retro> =
         withContext(dispatchers.io()) {
-            remoteDataStore.createRetro(userEmail = userEmail, retroTitle = title)
-                .map(retroRemoteToDbMapper::map)
-                .map { retroDbToDomainMapper.map(it, userEmail) }
+            val retroUuid = UUID.randomUUID().toString()
+            when (val deepLinkEither = deepLinkDataStore.generateDeepLink(DEEPLINK_FORMAT + retroUuid)) {
+                is Either.Left -> deepLinkEither
+                is Either.Right -> {
+                    remoteDataStore.createRetro(
+                        retroUuid = retroUuid,
+                        userEmail = userEmail,
+                        retroTitle = title,
+                        retroDeepLink = deepLinkEither.b.toString()
+                    )
+                        .map(retroRemoteToDbMapper::map)
+                        .map { retroDbToDomainMapper.map(it, userEmail) }
+                }
+            }
         }
 
     override suspend fun joinRetro(uuid: String): Either<Failure, Unit> =

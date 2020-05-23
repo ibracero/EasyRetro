@@ -55,7 +55,7 @@ object Libraries {
         const val firebase_analytics_version = "17.4.0"
         const val firebase_dynamic_links_version = "19.1.0"
         const val firebase_auth_version = "19.3.1"
-        const val coroutines_version = "1.3.6"
+        const val coroutines_version = "1.3.7"
         const val koin_version = "2.1.5"
         const val timber_version = "4.7.1"
         const val room_version = "2.2.5"
@@ -104,7 +104,7 @@ object TestLibraries {
         const val junit_version = "4.13"
         const val espresso_version = "3.1.1"
         const val mockito_version = "2.2.0"
-        const val mockito_inline_version = "2.27.0"
+        const val mockito_inline_version = "3.3.3"
         const val androidx_testing_version = "2.1.0"
     }
 

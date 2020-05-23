@@ -6,6 +6,7 @@ data class RetroRemote constructor(
     val timestamp: Long? = null,
     val ownerEmail: String? = null,
     val protected: Boolean = false,
+    val deepLink: String? = null,
     val users: List<UserRemote>? = emptyList()
 )
 

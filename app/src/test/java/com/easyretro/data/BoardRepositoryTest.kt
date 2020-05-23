@@ -291,6 +291,7 @@ class BoardRepositoryTest {
     private fun getMockLocalRetro(): RetroDb {
         val retroUuid = "retro-uuid"
         val retroTitle = "Retro title"
+        val retroDeepLink = "http://www.easyretro.com/join"
         val userFirstName = "First name"
         val userLastName = "Last name"
         val userPhotoUrl = "photo.com/user1"
@@ -307,6 +308,7 @@ class BoardRepositoryTest {
             uuid = retroUuid,
             title = retroTitle,
             timestamp = retroTimestamp,
+            deepLink = retroDeepLink,
             users = listOf(dbUserOne),
             ownerEmail = userEmail,
             isProtected = true

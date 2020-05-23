@@ -15,6 +15,7 @@ import com.easyretro.data.local.mapper.RetroDbToDomainMapper
 import com.easyretro.data.local.mapper.StatementDbToDomainMapper
 import com.easyretro.data.local.mapper.UserDbToDomainMapper
 import com.easyretro.data.remote.AuthDataStore
+import com.easyretro.data.remote.DeepLinkDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.mapper.RetroRemoteToDbMapper
 import com.easyretro.data.remote.mapper.StatementRemoteToDbMapper
@@ -52,11 +53,14 @@ val appModule = module {
             localDataStore = get(),
             remoteDataStore = get(),
             authDataStore = get(),
+            deepLinkDataStore = get(),
             retroDbToDomainMapper = get(),
             retroRemoteToDbMapper = get(),
             dispatchers = get()
         )
     }
+
+    factory { DeepLinkDataStore() }
 
     single { RemoteDataStore(get()) }
 

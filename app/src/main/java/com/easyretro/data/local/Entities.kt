@@ -21,6 +21,7 @@ data class RetroDb(
     @PrimaryKey val uuid: String,
     val title: String,
     val timestamp: Long,
+    val deepLink: String,
     val ownerEmail: String,
     val isProtected: Boolean,
     val users: List<UserDb>

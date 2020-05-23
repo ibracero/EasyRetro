@@ -9,11 +9,11 @@ object CloudFireStore {
 
     object FirestoreCollection {
         const val COLLECTION_STATEMENTS = "statements"
-        const val COLLECTION_USERS = "users"
     }
 
     object FirestoreField {
         const val RETRO_TITLE = "title"
+        const val RETRO_DEEPLINK = "deep_link"
         const val RETRO_CREATED = "created"
         const val RETRO_USERS = "users"
         const val RETRO_OWNER_EMAIL = "owner_email"

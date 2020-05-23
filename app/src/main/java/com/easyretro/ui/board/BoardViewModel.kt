@@ -7,6 +7,7 @@ import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
+import com.easyretro.domain.model.Failure
 import com.easyretro.ui.FailureMessage
 import com.google.firebase.dynamiclinks.DynamicLink
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
@@ -20,10 +21,6 @@ class BoardViewModel(
     private val boardRepository: BoardRepository
 ) : BaseViewModel<BoardViewState, BoardViewEffect, BoardViewEvent>() {
 
-    companion object {
-        private const val DEEPLINK_DOMAIN = "https://easyretro.page.link"
-    }
-
     private var statementObserverJob: Job? = null
     private var retroObserverJob: Job? = null
 
@@ -32,7 +29,7 @@ class BoardViewModel(
         when (viewEvent) {
             is BoardViewEvent.GetRetroInfo -> getRetroInfo(retroUuid = viewEvent.retroUuid)
             is BoardViewEvent.JoinRetro -> joinRetro(retroUuid = viewEvent.retroUuid)
-            is BoardViewEvent.ShareRetroLink -> shareRetroLink(link = viewEvent.link)
+            is BoardViewEvent.ShareRetroLink -> shareRetroLink()
             is BoardViewEvent.SubscribeRetroDetails -> startObservingRetro(retroUuid = viewEvent.retroUuid)
             is BoardViewEvent.LockRetro -> lockRetro(retroUuid = viewEvent.retroUuid)
             is BoardViewEvent.UnlockRetro -> unlockRetro(retroUuid = viewEvent.retroUuid)
@@ -62,27 +59,11 @@ class BoardViewModel(
         }
     }
 
-    private fun shareRetroLink(link: String) {
-        generateDeepLink(link)
-    }
-
-    private fun generateDeepLink(link: String) {
-        FirebaseDynamicLinks.getInstance().createDynamicLink()
-            .setLink(Uri.parse(link))
-            .setDomainUriPrefix(DEEPLINK_DOMAIN)
-            .setAndroidParameters(DynamicLink.AndroidParameters.Builder().build())
-            .buildShortDynamicLink()
-            .addOnSuccessListener { shortLink ->
-                val retro = viewStates().value?.retro
-                if (retro != null) displayShareSheet(retroTitle = retro.title, link = shortLink)
-                else viewEffect = BoardViewEffect.ShowSnackBar(R.string.error_generic)
-            }
-    }
-
-    private fun displayShareSheet(retroTitle: String, link: ShortDynamicLink) {
-        viewEffect = link.shortLink?.let { shortLink ->
-            BoardViewEffect.ShowShareSheet(retroTitle = retroTitle, shortLink = shortLink)
-        } ?: BoardViewEffect.ShowSnackBar(R.string.error_generic)
+    private fun shareRetroLink() {
+        val retro = viewState.retro
+        viewEffect = if (retro.deepLink.isNotEmpty())
+            BoardViewEffect.ShowShareSheet(retroTitle = retro.title, deepLink = retro.deepLink)
+        else BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(Failure.UnknownError))
     }
 
     private fun unlockRetro(retroUuid: String) {

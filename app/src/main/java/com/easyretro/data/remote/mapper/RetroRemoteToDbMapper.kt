@@ -13,6 +13,7 @@ class RetroRemoteToDbMapper(
             uuid = from.uuid,
             title = from.title,
             timestamp = from.timestamp ?: 0,
+            deepLink = from.deepLink.orEmpty(),
             ownerEmail = from.ownerEmail.orEmpty(),
             isProtected = from.protected,
             users = from.users?.map(userRemoteToDbMapper::map) ?: emptyList()
