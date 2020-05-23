@@ -12,8 +12,8 @@ sealed class RetroListViewEffect {
 
 sealed class RetroListViewEvent {
     object FetchRetros : RetroListViewEvent()
-    data class RetroClicked(val retro: Retro) : RetroListViewEvent()
-    data class CreateRetroClicked(val retroName: String) : RetroListViewEvent()
+    data class RetroClicked(val retroUuid: String) : RetroListViewEvent()
+    data class CreateRetroClicked(val retroTitle: String) : RetroListViewEvent()
     object LogoutClicked : RetroListViewEvent()
 }
 

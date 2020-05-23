@@ -105,11 +105,11 @@ class RetroListFragment :
     }
 
     private fun onRetroClicked(retro: Retro) {
-        viewModel.process(viewEvent = RetroListViewEvent.RetroClicked(retro = retro))
+        viewModel.process(viewEvent = RetroListViewEvent.RetroClicked(retroUuid = retro.uuid))
     }
 
     private fun onAddClicked(retroTitle: String) {
-        viewModel.process(viewEvent = RetroListViewEvent.CreateRetroClicked(retroName = retroTitle))
+        viewModel.process(viewEvent = RetroListViewEvent.CreateRetroClicked(retroTitle = retroTitle))
     }
 
     private fun showError(@StringRes errorMessage: Int) {

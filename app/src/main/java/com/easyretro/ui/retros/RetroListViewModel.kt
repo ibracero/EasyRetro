@@ -5,7 +5,6 @@ import com.easyretro.common.BaseViewModel
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
-import com.easyretro.domain.model.Retro
 import com.easyretro.ui.FailureMessage
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -26,8 +25,8 @@ class RetroListViewModel(
         super.process(viewEvent)
         when (viewEvent) {
             RetroListViewEvent.FetchRetros -> fetchRetros()
-            is RetroListViewEvent.RetroClicked -> openRetro(viewEvent.retro)
-            is RetroListViewEvent.CreateRetroClicked -> createRetro(viewEvent.retroName)
+            is RetroListViewEvent.RetroClicked -> openRetro(viewEvent.retroUuid)
+            is RetroListViewEvent.CreateRetroClicked -> createRetro(viewEvent.retroTitle)
             RetroListViewEvent.LogoutClicked -> logout()
         }
     }
@@ -60,8 +59,8 @@ class RetroListViewModel(
         }
     }
 
-    private fun openRetro(retro: Retro) {
-        viewEffect = RetroListViewEffect.OpenRetroDetail(retroUuid = retro.uuid)
+    private fun openRetro(retroUuid: String) {
+        viewEffect = RetroListViewEffect.OpenRetroDetail(retroUuid = retroUuid)
     }
 
     private fun logout() {
