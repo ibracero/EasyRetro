@@ -1,44 +1,58 @@
 package com.easyretro.ui.account
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import arrow.core.Either
+import com.easyretro.common.BaseViewModel
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
+import com.easyretro.ui.FailureMessage
 import kotlinx.coroutines.launch
 
 class AccountViewModel(
     private val repository: AccountRepository
-) : ViewModel() {
+) : BaseViewModel<AccountViewState, AccountViewEffect, AccountViewEvent>() {
 
-    var signInLiveData: MutableLiveData<Either<Failure, UserStatus>>? = null
-        private set
-    var signUpLiveData: MutableLiveData<Either<Failure, Unit>>? = null
-        private set
-
-    fun onStart() {
-        signInLiveData = MutableLiveData<Either<Failure, UserStatus>>()
-        signUpLiveData = MutableLiveData<Either<Failure, Unit>>()
-    }
-
-    fun onStop() {
-        signInLiveData = null
-        signUpLiveData = null
-    }
-
-    fun signIn(email: String, password: String) {
-        viewModelScope.launch {
-            val signInResult = repository.signWithEmail(email, password)
-            signInLiveData?.postValue(signInResult)
+    override fun process(viewEvent: AccountViewEvent) {
+        super.process(viewEvent)
+        when (viewEvent) {
+            AccountViewEvent.ResetPassword -> viewEffect = AccountViewEffect.OpenResetPassword
+            is AccountViewEvent.SignIn -> signIn(email = viewEvent.email, password = viewEvent.password)
+            is AccountViewEvent.SignUp -> signUp(email = viewEvent.email, password = viewEvent.password)
         }
     }
 
-    fun signUp(email: String, password: String) {
+    private fun signIn(email: String, password: String) {
+        viewState = AccountViewState(signingState = SigningState.Loading)
         viewModelScope.launch {
-            val signUpResult = repository.signUpWithEmail(email, password)
-            signUpLiveData?.postValue(signUpResult)
+            val signInResult = repository.signWithEmail(email, password)
+            viewState = AccountViewState(signingState = SigningState.RequestDone)
+            signInResult.fold(
+                { error ->
+                    viewEffect = if (error is Failure.InvalidUserFailure) {
+                        AccountViewEffect.ShowUnknownUserSnackBar(FailureMessage.parse(error))
+                    } else AccountViewEffect.ShowGenericSnackBar(FailureMessage.parse(error))
+                }, { userStatus ->
+                    viewEffect = when (userStatus) {
+                        UserStatus.VERIFIED -> AccountViewEffect.OpenRetroList
+                        UserStatus.NON_VERIFIED -> AccountViewEffect.OpenEmailVerification
+                    }
+                })
+        }
+    }
+
+    private fun signUp(email: String, password: String) {
+        viewState = AccountViewState(signingState = SigningState.Loading)
+        viewModelScope.launch {
+            val signInResult = repository.signUpWithEmail(email, password)
+            viewState = AccountViewState(signingState = SigningState.RequestDone)
+            signInResult.fold(
+                { error ->
+                    viewEffect = if (error is Failure.UserCollisionFailure) {
+                        AccountViewEffect.ShowExistingUserSnackBar(FailureMessage.parse(error))
+                    } else AccountViewEffect.ShowGenericSnackBar(FailureMessage.parse(error))
+                }, {
+                    viewEffect = AccountViewEffect.OpenEmailVerification
+                })
         }
     }
 }
