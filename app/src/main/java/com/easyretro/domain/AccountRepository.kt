@@ -9,7 +9,7 @@ interface AccountRepository {
 
     suspend fun signWithGoogleAccount(idToken: String, user: User): Either<Failure, Unit>
 
-    suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus>
+    suspend fun signInWithEmail(email: String, password: String): Either<Failure, UserStatus>
 
     suspend fun signUpWithEmail(email: String, password: String): Either<Failure, Unit>
 

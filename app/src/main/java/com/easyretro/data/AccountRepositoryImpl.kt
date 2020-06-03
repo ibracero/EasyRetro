@@ -35,7 +35,7 @@ class AccountRepositoryImpl(
             else startUserSession(user)
         }
 
-    override suspend fun signWithEmail(email: String, password: String): Either<Failure, UserStatus> =
+    override suspend fun signInWithEmail(email: String, password: String): Either<Failure, UserStatus> =
         withContext(dispatchers.io()) {
             authDataStore.signInWithEmailAndPassword(email = email, password = password)
                 .map { isUserVerified ->

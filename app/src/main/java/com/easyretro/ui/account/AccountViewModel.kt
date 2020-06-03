@@ -24,7 +24,7 @@ class AccountViewModel(
     private fun signIn(email: String, password: String) {
         viewState = AccountViewState(signingState = SigningState.Loading)
         viewModelScope.launch {
-            val signInResult = repository.signWithEmail(email, password)
+            val signInResult = repository.signInWithEmail(email, password)
             viewState = AccountViewState(signingState = SigningState.RequestDone)
             signInResult.fold(
                 { error ->

@@ -172,7 +172,7 @@ class AccountRepositoryImplTest {
             )
                 .thenReturn(Either.right(isUserVerifiedResponse))
 
-            val result = repository.signWithEmail(email = userEmail, password = userPassword)
+            val result = repository.signInWithEmail(email = userEmail, password = userPassword)
 
             verify(authDataStore).signInWithEmailAndPassword(
                 email = userEmail,
@@ -195,7 +195,7 @@ class AccountRepositoryImplTest {
             )
                 .thenReturn(Either.right(isUserVerifiedResponse))
 
-            val result = repository.signWithEmail(email = userEmail, password = userPassword)
+            val result = repository.signInWithEmail(email = userEmail, password = userPassword)
 
             verify(authDataStore).signInWithEmailAndPassword(
                 email = userEmail,
