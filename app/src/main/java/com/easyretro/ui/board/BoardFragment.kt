@@ -3,7 +3,6 @@ package com.easyretro.ui.board
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
@@ -69,11 +68,11 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private fun onUnlockClicked(retroUuid: String) {
-        viewModel.process(BoardViewEvent.UnlockRetro(retroUuid = retroUuid))
+        viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid = retroUuid))
     }
 
     private fun onLockClicked(retroUuid: String) {
-        viewModel.process(BoardViewEvent.LockRetro(retroUuid = retroUuid))
+        viewModel.process(BoardViewEvent.ProtectRetro(retroUuid = retroUuid))
     }
 
     private fun onInviteClicked() {

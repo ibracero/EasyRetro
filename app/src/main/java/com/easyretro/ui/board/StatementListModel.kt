@@ -9,7 +9,7 @@ data class StatementListViewState(val statements: List<Statement>, val addState:
 sealed class StatementListViewEvent {
     data class FetchStatements(val retroUuid: String, val type: StatementType) : StatementListViewEvent()
     data class CheckRetroLock(val retroUuid: String) : StatementListViewEvent()
-    data class RemoveStatement(val statement: Statement) : StatementListViewEvent()
+    data class RemoveStatement(val retroUuid: String, val statementUuid: String) : StatementListViewEvent()
     data class AddStatement(
         val retroUuid: String,
         val description: String,

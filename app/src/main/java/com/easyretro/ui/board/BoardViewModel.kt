@@ -1,17 +1,12 @@
 package com.easyretro.ui.board
 
-import android.net.Uri
 import androidx.lifecycle.viewModelScope
-import com.easyretro.R
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.ui.FailureMessage
-import com.google.firebase.dynamiclinks.DynamicLink
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
-import com.google.firebase.dynamiclinks.ShortDynamicLink
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -31,8 +26,8 @@ class BoardViewModel(
             is BoardViewEvent.JoinRetro -> joinRetro(retroUuid = viewEvent.retroUuid)
             is BoardViewEvent.ShareRetroLink -> shareRetroLink()
             is BoardViewEvent.SubscribeRetroDetails -> startObservingRetro(retroUuid = viewEvent.retroUuid)
-            is BoardViewEvent.LockRetro -> lockRetro(retroUuid = viewEvent.retroUuid)
-            is BoardViewEvent.UnlockRetro -> unlockRetro(retroUuid = viewEvent.retroUuid)
+            is BoardViewEvent.ProtectRetro -> lockRetro(retroUuid = viewEvent.retroUuid)
+            is BoardViewEvent.UnprotectRetro -> unlockRetro(retroUuid = viewEvent.retroUuid)
             BoardViewEvent.UnsubscribeRetroDetails -> stopObservingRetro()
         }.exhaustive
     }

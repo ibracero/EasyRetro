@@ -14,8 +14,8 @@ sealed class BoardViewEvent {
     data class GetRetroInfo(val retroUuid: String) : BoardViewEvent()
     data class JoinRetro(val retroUuid: String) : BoardViewEvent()
     data class SubscribeRetroDetails(val retroUuid: String) : BoardViewEvent()
-    data class LockRetro(val retroUuid: String) : BoardViewEvent()
-    data class UnlockRetro(val retroUuid: String) : BoardViewEvent()
+    data class ProtectRetro(val retroUuid: String) : BoardViewEvent()
+    data class UnprotectRetro(val retroUuid: String) : BoardViewEvent()
     object ShareRetroLink : BoardViewEvent()
     object UnsubscribeRetroDetails : BoardViewEvent()
 }

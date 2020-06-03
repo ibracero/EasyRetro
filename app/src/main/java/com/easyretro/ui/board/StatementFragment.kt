@@ -97,7 +97,12 @@ abstract class StatementFragment :
             .setTitle(R.string.remove_confirmation_title)
             .setMessage(statement.description)
             .setPositiveButton(R.string.action_yes) { _, _ ->
-                viewModel.process(StatementListViewEvent.RemoveStatement(statement))
+                viewModel.process(
+                    StatementListViewEvent.RemoveStatement(
+                        retroUuid = statement.retroUuid,
+                        statementUuid = statement.uuid
+                    )
+                )
             }
             .setNegativeButton(R.string.action_no) { dialogInterface, _ -> dialogInterface.dismiss() }
             .create()

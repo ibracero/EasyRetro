@@ -24,7 +24,8 @@ class StatementViewModel(
         super.process(viewEvent)
         when (viewEvent) {
             is StatementListViewEvent.CheckRetroLock -> checkRetroLock(retroUuid = viewEvent.retroUuid)
-            is StatementListViewEvent.RemoveStatement -> removeStatement(statement = viewEvent.statement)
+            is StatementListViewEvent.RemoveStatement ->
+                removeStatement(retroUuid = viewEvent.retroUuid, statementUuid = viewEvent.statementUuid)
             is StatementListViewEvent.AddStatement ->
                 addStatement(
                     retroUuid = viewEvent.retroUuid,
@@ -49,14 +50,13 @@ class StatementViewModel(
         viewModelScope.launch {
             retroRepository.observeRetro(retroUuid = retroUuid)
                 .collect {
-                    it.fold({
-
+                    it.fold({ failure ->
+                        viewEffect = StatementListViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(failure))
                     }, { retro ->
                         viewState = viewState.copy(
                             addState = if (retro.protected) StatementAddState.Hidden else StatementAddState.Shown
                         )
                     })
-
                 }
         }
     }
@@ -73,9 +73,9 @@ class StatementViewModel(
         }
     }
 
-    private fun removeStatement(statement: Statement) {
+    private fun removeStatement(retroUuid: String, statementUuid: String) {
         viewModelScope.launch {
-            boardRepository.removeStatement(retroUuid = statement.retroUuid, statementUuid = statement.uuid)
+            boardRepository.removeStatement(retroUuid = retroUuid, statementUuid = statementUuid)
                 .mapLeft {
                     viewEffect = StatementListViewEffect.ShowSnackBar(FailureMessage.parse(it))
                 }

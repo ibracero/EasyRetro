@@ -35,8 +35,8 @@ class RetroRepositoryImplTest {
 
     private val retroUuid = "retro-uuid"
     private val retroTitle = "Retro title"
-    private val userEmail = "email@email.com"
     private val retroDeepLink = "http://www.easyretro.com/join"
+    private val userEmail = "email@email.com"
 
     private lateinit var domainRetro: Retro
     private lateinit var dbRetro: RetroDb
