@@ -52,6 +52,10 @@ class RetroRepositoryImpl(
                         retroDeepLink = deepLinkEither.b
                     )
                         .map(retroRemoteToDbMapper::map)
+                        .map { dbRetro ->
+                            localDataStore.saveRetros(listOf(dbRetro))
+                            dbRetro
+                        }
                         .map { retroDbToDomainMapper.map(it, userEmail) }
                 }
             }

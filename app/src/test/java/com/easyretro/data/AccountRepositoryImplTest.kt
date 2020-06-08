@@ -317,9 +317,9 @@ class AccountRepositoryImplTest {
             val result = repository.logOut()
 
             inOrder(authDataStore, sessionSharedPrefsManager, localDataStore) {
-                verify(authDataStore).logOut()
-                verify(sessionSharedPrefsManager).setSessionEnded()
                 verify(localDataStore).clearAll()
+                verify(sessionSharedPrefsManager).setSessionEnded()
+                verify(authDataStore).logOut()
             }
             verifyNoMoreInteractions(sessionSharedPrefsManager)
             verifyNoMoreInteractions(authDataStore)

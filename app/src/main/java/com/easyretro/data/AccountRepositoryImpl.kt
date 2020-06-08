@@ -63,9 +63,9 @@ class AccountRepositoryImpl(
 
     override suspend fun logOut(): Unit =
         withContext(dispatchers.io()) {
-            authDataStore.logOut()
-            sessionManager.setSessionEnded()
             localDataStore.clearAll()
+            sessionManager.setSessionEnded()
+            authDataStore.logOut()
         }
 
     private suspend fun reloadUser(): Either<Failure, UserStatus> =
