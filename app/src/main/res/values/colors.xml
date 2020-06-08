@@ -13,7 +13,7 @@
     <color name="positiveBackgroundColor">#4ea37c</color>
     <color name="negativeBackgroundColor">#c27969</color>
     <color name="actionsBackgroundColor">#8191e6</color>
-    <color name="errorColor">#FF553E</color>
+    <color name="errorColor">#FFA000</color>
     <color name="successColor">#62E7F8</color>
     <color name="warningColor">#D5A61B</color>
     <color name="yellow">#ffd659</color>

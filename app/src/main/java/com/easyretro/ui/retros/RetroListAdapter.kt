@@ -17,8 +17,6 @@ class RetroListAdapter(
     companion object {
         private const val VIEW_TYPE_ADD = 1
         private const val VIEW_TYPE_RETRO = 2
-
-        private const val ADD_ITEM_OFFSET = 1
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -33,8 +31,7 @@ class RetroListAdapter(
             VIEW_TYPE_ADD -> AddItemViewHolder(
                 parent,
                 onAddClicked,
-                AddItemViewHolder.ItemType.RETRO,
-                itemCount > ADD_ITEM_OFFSET
+                AddItemViewHolder.ItemType.RETRO
             )
             else -> RetroViewHolder(parent, onRetroClicked)
         }

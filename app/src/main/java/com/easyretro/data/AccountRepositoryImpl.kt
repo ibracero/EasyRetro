@@ -40,7 +40,10 @@ class AccountRepositoryImpl(
             authDataStore.signInWithEmailAndPassword(email = email, password = password)
                 .map { isUserVerified ->
                     when (isUserVerified) {
-                        true -> UserStatus.VERIFIED
+                        true -> {
+                            sessionManager.setSessionStarted()
+                            UserStatus.VERIFIED
+                        }
                         false -> UserStatus.NON_VERIFIED
                     }
                 }
@@ -48,7 +51,9 @@ class AccountRepositoryImpl(
 
     override suspend fun signUpWithEmail(email: String, password: String): Either<Failure, Unit> =
         withContext(dispatchers.io()) {
-            authDataStore.signUpWithEmailAndPassword(email = email, password = password)
+            val signUpEither = authDataStore.signUpWithEmailAndPassword(email = email, password = password)
+            if (signUpEither.isLeft()) signUpEither
+            else remoteDataStore.createUser(UserRemote(email = email))
         }
 
     override suspend fun resetPassword(email: String): Either<Failure, Unit> =
@@ -73,7 +78,9 @@ class AccountRepositoryImpl(
             authDataStore.isUserVerified()
                 .map { userVerified ->
                     when (userVerified ?: sessionManager.isSessionStarted()) {
-                        true -> UserStatus.VERIFIED
+                        true -> {
+                            UserStatus.VERIFIED
+                        }
                         false -> UserStatus.NON_VERIFIED
                     }
                 }

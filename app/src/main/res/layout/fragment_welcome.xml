@@ -118,6 +118,7 @@
         android:id="@+id/group_buttons"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:visibility="gone"
         app:constraint_referenced_ids="google_sign_in,email_sign_in,sign_up_button,divider" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

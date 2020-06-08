@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name" translatable="false">EasyRetro</string>
     <string name="app_name_two_lines">Easy\nRetro</string>
-    <string name="title_positive">Went well</string>
-    <string name="title_negative">Not so well</string>
+    <string name="title_positive">Positive</string>
+    <string name="title_negative">Negative</string>
     <string name="title_actions">Actions</string>
     <string name="add_retro_hint">Put a name to your retro…</string>
     <string name="add_statement_hint">What would you like to point out?</string>
@@ -28,7 +28,6 @@
     <string name="confirm_logout_message">Do you really want to close your current session?</string>
     <string name="retro_invitation_message">"Hey there! You are invited to join my retro \"%1$s\". Just tap on the link: %2$s"</string>
     <string name="your_retros">Your retros</string>
-    <string name="create_retro">Create a new retro</string>
     <string name="email_validation_error">Please, insert a valid email address</string>
     <string name="password_minimum_length_validation_error">Please, insert at least 6 alphanumeric characters</string>
     <string name="password_alphanumeric_validation_error">Please insert a valid password (alphanumeric characters only)</string>

@@ -14,8 +14,7 @@ import kotlinx.android.synthetic.main.item_add.*
 class AddItemViewHolder(
     parent: ViewGroup,
     private val onAddClicked: (String) -> Unit,
-    type: ItemType,
-    hasMoreItems: Boolean? = null
+    type: ItemType
 ) : BaseViewHolder(parent.inflate(R.layout.item_add)) {
 
     enum class ItemType {
@@ -33,7 +32,7 @@ class AddItemViewHolder(
             } else false
         }
 
-        setupVariant(type, hasMoreItems)
+        setupVariant(type)
     }
 
     fun bindResult(success: Boolean) {
@@ -43,22 +42,18 @@ class AddItemViewHolder(
     }
 
     fun bindLockMode(retroProtected: Boolean) {
-        containerView.visibleOrGone(!retroProtected)
-
         if (retroProtected) itemView.layoutParams = RecyclerView.LayoutParams(0, 0)
         else itemView.layoutParams =
             RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
-    private fun setupVariant(type: ItemType, hasMoreItems: Boolean?) {
+    private fun setupVariant(type: ItemType) {
         val hint = if (type == ItemType.RETRO) containerView.context.getString(R.string.add_retro_hint)
         else containerView.context.getString(R.string.add_statement_hint)
         add_title.hint = hint
 
         create_label.visibleOrGone(type == ItemType.RETRO)
         welcome_label.visibleOrGone(type == ItemType.RETRO)
-        choose_label.visibleOrGone(type == ItemType.RETRO && hasMoreItems == true)
-        if (type == ItemType.STATEMENT) itemView.layoutParams = RecyclerView.LayoutParams(0, 0)
     }
 
     private fun showTitleInput() {

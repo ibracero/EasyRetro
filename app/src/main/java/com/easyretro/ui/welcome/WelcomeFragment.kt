@@ -32,6 +32,7 @@ class WelcomeFragment : Fragment() {
 
     companion object {
         const val GOOGLE_SIGN_IN_REQUEST_CODE = 2901
+        const val STARTUP_DELAY = 1500L
     }
 
     private val buttonsLayoutHandler = Handler()
@@ -75,7 +76,7 @@ class WelcomeFragment : Fragment() {
             showButtons()
         }, {
             when (it) {
-                UserStatus.VERIFIED -> navigateToRetroList()
+                UserStatus.VERIFIED -> buttonsLayoutHandler.postDelayed({ navigateToRetroList() }, STARTUP_DELAY)
                 else -> showButtons()
             }
         })
@@ -100,8 +101,7 @@ class WelcomeFragment : Fragment() {
     }
 
     private fun showButtons() {
-        google_sign_in.visible()
-        email_sign_in.visible()
+        group_buttons.visible()
     }
 
     private fun launchGoogleSignIn(it: View) {

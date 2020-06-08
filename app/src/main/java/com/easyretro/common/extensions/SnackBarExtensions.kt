@@ -47,5 +47,6 @@ fun View.showSnackBar(
 fun Snackbar.setActionStyle(): Snackbar {
     val snackbarActionTextView = view.findViewById<TextView>(com.google.android.material.R.id.snackbar_action)
     snackbarActionTextView.setTypeface(snackbarActionTextView.typeface, Typeface.BOLD)
+    snackbarActionTextView.setTextColor(ContextCompat.getColor(this.context, R.color.primaryTextColor))
     return this
 }

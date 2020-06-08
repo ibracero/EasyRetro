@@ -60,7 +60,7 @@ class StatementListAdapter(
             oldItem.uuid == newItem.uuid
 
         override fun areContentsTheSame(oldItem: Statement, newItem: Statement): Boolean =
-            oldItem.hashCode() == newItem.hashCode()
+            oldItem.description == newItem.description && oldItem.removable == newItem.removable
 
         override fun getChangePayload(oldItem: Statement, newItem: Statement): Payload? {
             return Payload.StatementContentPayload(description = newItem.description, isRemovable = newItem.removable)
