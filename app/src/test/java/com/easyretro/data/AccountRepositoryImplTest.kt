@@ -211,13 +211,14 @@ class AccountRepositoryImplTest {
     @Test
     fun `GIVEN success server response WHEN signing up with email THEN return EitherRight`() {
         runBlocking {
+            val remoteUser = UserRemote(email = userEmail)
+            whenever(remoteDataStore.createUser(remoteUser)).thenReturn(Either.right(Unit))
             whenever(
                 authDataStore.signUpWithEmailAndPassword(
                     email = userEmail,
                     password = userPassword
                 )
-            )
-                .thenReturn(Either.right(Unit))
+            ).thenReturn(Either.right(Unit))
 
             val result = repository.signUpWithEmail(email = userEmail, password = userPassword)
 
@@ -225,8 +226,36 @@ class AccountRepositoryImplTest {
                 email = userEmail,
                 password = userPassword
             )
+            verify(remoteDataStore).createUser(remoteUser)
             verifyNoMoreInteractions(authDataStore)
+            verifyNoMoreInteractions(remoteDataStore)
             assertEquals(Either.right(Unit), result)
+        }
+    }
+
+
+    @Test
+    fun `GIVEN failed server response WHEN creating user in firebase with email THEN return EitherLeft`() {
+        runBlocking {
+            val remoteUser = UserRemote(email = userEmail)
+            whenever(remoteDataStore.createUser(remoteUser)).thenReturn(Either.left(Failure.UnavailableNetwork))
+            whenever(
+                authDataStore.signUpWithEmailAndPassword(
+                    email = userEmail,
+                    password = userPassword
+                )
+            ).thenReturn(Either.right(Unit))
+
+            val result = repository.signUpWithEmail(email = userEmail, password = userPassword)
+
+            verify(authDataStore).signUpWithEmailAndPassword(
+                email = userEmail,
+                password = userPassword
+            )
+            verify(remoteDataStore).createUser(remoteUser)
+            verifyNoMoreInteractions(authDataStore)
+            verifyNoMoreInteractions(remoteDataStore)
+            assertEquals(Either.left(Failure.UnavailableNetwork), result)
         }
     }
 
