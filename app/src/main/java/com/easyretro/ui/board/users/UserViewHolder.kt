@@ -28,6 +28,13 @@ class UserViewHolder(view: View) : CachedRecyclerViewHolder(view) {
         }
     }
 
-    private fun getInitials(user: User) =
-        listOf(user.firstName, user.lastName).filter { it.isNotEmpty() }.map { it[0] }.joinToString("")
+    private fun getInitials(user: User): String {
+        val initials = listOf(user.firstName, user.lastName)
+            .filter { it.isNotEmpty() }
+            .map { it[0] }
+            .joinToString("")
+
+        return if (initials.isNotEmpty()) initials
+        else user.email.getOrElse(0) { '?' }.toString()
+    }
 }

@@ -1,6 +1,7 @@
 package com.easyretro
 
 import android.app.Application
+import com.easyretro.analytics.AnalyticsManager
 import com.easyretro.di.accountModule
 import com.easyretro.di.appModule
 import com.easyretro.di.mapperModule
@@ -19,8 +20,9 @@ class EasyRetroApp : Application() {
             androidLogger()
             androidContext(this@EasyRetroApp)
             modules(listOf(appModule, viewModelModule, mapperModule, accountModule))
-
-            Timber.plant(Timber.DebugTree())
         }
+
+        Timber.plant(Timber.DebugTree())
+        AnalyticsManager.init(this, BuildConfig.ENABLE_ANALYTICS)
     }
 }

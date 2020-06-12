@@ -7,6 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import com.easyretro.R
+import com.easyretro.analytics.Screen
+import com.easyretro.analytics.TapEvent
+import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.common.extensions.showErrorSnackbar
@@ -65,6 +69,7 @@ abstract class StatementFragment :
     private fun getRetroUuidArgument() = arguments?.getString(BoardFragment.ARGUMENT_RETRO_UUID)
 
     private fun onAddClicked(description: String) {
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.STATEMENT_CREATE))
         viewModel.process(
             StatementListViewEvent.AddStatement(
                 getRetroUuidArgument().orEmpty(),
@@ -88,6 +93,7 @@ abstract class StatementFragment :
 
     private fun onRemoveClicked(statement: Statement) {
         val safeContext = context ?: return
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.STATEMENT_REMOVE))
         createRemoveStatementConfirmationDialog(safeContext, statement).show()
     }
 
@@ -97,6 +103,12 @@ abstract class StatementFragment :
             .setTitle(R.string.remove_confirmation_title)
             .setMessage(statement.description)
             .setPositiveButton(R.string.action_yes) { _, _ ->
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RETRO_BOARD,
+                        uiValue = UiValue.STATEMENT_REMOVE_CONFIRMATION
+                    )
+                )
                 viewModel.process(
                     StatementListViewEvent.RemoveStatement(
                         retroUuid = statement.retroUuid,
@@ -104,7 +116,15 @@ abstract class StatementFragment :
                     )
                 )
             }
-            .setNegativeButton(R.string.action_no) { dialogInterface, _ -> dialogInterface.dismiss() }
+            .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RETRO_BOARD,
+                        uiValue = UiValue.STATEMENT_REMOVE_DISMISS
+                    )
+                )
+                dialogInterface.dismiss()
+            }
             .create()
     }
 }

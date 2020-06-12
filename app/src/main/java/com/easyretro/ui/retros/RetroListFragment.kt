@@ -1,5 +1,6 @@
 package com.easyretro.ui.retros
 
+import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.activity.ComponentActivity
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import com.easyretro.R
+import com.easyretro.analytics.*
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.common.extensions.showErrorSnackbar
@@ -59,6 +61,7 @@ class RetroListFragment :
     override fun onOptionsItemSelected(item: MenuItem) =
         when (item.itemId) {
             R.id.action_logout -> {
+                reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT))
                 showLogoutConfirmationDialog()
                 true
             }
@@ -67,6 +70,8 @@ class RetroListFragment :
 
     override fun onStart() {
         super.onStart()
+        reportAnalytics(event = PageEnterEvent(screen = Screen.RETRO_LIST))
+
         handleDeepLink()
         viewModel.process(viewEvent = RetroListViewEvent.FetchRetros)
     }
@@ -105,10 +110,12 @@ class RetroListFragment :
     }
 
     private fun onRetroClicked(retro: Retro) {
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.RETRO_ITEM))
         viewModel.process(viewEvent = RetroListViewEvent.RetroClicked(retroUuid = retro.uuid))
     }
 
     private fun onAddClicked(retroTitle: String) {
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.RETRO_CREATE))
         viewModel.process(viewEvent = RetroListViewEvent.CreateRetroClicked(retroTitle = retroTitle))
     }
 
@@ -123,8 +130,14 @@ class RetroListFragment :
             .setCancelable(true)
             .setTitle(R.string.confirm_logout)
             .setMessage(getString(R.string.confirm_logout_message))
-            .setPositiveButton(R.string.action_yes) { _, _ -> onLogoutConfirmed() }
-            .setNegativeButton(R.string.action_no) { dialogInterface, _ -> dialogInterface.dismiss() }
+            .setPositiveButton(R.string.action_yes) { _, _ ->
+                reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT_CONFIRMATION))
+                onLogoutConfirmed()
+            }
+            .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
+                reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT_DISMISS))
+                dialogInterface.dismiss()
+            }
             .create()
             .show()
     }

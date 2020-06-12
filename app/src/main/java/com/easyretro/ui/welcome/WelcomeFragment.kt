@@ -1,5 +1,6 @@
 package com.easyretro.ui.welcome
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.easyretro.R
+import com.easyretro.analytics.*
 import com.easyretro.common.extensions.gone
 import com.easyretro.common.extensions.invisible
 import com.easyretro.common.extensions.showErrorSnackbar
@@ -50,6 +52,11 @@ class WelcomeFragment : Fragment() {
         welcomeViewModel.userSessionLiveData.observe(viewLifecycleOwner, Observer { processUserSession(it) })
     }
 
+    override fun onStart() {
+        super.onStart()
+        reportAnalytics(event = PageEnterEvent(screen = Screen.WELCOME))
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
@@ -65,6 +72,7 @@ class WelcomeFragment : Fragment() {
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -95,9 +103,18 @@ class WelcomeFragment : Fragment() {
     private fun initUi() {
         group_post_it.visible()
 
-        google_sign_in.setOnClickListener { launchGoogleSignIn(it) }
-        email_sign_in.setOnClickListener { navigateToLogin() }
-        sign_up_button.setOnClickListener { navigateToRegister() }
+        google_sign_in.setOnClickListener {
+            reportAnalytics(event = TapEvent(screen = Screen.WELCOME, uiValue = UiValue.GOOGLE_SIGN_IN))
+            launchGoogleSignIn(it)
+        }
+        email_sign_in.setOnClickListener {
+            reportAnalytics(event = TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_IN))
+            navigateToLogin()
+        }
+        sign_up_button.setOnClickListener {
+            reportAnalytics(event = TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_UP))
+            navigateToRegister()
+        }
     }
 
     private fun showButtons() {

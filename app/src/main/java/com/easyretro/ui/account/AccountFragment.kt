@@ -1,5 +1,6 @@
 package com.easyretro.ui.account
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Patterns
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.navigation.fragment.findNavController
 import com.easyretro.R
+import com.easyretro.analytics.*
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.*
 import com.easyretro.ui.account.ResetPasswordFragment.Companion.ARG_EMAIL
@@ -32,7 +34,12 @@ class AccountFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initUi(arguments?.getBoolean(ARG_IS_NEW_ACCOUNT) ?: false)
+        initUi(getIsNewAccountArgument())
+    }
+
+    override fun onStart() {
+        super.onStart()
+        logPageEnter()
     }
 
     override fun renderViewState(viewState: AccountViewState) {
@@ -59,10 +66,15 @@ class AccountFragment :
         if (isNewAccount) setupSignUp()
         else setupSignIn()
 
-        sign_in_toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+        sign_in_toolbar.setNavigationOnClickListener {
+            reportAnalytics(event = TapEvent(screen = getAnalyticsScreen(), uiValue = UiValue.BACK))
+            findNavController().navigateUp()
+        }
 
-        val resetPasswordClickListener =
-            { _: View -> viewModel.process(AccountViewEvent.ResetPassword) }
+        val resetPasswordClickListener = { _: View ->
+            reportAnalytics(event = TapEvent(screen = getAnalyticsScreen(), uiValue = UiValue.ACCOUNT_RESET_PASSWORD))
+            viewModel.process(AccountViewEvent.ResetPassword)
+        }
         reset_password_button.setOnClickListener(resetPasswordClickListener)
         reset_password_label.setOnClickListener(resetPasswordClickListener)
 
@@ -102,6 +114,13 @@ class AccountFragment :
         })
 
         sign_in_button.setOnClickListener {
+            reportAnalytics(
+                event = TapEvent(
+                    screen = getAnalyticsScreen(),
+                    uiValue = if (getAnalyticsScreen() == Screen.SIGN_IN) UiValue.ACCOUNT_SIGN_IN else UiValue.ACCOUNT_SIGN_UP
+                )
+            )
+
             val email = email_input_field.text.toString()
             val password = password_input_field.text.toString()
 
@@ -198,4 +217,14 @@ class AccountFragment :
         reset_password_label?.visible()
         loading?.gone()
     }
+
+    private fun getIsNewAccountArgument(): Boolean = arguments?.getBoolean(ARG_IS_NEW_ACCOUNT) ?: false
+
+    private fun logPageEnter() {
+        val event = if (!getIsNewAccountArgument()) PageEnterEvent(screen = Screen.SIGN_IN)
+        else PageEnterEvent(screen = Screen.SIGN_UP)
+        reportAnalytics(event = event)
+    }
+
+    private fun getAnalyticsScreen(): Screen = if (getIsNewAccountArgument()) Screen.SIGN_UP else Screen.SIGN_IN
 }

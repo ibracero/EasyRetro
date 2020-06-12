@@ -13,6 +13,7 @@ import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.easyretro.R
+import com.easyretro.analytics.*
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.*
 import com.easyretro.ui.board.action.ActionsFragment
@@ -67,20 +68,9 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         else initPortraitUi()
     }
 
-    private fun onUnlockClicked(retroUuid: String) {
-        viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid = retroUuid))
-    }
-
-    private fun onLockClicked(retroUuid: String) {
-        viewModel.process(BoardViewEvent.ProtectRetro(retroUuid = retroUuid))
-    }
-
-    private fun onInviteClicked() {
-        viewModel.process(BoardViewEvent.ShareRetroLink)
-    }
-
     override fun onStart() {
         super.onStart()
+        reportAnalytics(event = PageEnterEvent(screen = Screen.RETRO_BOARD))
 
         requireActivity().onBackPressedDispatcher.addCallback(backPressedCallback)
 
@@ -116,12 +106,15 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     private fun initToolbar(retroUuid: String, retroTitle: String?) {
         board_toolbar?.run {
             title = retroTitle
-            setNavigationOnClickListener { backPressedCallback.handleOnBackPressed() }
+            setNavigationOnClickListener {
+                reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.BACK))
+                backPressedCallback.handleOnBackPressed()
+            }
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.action_invite -> onInviteClicked()
                     R.id.action_lock -> context?.let { createLockConfirmationDialog(it, retroUuid).show() }
-                    R.id.action_unlock -> onUnlockClicked(retroUuid)
+                    R.id.action_unlock -> onUnprotectClicked(retroUuid)
                 }
                 true
             }
@@ -237,14 +230,33 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private fun createLockConfirmationDialog(context: Context, retroUuid: String): AlertDialog {
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT))
         return AlertDialog.Builder(context)
             .setCancelable(true)
             .setTitle(R.string.lock_confirmation_title)
             .setMessage(R.string.lock_confirmation_message)
             .setPositiveButton(R.string.action_yes) { _, _ ->
-                onLockClicked(retroUuid = retroUuid)
+                onProtectConfirmed(retroUuid = retroUuid)
             }
-            .setNegativeButton(R.string.action_no) { dialogInterface, _ -> dialogInterface.dismiss() }
+            .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
+                reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT_DISMISS))
+                dialogInterface.dismiss()
+            }
             .create()
+    }
+
+    private fun onProtectConfirmed(retroUuid: String) {
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT_CONFIRMATION))
+        viewModel.process(BoardViewEvent.ProtectRetro(retroUuid = retroUuid))
+    }
+
+    private fun onUnprotectClicked(retroUuid: String) {
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_UNPROTECT))
+        viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid = retroUuid))
+    }
+
+    private fun onInviteClicked() {
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_INVITE))
+        viewModel.process(BoardViewEvent.ShareRetroLink)
     }
 }

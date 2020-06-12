@@ -1,5 +1,9 @@
 import BuildTypes.DEBUG
 import BuildTypes.RELEASE
+import Name.ENABLE_ANALYTICS
+import Type.TYPE_BOOLEAN
+import Value.FALSE
+import Value.TRUE
 
 plugins {
     id(Plugins.androidApplication)
@@ -22,12 +26,14 @@ android {
     }
     buildTypes {
         getByName(DEBUG) {
+            buildConfigField(TYPE_BOOLEAN, ENABLE_ANALYTICS, FALSE)
             applicationIdSuffix = ".debug"
             isMinifyEnabled = false
             isDebuggable = true
         }
 
         getByName(RELEASE) {
+            buildConfigField(TYPE_BOOLEAN, ENABLE_ANALYTICS, TRUE)
             isMinifyEnabled = true
             isDebuggable = false
             proguardFiles(
