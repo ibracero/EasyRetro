@@ -15,7 +15,10 @@ import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.extensions.addTextWatcher
 import com.easyretro.common.extensions.hasValidText
+import com.easyretro.common.extensions.showErrorSnackbar
+import com.easyretro.common.extensions.showSuccessSnackbar
 import com.easyretro.domain.model.Failure
+import com.easyretro.ui.FailureMessage
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -45,10 +48,11 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
     private fun initUi(email: String) {
 
         reset_password_toolbar.setNavigationOnClickListener {
-            reportAnalytics(event = TapEvent(
-                screen = Screen.RESET_PASSWORD,
-                uiValue = UiValue.BACK
-            )
+            reportAnalytics(
+                event = TapEvent(
+                    screen = Screen.RESET_PASSWORD,
+                    uiValue = UiValue.BACK
+                )
             )
             findNavController().navigateUp()
         }
@@ -64,10 +68,11 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         })
 
         confirm_button.setOnClickListener {
-            reportAnalytics(event = TapEvent(
-                screen = Screen.RESET_PASSWORD,
-                uiValue = UiValue.RESET_PASSWORD_CONFIRM
-            )
+            reportAnalytics(
+                event = TapEvent(
+                    screen = Screen.RESET_PASSWORD,
+                    uiValue = UiValue.RESET_PASSWORD_CONFIRM
+                )
             )
             resetPasswordViewModel.resetPassword(email_input_field.text.toString())
         }
@@ -80,9 +85,9 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
 
     private fun processResetPasswordResponse(response: Either<Failure, Unit>) {
         response.fold({
-            //showSnackbar
+            reset_password_root.showErrorSnackbar(FailureMessage.parse(it))
         }, {
-            //show toast
+            reset_password_root.showSuccessSnackbar(R.string.reset_password_success)
             findNavController().navigateUp()
         })
     }

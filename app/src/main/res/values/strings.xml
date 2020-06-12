@@ -1,65 +1,66 @@
 <resources>
-    <string name="app_name" translatable="false">EasyRetro</string>
-    <string name="app_name_two_lines">Easy\nRetro</string>
-    <string name="title_positive">Positive</string>
-    <string name="title_negative">Negative</string>
-    <string name="title_actions">Actions</string>
-    <string name="add_retro_hint">Put a name to your retro…</string>
-    <string name="add_statement_hint">What would you like to point out?</string>
-    <string name="remove_confirmation_title">Remove item?</string>
-    <string name="lock_confirmation_title">Disable editing?</string>
-    <string name="lock_confirmation_message">This action will disable editing for all the users participating in this retro. You will be able to enable it back using the "Unlock" option</string>
-    <string name="action_yes">Yes</string>
-    <string name="action_no">No</string>
-    <string name="offline_message">Your connection seems unavailable. Some features might be disabled</string>
-    <string name="sign_in_with_email">Sign in with email</string>
-    <string name="create_account_with_email">Create account</string>
-    <string name="sign_in_with_google">Continue with Google</string>
-    <string name="create_account">Create account</string>
-    <string name="or">or</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="confirm_password">Confirm password</string>
-    <string name="invite">Invite</string>
-    <string name="lock">Lock</string>
-    <string name="unlock">Unlock</string>
-    <string name="logout">Log out</string>
-    <string name="confirm_logout">Confirm exit</string>
-    <string name="confirm_logout_message">Do you really want to close your current session?</string>
-    <string name="retro_invitation_message">"Hey there! You are invited to join my retro \"%1$s\". Just tap on the link: %2$s"</string>
-    <string name="your_retros">Your retros</string>
-    <string name="email_validation_error">Please, insert a valid email address</string>
-    <string name="password_minimum_length_validation_error">Please, insert at least 6 alphanumeric characters</string>
-    <string name="password_alphanumeric_validation_error">Please insert a valid password (alphanumeric characters only)</string>
-    <string name="sign_in">Sign in</string>
-    <string name="sign_up">Sign up</string>
-    <string name="sign_up_with_email">Sign up with email</string>
-    <string name="confirm_password_validation_error">This field does not match with the password above</string>
-    <string name="forgot_your_password_label">Forgot your password?</string>
-    <string name="forgot_your_password_button">Reset here</string>
-    <string name="confirm">Confirm</string>
-    <string name="verify_your_account">Verify your account</string>
-    <string name="email_verification_message">Please, check your inbox. For safety reasons, we just sent you an email with a verification link</string>
-    <string name="email_verification_did_not_receive_it">Didn\'t receive it?</string>
-    <string name="resend_verification_email">Resend verification email</string>
-    <string name="open_your_email_app">Open your email app</string>
-    <string name="reset_password_directions">Please insert the email you used to create your account. We will send you the instructions to reset your password‘</string>
+	<string name="app_name" translatable="false">EasyRetro</string>
+	<string name="app_name_two_lines">Easy\nRetro</string>
+	<string name="title_positive">Positive</string>
+	<string name="title_negative">Negative</string>
+	<string name="title_actions">Actions</string>
+	<string name="add_retro_hint">Put a name to your retro…</string>
+	<string name="add_statement_hint">What would you like to point out?</string>
+	<string name="remove_confirmation_title">Remove item?</string>
+	<string name="lock_confirmation_title">Disable editing?</string>
+	<string name="lock_confirmation_message">This action will disable editing for all the users participating in this retro. You will be able to enable it back using the "Unlock" option</string>
+	<string name="action_yes">Yes</string>
+	<string name="action_no">No</string>
+	<string name="offline_message">Your connection seems unavailable. Some features might be disabled</string>
+	<string name="sign_in_with_email">Sign in with email</string>
+	<string name="create_account_with_email">Create account</string>
+	<string name="sign_in_with_google">Continue with Google</string>
+	<string name="create_account">Create account</string>
+	<string name="or">or</string>
+	<string name="email">Email</string>
+	<string name="password">Password</string>
+	<string name="confirm_password">Confirm password</string>
+	<string name="invite">Invite</string>
+	<string name="lock">Lock</string>
+	<string name="unlock">Unlock</string>
+	<string name="logout">Log out</string>
+	<string name="confirm_logout">Confirm exit</string>
+	<string name="confirm_logout_message">Do you really want to close your current session?</string>
+	<string name="retro_invitation_message">"Hey there! You are invited to join my retro \"%1$s\". Just tap on the link: %2$s"</string>
+	<string name="your_retros">Your retros</string>
+	<string name="email_validation_error">Please, insert a valid email address</string>
+	<string name="password_minimum_length_validation_error">Please, insert at least 6 alphanumeric characters</string>
+	<string name="password_alphanumeric_validation_error">Please insert a valid password (alphanumeric characters only)</string>
+	<string name="sign_in">Sign in</string>
+	<string name="sign_up">Sign up</string>
+	<string name="sign_up_with_email">Sign up with email</string>
+	<string name="confirm_password_validation_error">This field does not match with the password above</string>
+	<string name="forgot_your_password_label">Forgot your password?</string>
+	<string name="forgot_your_password_button">Reset here</string>
+	<string name="confirm">Confirm</string>
+	<string name="verify_your_account">Verify your account</string>
+	<string name="email_verification_message">Please, check your inbox. For safety reasons, we just sent you an email with a verification link</string>
+	<string name="email_verification_did_not_receive_it">Didn\'t receive it?</string>
+	<string name="resend_verification_email">Resend verification email</string>
+	<string name="open_your_email_app">Open your email app</string>
+	<string name="reset_password_directions">Please insert the email you used to create your account. We will send you the instructions to reset your password‘</string>
 
-    <!--Errors-->
-    <string name="error_generic">Couldn\'t complete the requested operation. Please, check your connection and try again later.</string>
-    <string name="error_network">You seem to be offline. Please check your network connection.</string>
-    <string name="error_invalid_user">We couldn\'t find that user in our database. Do you want to sign up?</string>
-    <string name="error_invalid_user_credentials">The credentials you provided are not correct. Please, check them and try again.</string>
-    <string name="error_token_expired">For safety reasons, we need you to login again.</string>
-    <string name="error_user_collision">The user you provided already exists. Do you want to sign in?</string>
-    <string name="error_too_many_requests">Too many requests. We have blocked them due to unusual activity. Please, try again later.</string>
-    <string name="error_retro_not_found">Something went wrong! Please, try again later.</string>
+	<!--Errors-->
+	<string name="error_generic">Couldn\'t complete the requested operation. Please, check your connection and try again later.</string>
+	<string name="error_network">You seem to be offline. Please check your network connection.</string>
+	<string name="error_invalid_user">We couldn\'t find that user in our database. Do you want to sign up?</string>
+	<string name="error_invalid_user_credentials">The credentials you provided are not correct. Please, check them and try again.</string>
+	<string name="error_token_expired">For safety reasons, we need you to login again.</string>
+	<string name="error_user_collision">The user you provided already exists. Do you want to sign in?</string>
+	<string name="error_too_many_requests">Too many requests. We have blocked them due to unusual activity. Please, try again later.</string>
+	<string name="error_retro_not_found">Something went wrong! Please, try again later.</string>
 
-    <!--Confirmations-->
-    <string name="confirmation_email_sent">We have just sent a new confirmation link to your email</string>
-    <string name="confirmation_user_verified">Your user has been verified successfully!</string>
-    <string name="welcome_message">Welcome to\nEasyRetro</string>
-    <string name="protected_message">This retro has been protected by the owner. You will not be able to edit.</string>
-    <string name="ok">OK</string>
+	<!--Confirmations-->
+	<string name="reset_password_success">Please, check your email to reset yor password</string>
+	<string name="confirmation_email_sent">We have just sent a new confirmation link to your email</string>
+	<string name="confirmation_user_verified">Your user has been verified successfully!</string>
+	<string name="welcome_message">Welcome to\nEasyRetro</string>
+	<string name="protected_message">This retro has been protected by the owner. You will not be able to edit.</string>
+	<string name="ok">OK</string>
 
 </resources>
