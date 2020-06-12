@@ -1,6 +1,6 @@
 <resources>
 	<string name="app_name" translatable="false">EasyRetro</string>
-	<string name="app_name_two_lines">Easy\nRetro</string>
+	<string name="app_name_two_lines" translatable="false">Easy\nRetro</string>
 	<string name="title_positive">Positive</string>
 	<string name="title_negative">Negative</string>
 	<string name="title_actions">Actions</string>
