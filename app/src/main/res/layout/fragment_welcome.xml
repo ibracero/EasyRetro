@@ -85,6 +85,7 @@
 		android:paddingStart="2dp"
 		android:paddingTop="48dp"
 		android:rotation="-2"
+		android:textStyle="bold"
 		android:text="@string/app_name_two_lines"
 		android:textAppearance="@style/TextAppearance.AppCompat.Headline"
 		android:textColor="@color/colorPrimaryDark"
