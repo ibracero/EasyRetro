@@ -21,7 +21,9 @@ object AnalyticsManager {
         firebaseAnalytics?.logEvent(event.type.toLowerCase(Locale.getDefault()), event.properties.asBundle())
     }
 
-    private fun Map<String, String>.asBundle(): Bundle {
+    private fun Map<String, String>?.asBundle(): Bundle? {
+        if (this == null) return null
+
         val bundle = Bundle()
         this.entries.forEach {
             bundle.putString(it.key, it.value)

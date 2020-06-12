@@ -1,8 +1,12 @@
-package com.easyretro.analytics
+package com.easyretro.analytics.events
 
+import com.easyretro.analytics.AnalyticsEvent
+import com.easyretro.analytics.EventType
+import com.easyretro.analytics.Screen
 import java.util.*
 
-data class PageEnterEvent(private val screen: Screen) : AnalyticsEvent {
+data class PageEnterEvent(private val screen: Screen) :
+    AnalyticsEvent {
 
     override val type: String
         get() = EventType.PAGE_ENTER.toString().toLowerCase(Locale.getDefault())

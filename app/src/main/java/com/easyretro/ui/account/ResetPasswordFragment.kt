@@ -1,6 +1,5 @@
 package com.easyretro.ui.account
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
@@ -9,7 +8,11 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.easyretro.R
-import com.easyretro.analytics.*
+import com.easyretro.analytics.Screen
+import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.events.PageEnterEvent
+import com.easyretro.analytics.events.TapEvent
+import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.extensions.addTextWatcher
 import com.easyretro.common.extensions.hasValidText
 import com.easyretro.domain.model.Failure
@@ -42,7 +45,11 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
     private fun initUi(email: String) {
 
         reset_password_toolbar.setNavigationOnClickListener {
-            reportAnalytics(event = TapEvent(screen = Screen.RESET_PASSWORD, uiValue = UiValue.BACK))
+            reportAnalytics(event = TapEvent(
+                screen = Screen.RESET_PASSWORD,
+                uiValue = UiValue.BACK
+            )
+            )
             findNavController().navigateUp()
         }
 
@@ -57,7 +64,11 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         })
 
         confirm_button.setOnClickListener {
-            reportAnalytics(event = TapEvent(screen = Screen.RESET_PASSWORD, uiValue = UiValue.RESET_PASSWORD_CONFIRM))
+            reportAnalytics(event = TapEvent(
+                screen = Screen.RESET_PASSWORD,
+                uiValue = UiValue.RESET_PASSWORD_CONFIRM
+            )
+            )
             resetPasswordViewModel.resetPassword(email_input_field.text.toString())
         }
         checkEmailField()

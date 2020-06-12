@@ -1,6 +1,5 @@
 package com.easyretro.ui.account
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Patterns
 import android.view.LayoutInflater
@@ -9,7 +8,12 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.navigation.fragment.findNavController
 import com.easyretro.R
-import com.easyretro.analytics.*
+import com.easyretro.analytics.Screen
+import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.events.PageEnterEvent
+import com.easyretro.analytics.events.TapEvent
+import com.easyretro.analytics.events.UserSignedInEvent
+import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.*
 import com.easyretro.ui.account.ResetPasswordFragment.Companion.ARG_EMAIL
@@ -53,12 +57,15 @@ class AccountFragment :
     @Suppress("IMPLICIT_CAST_TO_ANY")
     override fun renderViewEffect(viewEffect: AccountViewEffect) {
         when (viewEffect) {
-            AccountViewEffect.OpenResetPassword -> navigateToResetPassword()
-            AccountViewEffect.OpenRetroList -> navigateToRetroList()
-            AccountViewEffect.OpenEmailVerification -> navigateToEmailVerification()
             is AccountViewEffect.ShowGenericSnackBar -> showError(viewEffect.errorMessage)
             is AccountViewEffect.ShowExistingUserSnackBar -> showExistingUserError()
             is AccountViewEffect.ShowUnknownUserSnackBar -> showUnknownUserError()
+            AccountViewEffect.OpenResetPassword -> navigateToResetPassword()
+            AccountViewEffect.OpenEmailVerification -> navigateToEmailVerification()
+            AccountViewEffect.OpenRetroList -> {
+                reportAnalytics(event = UserSignedInEvent)
+                navigateToRetroList()
+            }
         }.exhaustive
     }
 
@@ -67,12 +74,22 @@ class AccountFragment :
         else setupSignIn()
 
         sign_in_toolbar.setNavigationOnClickListener {
-            reportAnalytics(event = TapEvent(screen = getAnalyticsScreen(), uiValue = UiValue.BACK))
+            reportAnalytics(
+                event = TapEvent(
+                    screen = getAnalyticsScreen(),
+                    uiValue = UiValue.BACK
+                )
+            )
             findNavController().navigateUp()
         }
 
         val resetPasswordClickListener = { _: View ->
-            reportAnalytics(event = TapEvent(screen = getAnalyticsScreen(), uiValue = UiValue.ACCOUNT_RESET_PASSWORD))
+            reportAnalytics(
+                event = TapEvent(
+                    screen = getAnalyticsScreen(),
+                    uiValue = UiValue.ACCOUNT_RESET_PASSWORD
+                )
+            )
             viewModel.process(AccountViewEvent.ResetPassword)
         }
         reset_password_button.setOnClickListener(resetPasswordClickListener)
@@ -221,7 +238,9 @@ class AccountFragment :
     private fun getIsNewAccountArgument(): Boolean = arguments?.getBoolean(ARG_IS_NEW_ACCOUNT) ?: false
 
     private fun logPageEnter() {
-        val event = if (!getIsNewAccountArgument()) PageEnterEvent(screen = Screen.SIGN_IN)
+        val event = if (!getIsNewAccountArgument()) PageEnterEvent(
+            screen = Screen.SIGN_IN
+        )
         else PageEnterEvent(screen = Screen.SIGN_UP)
         reportAnalytics(event = event)
     }

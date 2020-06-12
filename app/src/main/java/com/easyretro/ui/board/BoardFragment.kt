@@ -4,7 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.NavController
@@ -13,7 +16,11 @@ import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.easyretro.R
-import com.easyretro.analytics.*
+import com.easyretro.analytics.Screen
+import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.events.PageEnterEvent
+import com.easyretro.analytics.events.TapEvent
+import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.*
 import com.easyretro.ui.board.action.ActionsFragment
@@ -107,7 +114,11 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         board_toolbar?.run {
             title = retroTitle
             setNavigationOnClickListener {
-                reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.BACK))
+                reportAnalytics(event = TapEvent(
+                    screen = Screen.RETRO_BOARD,
+                    uiValue = UiValue.BACK
+                )
+                )
                 backPressedCallback.handleOnBackPressed()
             }
             setOnMenuItemClickListener { menuItem ->
@@ -230,7 +241,11 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private fun createLockConfirmationDialog(context: Context, retroUuid: String): AlertDialog {
-        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT))
+        reportAnalytics(event = TapEvent(
+            screen = Screen.RETRO_BOARD,
+            uiValue = UiValue.RETRO_PROTECT
+        )
+        )
         return AlertDialog.Builder(context)
             .setCancelable(true)
             .setTitle(R.string.lock_confirmation_title)
@@ -239,24 +254,40 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
                 onProtectConfirmed(retroUuid = retroUuid)
             }
             .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
-                reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT_DISMISS))
+                reportAnalytics(event = TapEvent(
+                    screen = Screen.RETRO_BOARD,
+                    uiValue = UiValue.RETRO_PROTECT_DISMISS
+                )
+                )
                 dialogInterface.dismiss()
             }
             .create()
     }
 
     private fun onProtectConfirmed(retroUuid: String) {
-        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT_CONFIRMATION))
+        reportAnalytics(event = TapEvent(
+            screen = Screen.RETRO_BOARD,
+            uiValue = UiValue.RETRO_PROTECT_CONFIRMATION
+        )
+        )
         viewModel.process(BoardViewEvent.ProtectRetro(retroUuid = retroUuid))
     }
 
     private fun onUnprotectClicked(retroUuid: String) {
-        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_UNPROTECT))
+        reportAnalytics(event = TapEvent(
+            screen = Screen.RETRO_BOARD,
+            uiValue = UiValue.RETRO_UNPROTECT
+        )
+        )
         viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid = retroUuid))
     }
 
     private fun onInviteClicked() {
-        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_INVITE))
+        reportAnalytics(event = TapEvent(
+            screen = Screen.RETRO_BOARD,
+            uiValue = UiValue.RETRO_INVITE
+        )
+        )
         viewModel.process(BoardViewEvent.ShareRetroLink)
     }
 }

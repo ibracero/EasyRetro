@@ -1,6 +1,5 @@
 package com.easyretro.ui.account
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -11,7 +10,12 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.easyretro.R
-import com.easyretro.analytics.*
+import com.easyretro.analytics.Screen
+import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.events.PageEnterEvent
+import com.easyretro.analytics.events.TapEvent
+import com.easyretro.analytics.events.UserSignedUpEvent
+import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.extensions.showErrorSnackbar
 import com.easyretro.common.extensions.showSuccessSnackbar
 import com.easyretro.domain.model.Failure
@@ -60,15 +64,30 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
 
     private fun initUi() {
         email_verification_toolbar.setNavigationOnClickListener {
-            reportAnalytics(event = TapEvent(screen = Screen.VERIFY_EMAIL, uiValue = UiValue.BACK))
+            reportAnalytics(
+                event = TapEvent(
+                    screen = Screen.VERIFY_EMAIL,
+                    uiValue = UiValue.BACK
+                )
+            )
             findNavController().popBackStack()
         }
         resend_verification_email.setOnClickListener {
-            reportAnalytics(event = TapEvent(screen = Screen.VERIFY_EMAIL, uiValue = UiValue.RESEND_EMAIL_VERIFICATION))
+            reportAnalytics(
+                event = TapEvent(
+                    screen = Screen.VERIFY_EMAIL,
+                    uiValue = UiValue.RESEND_EMAIL_VERIFICATION
+                )
+            )
             viewModel.resendVerificationEmail()
         }
         open_email_app_button.setOnClickListener {
-            reportAnalytics(event = TapEvent(screen = Screen.VERIFY_EMAIL, uiValue = UiValue.OPEN_EMAIL_APP))
+            reportAnalytics(
+                event = TapEvent(
+                    screen = Screen.VERIFY_EMAIL,
+                    uiValue = UiValue.OPEN_EMAIL_APP
+                )
+            )
             openEmailIntent()
         }
     }
@@ -99,6 +118,7 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
                 when (it) {
                     UserStatus.VERIFIED -> {
                         verification_root.showSuccessSnackbar(message = R.string.confirmation_user_verified)
+                        reportAnalytics(event = UserSignedUpEvent)
                         navigateToRetroList()
                     }
                     UserStatus.NON_VERIFIED -> Unit

@@ -1,6 +1,8 @@
 package com.easyretro.ui.retros
 
 import androidx.lifecycle.viewModelScope
+import com.easyretro.analytics.events.RetroCreatedEvent
+import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseViewModel
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.RetroRepository
@@ -53,6 +55,7 @@ class RetroListViewModel(
                 viewState = viewState.copy(retroCreationStatus = RetroCreationStatus.NotCreated)
                 viewEffect = failure.toViewEffect()
             }, { retro ->
+                reportAnalytics(event = RetroCreatedEvent)
                 viewState = viewState.copy(retroCreationStatus = RetroCreationStatus.Created)
                 viewEffect = RetroListViewEffect.OpenRetroDetail(retroUuid = retro.uuid)
             })

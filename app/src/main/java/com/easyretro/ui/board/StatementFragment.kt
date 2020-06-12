@@ -8,8 +8,9 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import com.easyretro.R
 import com.easyretro.analytics.Screen
-import com.easyretro.analytics.TapEvent
 import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.events.StatementCreatedEvent
+import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.exhaustive
@@ -57,7 +58,10 @@ abstract class StatementFragment :
     override fun renderViewEffect(viewEffect: StatementListViewEffect) {
         when (viewEffect) {
             is StatementListViewEffect.ShowSnackBar -> statement_list_root.showErrorSnackbar(viewEffect.errorMessage)
-            StatementListViewEffect.CreateItemSuccess -> resetAddItem(success = true)
+            StatementListViewEffect.CreateItemSuccess -> {
+                reportAnalytics(event = StatementCreatedEvent)
+                resetAddItem(success = true)
+            }
             StatementListViewEffect.CreateItemFailed -> resetAddItem(success = false)
         }.exhaustive
     }
@@ -69,7 +73,12 @@ abstract class StatementFragment :
     private fun getRetroUuidArgument() = arguments?.getString(BoardFragment.ARGUMENT_RETRO_UUID)
 
     private fun onAddClicked(description: String) {
-        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.STATEMENT_CREATE))
+        reportAnalytics(
+            event = TapEvent(
+                screen = Screen.RETRO_BOARD,
+                uiValue = UiValue.STATEMENT_CREATE
+            )
+        )
         viewModel.process(
             StatementListViewEvent.AddStatement(
                 getRetroUuidArgument().orEmpty(),
@@ -93,7 +102,12 @@ abstract class StatementFragment :
 
     private fun onRemoveClicked(statement: Statement) {
         val safeContext = context ?: return
-        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.STATEMENT_REMOVE))
+        reportAnalytics(
+            event = TapEvent(
+                screen = Screen.RETRO_BOARD,
+                uiValue = UiValue.STATEMENT_REMOVE
+            )
+        )
         createRemoveStatementConfirmationDialog(safeContext, statement).show()
     }
 

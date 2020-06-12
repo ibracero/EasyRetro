@@ -1,6 +1,5 @@
 package com.easyretro.ui.retros
 
-import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.activity.ComponentActivity
@@ -10,7 +9,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import com.easyretro.R
-import com.easyretro.analytics.*
+import com.easyretro.analytics.Screen
+import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.events.PageEnterEvent
+import com.easyretro.analytics.events.TapEvent
+import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.common.extensions.showErrorSnackbar
@@ -61,7 +64,12 @@ class RetroListFragment :
     override fun onOptionsItemSelected(item: MenuItem) =
         when (item.itemId) {
             R.id.action_logout -> {
-                reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT))
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RETRO_LIST,
+                        uiValue = UiValue.SIGN_OUT
+                    )
+                )
                 showLogoutConfirmationDialog()
                 true
             }
@@ -87,7 +95,9 @@ class RetroListFragment :
         }
 
         when (viewState.retroCreationStatus) {
-            RetroCreationStatus.Created -> retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(true))
+            RetroCreationStatus.Created -> {
+                retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(true))
+            }
             RetroCreationStatus.NotCreated -> retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(false))
         }
     }
@@ -110,12 +120,22 @@ class RetroListFragment :
     }
 
     private fun onRetroClicked(retro: Retro) {
-        reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.RETRO_ITEM))
+        reportAnalytics(
+            event = TapEvent(
+                screen = Screen.RETRO_LIST,
+                uiValue = UiValue.RETRO_ITEM
+            )
+        )
         viewModel.process(viewEvent = RetroListViewEvent.RetroClicked(retroUuid = retro.uuid))
     }
 
     private fun onAddClicked(retroTitle: String) {
-        reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.RETRO_CREATE))
+        reportAnalytics(
+            event = TapEvent(
+                screen = Screen.RETRO_LIST,
+                uiValue = UiValue.RETRO_CREATE
+            )
+        )
         viewModel.process(viewEvent = RetroListViewEvent.CreateRetroClicked(retroTitle = retroTitle))
     }
 
@@ -131,11 +151,21 @@ class RetroListFragment :
             .setTitle(R.string.confirm_logout)
             .setMessage(getString(R.string.confirm_logout_message))
             .setPositiveButton(R.string.action_yes) { _, _ ->
-                reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT_CONFIRMATION))
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RETRO_LIST,
+                        uiValue = UiValue.SIGN_OUT_CONFIRMATION
+                    )
+                )
                 onLogoutConfirmed()
             }
             .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
-                reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT_DISMISS))
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RETRO_LIST,
+                        uiValue = UiValue.SIGN_OUT_DISMISS
+                    )
+                )
                 dialogInterface.dismiss()
             }
             .create()

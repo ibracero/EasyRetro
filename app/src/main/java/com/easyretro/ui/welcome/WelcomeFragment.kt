@@ -1,6 +1,5 @@
 package com.easyretro.ui.welcome
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -12,7 +11,12 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.easyretro.R
-import com.easyretro.analytics.*
+import com.easyretro.analytics.Screen
+import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.events.PageEnterEvent
+import com.easyretro.analytics.events.TapEvent
+import com.easyretro.analytics.events.UserGoogleSignedInEvent
+import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.extensions.gone
 import com.easyretro.common.extensions.invisible
 import com.easyretro.common.extensions.showErrorSnackbar
@@ -96,6 +100,7 @@ class WelcomeFragment : Fragment() {
             loading.gone()
             group_buttons.visible()
         }, {
+            reportAnalytics(event = UserGoogleSignedInEvent)
             navigateToRetroList()
         })
     }
@@ -104,15 +109,30 @@ class WelcomeFragment : Fragment() {
         group_post_it.visible()
 
         google_sign_in.setOnClickListener {
-            reportAnalytics(event = TapEvent(screen = Screen.WELCOME, uiValue = UiValue.GOOGLE_SIGN_IN))
+            reportAnalytics(
+                event = TapEvent(
+                    screen = Screen.WELCOME,
+                    uiValue = UiValue.GOOGLE_SIGN_IN
+                )
+            )
             launchGoogleSignIn(it)
         }
         email_sign_in.setOnClickListener {
-            reportAnalytics(event = TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_IN))
+            reportAnalytics(
+                event = TapEvent(
+                    screen = Screen.WELCOME,
+                    uiValue = UiValue.WELCOME_EMAIL_SIGN_IN
+                )
+            )
             navigateToLogin()
         }
         sign_up_button.setOnClickListener {
-            reportAnalytics(event = TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_UP))
+            reportAnalytics(
+                event = TapEvent(
+                    screen = Screen.WELCOME,
+                    uiValue = UiValue.WELCOME_EMAIL_SIGN_UP
+                )
+            )
             navigateToRegister()
         }
     }
