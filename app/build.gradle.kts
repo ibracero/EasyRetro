@@ -4,6 +4,8 @@ import Name.ENABLE_ANALYTICS
 import Type.TYPE_BOOLEAN
 import Value.FALSE
 import Value.TRUE
+import java.io.FileInputStream
+import java.util.*
 
 plugins {
     id(Plugins.androidApplication)
@@ -14,8 +16,15 @@ plugins {
     id(Plugins.crashlytics)
 }
 
+val keystorePropertiesFile = rootProject.file(".signing/keystore.properties")
+val keystoreProperties = Properties()
+val isLocalBuild = keystorePropertiesFile.exists()
+if (isLocalBuild) keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+val signingConfigName = "releaseConfig"
+
 android {
     compileSdkVersion(AndroidSdk.compile)
+
     defaultConfig {
         applicationId = "com.easyretro"
         minSdkVersion(AndroidSdk.min)
@@ -23,7 +32,30 @@ android {
         versionCode = Project.versionCode
         versionName = Project.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = mapOf("room.schemaLocation" to "$projectDir/schemas")
+            }
+        }
     }
+
+    signingConfigs {
+        register(signingConfigName).configure {
+            if (isLocalBuild) {
+                keyAlias = keystoreProperties["LOCAL_KEY_ALIAS"] as String
+                keyPassword = keystoreProperties["LOCAL_KEY_PASSWORD"] as String
+                storeFile = file(keystoreProperties["LOCAL_KEYSTORE_FILE"] as String)
+                storePassword = keystoreProperties["LOCAL_STORE_PASSWORD"] as String
+            } else {
+                keyAlias = System.getenv("CI_KEY_ALIAS") as String
+                keyPassword = System.getenv("CI_KEY_PASSWORD") as String
+                storeFile = file("../${System.getenv("CI_STORE_FILE") as String}")
+                storePassword = System.getenv("CI_STORE_PASSWORD") as String
+            }
+        }
+    }
+
     buildTypes {
         getByName(DEBUG) {
             buildConfigField(TYPE_BOOLEAN, ENABLE_ANALYTICS, FALSE)
@@ -40,8 +72,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName(signingConfigName)
         }
     }
+
     (kotlinOptions as org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions).apply {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
