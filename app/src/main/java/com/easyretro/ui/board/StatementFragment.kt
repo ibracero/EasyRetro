@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.viewModels
 import com.easyretro.R
 import com.easyretro.analytics.Screen
 import com.easyretro.analytics.UiValue
@@ -19,12 +20,11 @@ import com.easyretro.domain.model.Statement
 import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.Payload
 import kotlinx.android.synthetic.main.fragment_statements.*
-import org.koin.android.viewmodel.ext.android.viewModel
 
 abstract class StatementFragment :
     BaseFragment<StatementListViewState, StatementListViewEffect, StatementListViewEvent, StatementViewModel>() {
 
-    override val viewModel: StatementViewModel by viewModel()
+    override val viewModel: StatementViewModel by viewModels()
 
     private val adapter by lazy { StatementListAdapter(::onAddClicked, ::onRemoveClicked) }
 

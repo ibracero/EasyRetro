@@ -1,5 +1,6 @@
 package com.easyretro.ui.welcome
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +12,7 @@ import com.easyretro.domain.model.UserStatus
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import kotlinx.coroutines.launch
 
-class WelcomeViewModel(
+class WelcomeViewModel @ViewModelInject constructor(
     private val repository: AccountRepository
 ) : ViewModel() {
 

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.easyretro.R
 import com.easyretro.analytics.Screen
@@ -18,11 +19,12 @@ import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.*
 import com.easyretro.ui.account.ResetPasswordFragment.Companion.ARG_EMAIL
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_account.*
-import org.koin.android.viewmodel.ext.android.viewModel
 
-class AccountFragment :
-    BaseFragment<AccountViewState, AccountViewEffect, AccountViewEvent, AccountViewModel>() {
+
+@AndroidEntryPoint
+class AccountFragment : BaseFragment<AccountViewState, AccountViewEffect, AccountViewEvent, AccountViewModel>() {
 
     companion object {
         private const val MINIMUM_PASSWORD_LENGHT = 6
@@ -30,7 +32,7 @@ class AccountFragment :
         const val ARG_IS_NEW_ACCOUNT = "arg_is_new_account"
     }
 
-    override val viewModel: AccountViewModel by viewModel()
+    override val viewModel: AccountViewModel by viewModels()
     private val passwordRegex = PASSWORD_PATTERN.toRegex()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =

@@ -1,5 +1,6 @@
 package com.easyretro.ui.account
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +10,7 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import kotlinx.coroutines.launch
 
-class EmailVerificationViewModel(
+class EmailVerificationViewModel @ViewModelInject constructor(
     private val repository: AccountRepository
 ) : ViewModel() {
 

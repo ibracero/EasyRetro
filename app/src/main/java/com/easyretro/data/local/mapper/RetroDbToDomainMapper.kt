@@ -3,8 +3,9 @@ package com.easyretro.data.local.mapper
 import com.easyretro.common.Mapper
 import com.easyretro.data.local.RetroDb
 import com.easyretro.domain.model.Retro
+import javax.inject.Inject
 
-class RetroDbToDomainMapper(
+class RetroDbToDomainMapper @Inject constructor(
     private val userDbToDomainMapper: UserDbToDomainMapper
 ) : Mapper<RetroDb, Retro> {
 

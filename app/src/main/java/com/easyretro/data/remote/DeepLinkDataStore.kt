@@ -5,10 +5,11 @@ import arrow.core.Either
 import com.easyretro.domain.model.Failure
 import com.google.firebase.dynamiclinks.DynamicLink
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class DeepLinkDataStore() {
+class DeepLinkDataStore @Inject constructor() {
 
     companion object {
         private const val DEEPLINK_DOMAIN = "https://easyretro.page.link"

@@ -1,5 +1,6 @@
 package com.easyretro.ui.account
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.domain.AccountRepository
@@ -8,7 +9,7 @@ import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
 import kotlinx.coroutines.launch
 
-class AccountViewModel(
+class AccountViewModel @ViewModelInject constructor(
     private val repository: AccountRepository
 ) : BaseViewModel<AccountViewState, AccountViewEffect, AccountViewEvent>() {
 

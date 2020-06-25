@@ -3,8 +3,9 @@ package com.easyretro.data.local.mapper
 import com.easyretro.common.Mapper
 import com.easyretro.data.local.StatementDb
 import com.easyretro.domain.model.Statement
+import javax.inject.Inject
 
-class StatementDbToDomainMapper : Mapper<StatementDb, Statement> {
+class StatementDbToDomainMapper @Inject constructor() : Mapper<StatementDb, Statement> {
 
     override fun map(from: StatementDb): Statement =
         Statement(

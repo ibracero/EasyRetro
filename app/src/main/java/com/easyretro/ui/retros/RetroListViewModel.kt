@@ -1,5 +1,6 @@
 package com.easyretro.ui.retros
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.easyretro.analytics.events.RetroCreatedEvent
 import com.easyretro.analytics.reportAnalytics
@@ -11,7 +12,7 @@ import com.easyretro.ui.FailureMessage
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class RetroListViewModel(
+class RetroListViewModel @ViewModelInject constructor(
     private val retroRepository: RetroRepository,
     private val accountRepository: AccountRepository
 ) : BaseViewModel<RetroListViewState, RetroListViewEffect, RetroListViewEvent>() {

@@ -2,8 +2,11 @@ package com.easyretro.data.local
 
 import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
+import javax.inject.Inject
 
-class LocalDataStore(private val retroDao: RetroDao) {
+class LocalDataStore @Inject constructor(
+    private val retroDao: RetroDao
+) {
 
     fun getRetros(): List<RetroDb> = retroDao.getRetros()
 

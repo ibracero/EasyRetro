@@ -18,10 +18,15 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import timber.log.Timber
 import java.util.*
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class RemoteDataStore(private val connectionManager: ConnectionManager) {
+@Singleton
+class RemoteDataStore @Inject constructor(
+    private val connectionManager: ConnectionManager
+) {
 
     private val firestore = FirebaseFirestore.getInstance()
 
