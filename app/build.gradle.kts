@@ -14,6 +14,7 @@ plugins {
     id(Plugins.kotlinKapt)
     id(Plugins.googleServices)
     id(Plugins.crashlytics)
+    id(Plugins.hilt)
 }
 
 val keystorePropertiesFile = file(".signing/keystore.properties")
@@ -113,9 +114,11 @@ dependencies {
     implementation(Libraries.play_services_auth)
     implementation(Libraries.glide)
     implementation(Libraries.crashlytics)
+    implementation(Libraries.dagger_hilt)
 
     debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
+    kapt(Libraries.dagger_hilt_compiler)
 
     testImplementation(TestLibraries.junit)
     testImplementation(TestLibraries.mockito_kotlin)

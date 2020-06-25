@@ -14,7 +14,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: gradle-{{ checksum "build.gradle" }}-{{ checksum  "buildSrc/src/main/java/Dependencies.kt" }}-{{ checksum  "gradle/wrapper/gradle-wrapper.properties" }}
+          key: gradle-{{ checksum "build.gradle.kts" }}-{{ checksum  "buildSrc/src/main/java/Dependencies.kt" }}-{{ checksum  "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           # Decode the base64 string
           name: Decode Google Services Json
@@ -31,7 +31,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: gradle-{{ checksum "build.gradle" }}-{{ checksum  "buildSrc/src/main/java/Dependencies.kt" }}-{{ checksum  "gradle/wrapper/gradle-wrapper.properties" }}
+          key: gradle-{{ checksum "build.gradle.kts" }}-{{ checksum  "buildSrc/src/main/java/Dependencies.kt" }}-{{ checksum  "gradle/wrapper/gradle-wrapper.properties" }}
       - store_artifacts:
           path: app/build/outputs/apk/
           destination: apks/
@@ -45,7 +45,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: gradle-{{ checksum "build.gradle" }}-{{ checksum  "buildSrc/src/main/java/Dependencies.kt" }}-{{ checksum  "gradle/wrapper/gradle-wrapper.properties" }}
+          key: gradle-{{ checksum "build.gradle.kts" }}-{{ checksum  "buildSrc/src/main/java/Dependencies.kt" }}-{{ checksum  "gradle/wrapper/gradle-wrapper.properties" }}
       - run:
           name: Decode Google Services Json
           command: echo $GOOGLE_SERVICES_JSON | base64 --decode > app/google-services.json
@@ -64,7 +64,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle
-          key: gradle-{{ checksum "build.gradle" }}-{{ checksum  "buildSrc/src/main/java/Dependencies.kt" }}-{{ checksum  "gradle/wrapper/gradle-wrapper.properties" }}
+          key: gradle-{{ checksum "build.gradle.kts" }}-{{ checksum  "buildSrc/src/main/java/Dependencies.kt" }}-{{ checksum  "gradle/wrapper/gradle-wrapper.properties" }}
       - store_artifacts:
           path: app/build/outputs/apk/
           destination: apks/
