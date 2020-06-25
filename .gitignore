@@ -109,7 +109,7 @@ output.json
 .gradle
 
 # Signing files
-.signing/
+app/.signing/
 
 # Local configuration file (sdk path, etc)
 

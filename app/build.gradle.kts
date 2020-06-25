@@ -16,7 +16,7 @@ plugins {
     id(Plugins.crashlytics)
 }
 
-val keystorePropertiesFile = rootProject.file(".signing/keystore.properties")
+val keystorePropertiesFile = file(".signing/keystore.properties")
 val keystoreProperties = Properties()
 val isLocalBuild = keystorePropertiesFile.exists()
 if (isLocalBuild) keystoreProperties.load(FileInputStream(keystorePropertiesFile))
