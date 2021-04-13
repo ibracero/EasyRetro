@@ -112,13 +112,14 @@ dependencies {
     implementation(Libraries.play_services_auth)
     implementation(Libraries.glide)
     implementation(Libraries.crashlytics)
-    implementation(Libraries.dagger_hilt)
+
+    implementation(Libraries.dagger_hilt_android)
     implementation(Libraries.dagger_hilt_viewmodel)
 
     debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
+
     kapt(Libraries.dagger_hilt_compiler)
-    kapt(Libraries.dagger_hilt_android_compiler)
 
     testImplementation(TestLibraries.junit)
     testImplementation(TestLibraries.mockito_kotlin)
@@ -127,4 +128,8 @@ dependencies {
     testImplementation(TestLibraries.androidx_core_testing)
 
     androidTestImplementation(TestLibraries.androidx_test_espresso_core)
+}
+
+kapt {
+    correctErrorTypes = true
 }

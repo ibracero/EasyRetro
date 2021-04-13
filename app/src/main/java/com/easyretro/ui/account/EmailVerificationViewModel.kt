@@ -8,9 +8,12 @@ import arrow.core.Either
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class EmailVerificationViewModel @ViewModelInject constructor(
+@HiltViewModel
+class EmailVerificationViewModel @Inject constructor(
     private val repository: AccountRepository
 ) : ViewModel() {
 
