@@ -4,7 +4,9 @@ import android.os.Bundle
 import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.board.BoardFragment
 import com.easyretro.ui.board.StatementFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class PositiveFragment(override val statementType: StatementType = StatementType.POSITIVE) : StatementFragment() {
 
     companion object {

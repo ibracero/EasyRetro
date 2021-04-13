@@ -1,5 +1,6 @@
 package com.easyretro.ui.board
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
@@ -11,7 +12,7 @@ import com.easyretro.ui.FailureMessage
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class StatementViewModel(
+class StatementViewModel @ViewModelInject constructor(
     private val boardRepository: BoardRepository,
     private val retroRepository: RetroRepository
 ) : BaseViewModel<StatementListViewState, StatementListViewEffect, StatementListViewEvent>() {

@@ -14,6 +14,7 @@ plugins {
     id(Plugins.kotlinKapt)
     id(Plugins.googleServices)
     id(Plugins.crashlytics)
+    id(Plugins.hilt)
 }
 
 val keystorePropertiesFile = file(".signing/keystore.properties")
@@ -35,7 +36,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = mapOf(
+                arguments = arguments + mapOf(
                     "room.schemaLocation" to "$projectDir/schemas",
                     "room.incremental" to "true"
                 )
@@ -79,7 +80,7 @@ android {
         }
     }
 
-    (kotlinOptions as org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions).apply {
+    kotlinOptions.apply {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
@@ -104,8 +105,6 @@ dependencies {
     implementation(Libraries.firebase_auth)
     implementation(Libraries.coroutines_core)
     implementation(Libraries.coroutines_android)
-    implementation(Libraries.koin_android)
-    implementation(Libraries.koin_android_viewmodel)
     implementation(Libraries.timber)
     implementation(Libraries.androidx_room)
     implementation(Libraries.androidx_room_ktx)
@@ -113,9 +112,13 @@ dependencies {
     implementation(Libraries.play_services_auth)
     implementation(Libraries.glide)
     implementation(Libraries.crashlytics)
+    implementation(Libraries.dagger_hilt)
+    implementation(Libraries.dagger_hilt_viewmodel)
 
     debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
+    kapt(Libraries.dagger_hilt_compiler)
+    kapt(Libraries.dagger_hilt_android_compiler)
 
     testImplementation(TestLibraries.junit)
     testImplementation(TestLibraries.mockito_kotlin)

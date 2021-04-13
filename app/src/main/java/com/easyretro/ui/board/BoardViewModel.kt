@@ -1,5 +1,6 @@
 package com.easyretro.ui.board
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
@@ -11,7 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class BoardViewModel(
+class BoardViewModel @ViewModelInject constructor(
     private val retroRepository: RetroRepository,
     private val boardRepository: BoardRepository
 ) : BaseViewModel<BoardViewState, BoardViewEffect, BoardViewEvent>() {

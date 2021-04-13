@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation.findNavController
@@ -27,18 +28,19 @@ import com.easyretro.ui.board.action.ActionsFragment
 import com.easyretro.ui.board.negative.NegativeFragment
 import com.easyretro.ui.board.positive.PositiveFragment
 import com.easyretro.ui.board.users.UserListAdapter
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_board.*
-import org.koin.android.viewmodel.ext.android.viewModel
 import kotlin.math.min
 
 
+@AndroidEntryPoint
 class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEvent, BoardViewModel>() {
 
     companion object {
         const val ARGUMENT_RETRO_UUID = "arg_retro_uuid"
     }
 
-    override val viewModel: BoardViewModel by viewModel()
+    override val viewModel: BoardViewModel by viewModels()
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {

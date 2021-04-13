@@ -3,8 +3,9 @@ package com.easyretro.data.remote.mapper
 import com.easyretro.common.Mapper
 import com.easyretro.data.local.RetroDb
 import com.easyretro.data.remote.firestore.RetroRemote
+import javax.inject.Inject
 
-class RetroRemoteToDbMapper(
+class RetroRemoteToDbMapper @Inject constructor(
     private val userRemoteToDbMapper: UserRemoteToDbMapper
 ) : Mapper<RetroRemote, RetroDb> {
 

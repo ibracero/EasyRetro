@@ -6,6 +6,7 @@ import android.os.Handler
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
@@ -22,17 +23,18 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_email_verification.*
-import org.koin.android.viewmodel.ext.android.viewModel
 
 
+@AndroidEntryPoint
 class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification) {
 
     companion object {
         private const val USER_VERIFIED_NAVIGATION_DELAY = 1000L
     }
 
-    private val viewModel: EmailVerificationViewModel by viewModel()
+    private val viewModel: EmailVerificationViewModel by viewModels()
     private val userStatusObserver = Observer<Either<Failure, UserStatus>> { processUserStatus(it) }
     private val handler = Handler()
 

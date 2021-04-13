@@ -5,8 +5,9 @@ import com.easyretro.data.local.StatementDb
 import com.easyretro.data.remote.firestore.StatementRemote
 import com.easyretro.domain.model.StatementType
 import java.util.*
+import javax.inject.Inject
 
-class StatementRemoteToDbMapper : Mapper<StatementRemote, StatementDb> {
+class StatementRemoteToDbMapper @Inject constructor() : Mapper<StatementRemote, StatementDb> {
 
     override fun map(from: StatementRemote): StatementDb =
         StatementDb(

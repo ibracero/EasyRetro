@@ -1,5 +1,6 @@
 package com.easyretro.ui.account
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +9,7 @@ import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import kotlinx.coroutines.launch
 
-class ResetPasswordViewModel(
+class ResetPasswordViewModel @ViewModelInject constructor(
     private val accountRepository: AccountRepository
 ) : ViewModel() {
 

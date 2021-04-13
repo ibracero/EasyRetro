@@ -7,6 +7,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.easyretro.R
 import com.easyretro.analytics.Screen
@@ -23,14 +24,15 @@ import com.easyretro.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_retro_list.*
-import org.koin.android.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
+@AndroidEntryPoint
 class RetroListFragment :
     BaseFragment<RetroListViewState, RetroListViewEffect, RetroListViewEvent, RetroListViewModel>() {
 
-    override val viewModel: RetroListViewModel by viewModel()
+    override val viewModel: RetroListViewModel by viewModels()
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {

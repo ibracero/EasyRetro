@@ -8,11 +8,16 @@ import com.easyretro.domain.model.UserStatus
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class AuthDataStore(private val connectionManager: ConnectionManager) {
+@Singleton
+class AuthDataStore @Inject constructor(
+    private val connectionManager: ConnectionManager
+) {
 
     private val firebaseAuth: FirebaseAuth
         get() = FirebaseAuth.getInstance()

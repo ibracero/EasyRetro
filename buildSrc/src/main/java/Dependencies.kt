@@ -1,5 +1,9 @@
+import BuildPlugins.Versions.android_gradle_plugin_version
+import BuildPlugins.Versions.fabric_gradle_version
+import BuildPlugins.Versions.google_services_version
 import Libraries.Versions.androidx_compat_version
 import Libraries.Versions.androidx_constraint_layout_version
+import Libraries.Versions.androidx_hilt_version
 import Libraries.Versions.androidx_lifecycle_version
 import Libraries.Versions.androidx_navigation_version
 import Libraries.Versions.arrow_version
@@ -11,7 +15,6 @@ import Libraries.Versions.firebase_dynamic_links_version
 import Libraries.Versions.firebase_firestore_version
 import Libraries.Versions.glide_version
 import Libraries.Versions.google_material_version
-import Libraries.Versions.koin_version
 import Libraries.Versions.play_services_auth_version
 import Libraries.Versions.room_debugger_version
 import Libraries.Versions.room_version
@@ -23,6 +26,8 @@ import TestLibraries.Versions.mockito_inline_version
 import TestLibraries.Versions.mockito_version
 
 const val kotlin_version = "1.3.72"
+const val dagger_hilt_version = "2.28-alpha"
+
 
 object AndroidSdk {
     const val min = 21
@@ -35,6 +40,20 @@ object Project {
     const val versionName = "1.0.0"
 }
 
+object BuildPlugins {
+    object Versions {
+        const val android_gradle_plugin_version = "4.0.0"
+        const val google_services_version = "4.3.3"
+        const val fabric_gradle_version = "1.31.2"
+    }
+
+    const val android_gradle_plugin = "com.android.tools.build:gradle:$android_gradle_plugin_version"
+    const val kotlin_gradle_plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    const val google_services_plugin = "com.google.gms:google-services:$google_services_version"
+    const val fabric_gradle_plugin = "io.fabric.tools:gradle:$fabric_gradle_version"
+    const val dagger_hilt_plugin = "com.google.dagger:hilt-android-gradle-plugin:$dagger_hilt_version"
+}
+
 object Plugins {
     const val androidApplication = "com.android.application"
     const val kotlinAndroid = "kotlin-android"
@@ -42,6 +61,7 @@ object Plugins {
     const val googleServices = "com.google.gms.google-services"
     const val kotlinKapt = "kotlin-kapt"
     const val crashlytics = "io.fabric"
+    const val hilt = "dagger.hilt.android.plugin"
 }
 
 object Libraries {
@@ -50,6 +70,7 @@ object Libraries {
         const val androidx_compat_version = "1.1.0"
         const val androidx_constraint_layout_version = "1.1.3"
         const val androidx_lifecycle_version = "2.2.0"
+        const val androidx_hilt_version = "1.0.0-alpha01"
         const val google_material_version = "1.0.0"
         const val firebase_firestore_version = "21.4.3"
         const val firebase_analytics_version = "17.4.0"
@@ -85,8 +106,6 @@ object Libraries {
     const val firebase_dynamic_links = "com.google.firebase:firebase-dynamic-links:$firebase_dynamic_links_version"
     const val coroutines_core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     const val coroutines_android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-    const val koin_android = "org.koin:koin-android:$koin_version"
-    const val koin_android_viewmodel = "org.koin:koin-android-viewmodel:$koin_version"
     const val timber = "com.jakewharton.timber:timber:$timber_version"
     const val androidx_room = "androidx.room:room-runtime:$room_version"
     const val androidx_room_compiler = "androidx.room:room-compiler:$room_version"
@@ -97,6 +116,10 @@ object Libraries {
     const val play_services_auth = "com.google.android.gms:play-services-auth:$play_services_auth_version"
     const val glide = "com.github.bumptech.glide:glide:$glide_version"
     const val crashlytics = "com.crashlytics.sdk.android:crashlytics:$crashlytics_version"
+    const val dagger_hilt = "com.google.dagger:hilt-android:$dagger_hilt_version"
+    const val dagger_hilt_viewmodel = "androidx.hilt:hilt-lifecycle-viewmodel:$androidx_hilt_version"
+    const val dagger_hilt_compiler = "androidx.hilt:hilt-compiler:$androidx_hilt_version"
+    const val dagger_hilt_android_compiler = "com.google.dagger:hilt-android-compiler:$dagger_hilt_version"
 }
 
 object TestLibraries {
