@@ -3,7 +3,6 @@ package com.easyretro.ui.welcome
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import arrow.core.Either
-import com.easyretro.CoroutineTestRule
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
@@ -13,20 +12,22 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class WelcomeViewModelTest {
-
-    @get:Rule
-    val coroutinesTestRule = CoroutineTestRule()
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private val accountRepository = mock<AccountRepository>()
 
+    private val testCoroutineScope = TestCoroutineScope()
+    
     private lateinit var viewModel: WelcomeViewModel
 
     private val userSessionObserver = mock<Observer<Either<Failure, UserStatus>>>()
@@ -48,7 +49,7 @@ class WelcomeViewModelTest {
     //region welcome launch
     @Test
     fun `GIVEN user verified WHEN welcome page launches THEN return VERIFIED to view`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.VERIFIED))
             viewModel = WelcomeViewModel(repository = accountRepository)
             viewModel.userSessionLiveData.observeForever(userSessionObserver)
@@ -60,7 +61,7 @@ class WelcomeViewModelTest {
 
     @Test
     fun `GIVEN user non verified WHEN welcome page launches THEN pass NON VERIFIED to view`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
             viewModel = WelcomeViewModel(repository = accountRepository)
             viewModel.userSessionLiveData.observeForever(userSessionObserver)
@@ -72,7 +73,7 @@ class WelcomeViewModelTest {
 
     @Test
     fun `GIVEN failed response WHEN welcome page launches THEN pass the error to view`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.getUserStatus()).thenReturn(Either.left(Failure.UnknownError))
             viewModel = WelcomeViewModel(repository = accountRepository)
             viewModel.userSessionLiveData.observeForever(userSessionObserver)
@@ -86,7 +87,7 @@ class WelcomeViewModelTest {
     //region sign in with google
     @Test
     fun `GIVEN success response WHEN logging in with Google THEN pass success to view`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.signWithGoogleAccount(idToken, user)).thenReturn(Either.right(Unit))
             viewModel = WelcomeViewModel(repository = accountRepository)
             viewModel.googleSignInLiveData.observeForever(googleSignInObserver)
@@ -100,7 +101,7 @@ class WelcomeViewModelTest {
 
     @Test
     fun `GIVEN null google account WHEN logging in with Google THEN pass unknown error`() {
-        runBlocking {
+        testCoroutineScope.launch {
             viewModel = WelcomeViewModel(repository = accountRepository)
             viewModel.googleSignInLiveData.observeForever(googleSignInObserver)
 
@@ -113,7 +114,7 @@ class WelcomeViewModelTest {
 
     @Test
     fun `GIVEN failed respon se WHEN logging in with Google THEN pass error`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.signWithGoogleAccount(idToken, user))
                 .thenReturn(Either.left(Failure.UnavailableNetwork))
             viewModel = WelcomeViewModel(repository = accountRepository)

@@ -3,25 +3,27 @@ package com.easyretro.ui.retros
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import arrow.core.Either
-import com.easyretro.CoroutineTestRule
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Retro
 import com.easyretro.ui.FailureMessage
 import com.nhaarman.mockitokotlin2.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class RetroListViewModelTest {
 
-    @get:Rule
-    val coroutinesTestRule = CoroutineTestRule()
+
+    private val testCoroutineScope = TestCoroutineScope()
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -36,12 +38,10 @@ class RetroListViewModelTest {
 
     @Before
     fun `Set up`() {
-        runBlocking {
-            viewModel = RetroListViewModel(
-                retroRepository = retroRepository,
-                accountRepository = accountRepository
-            )
-        }
+        viewModel = RetroListViewModel(
+            retroRepository = retroRepository,
+            accountRepository = accountRepository
+        )
     }
 
     @After
@@ -53,7 +53,7 @@ class RetroListViewModelTest {
     //region fetch retros
     @Test
     fun `GIVEN success response WHEN FetchRetros view event THEN modify view state with retro list`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(retroRepository.getRetros()).thenReturn(flowOf(Either.right(getMockRetroList())))
             viewModel.viewStates().observeForever(viewStateObserver)
 
@@ -72,7 +72,7 @@ class RetroListViewModelTest {
 
     @Test
     fun `GIVEN failed response WHEN FetchRetros view event THEN modify view state and view effect`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(retroRepository.getRetros()).thenReturn(flowOf(Either.left(Failure.UnavailableNetwork)))
             viewModel.viewStates().observeForever(viewStateObserver)
             viewModel.viewEffects().observeForever(viewEffectsObserver)
@@ -97,7 +97,7 @@ class RetroListViewModelTest {
     //region retro clicked
     @Test
     fun `GIVEN a retro uuid WHEN retro clicked THEN cause a viewEffect to open that retro`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val retroUuid = "retro-uuid"
             viewModel.viewEffects().observeForever(viewEffectsObserver)
 
@@ -111,7 +111,7 @@ class RetroListViewModelTest {
     //region create retro clicked
     @Test
     fun `GIVEN server response success WHEN create retro clicked THEN update the viewState and open the detail`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val retroTitle = "Sample title"
             val retro = getMockRetroList()[0]
             whenever(retroRepository.createRetro(retroTitle)).thenReturn(Either.right(retro))
@@ -133,7 +133,7 @@ class RetroListViewModelTest {
 
     @Test
     fun `GIVEN server response failed WHEN create retro clicked THEN update the viewState and open the detail`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val retroTitle = "Sample title"
             whenever(retroRepository.createRetro(retroTitle)).thenReturn(Either.left(Failure.CreateRetroError))
             viewModel.viewStates().observeForever(viewStateObserver)
@@ -157,7 +157,7 @@ class RetroListViewModelTest {
     //region logout
     @Test
     fun `GIVEN viewEvent WHEN logout THEN calls account repository`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.logOut()).thenReturn(Unit)
 
             viewModel.process(RetroListViewEvent.LogoutClicked)
