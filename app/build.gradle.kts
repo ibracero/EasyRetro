@@ -24,19 +24,19 @@ if (isLocalBuild) keystoreProperties.load(FileInputStream(keystorePropertiesFile
 val signingConfigName = "releaseConfig"
 
 android {
-    compileSdkVersion(AndroidSdk.compile)
+    compileSdkVersion(AndroidSdk.compileVersion)
 
     defaultConfig {
         applicationId = "com.easyretro"
-        minSdkVersion(AndroidSdk.min)
-        targetSdkVersion(AndroidSdk.target)
+        minSdkVersion(AndroidSdk.minVersion)
+        targetSdkVersion(AndroidSdk.targetVersion)
         versionCode = Project.versionCode
         versionName = Project.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = arguments + mapOf(
+                arguments += mapOf(
                     "room.schemaLocation" to "$projectDir/schemas",
                     "room.incremental" to "true"
                 )
