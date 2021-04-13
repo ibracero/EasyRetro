@@ -1,9 +1,9 @@
 package com.easyretro.data
 
 import arrow.core.Either
-import com.easyretro.CoroutineTestRule
-import com.easyretro.data.local.SessionManager
+import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
+import com.easyretro.data.local.SessionManager
 import com.easyretro.data.remote.AuthDataStore
 import com.easyretro.data.remote.RemoteDataStore
 import com.easyretro.data.remote.firestore.UserRemote
@@ -12,11 +12,13 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
 import com.nhaarman.mockitokotlin2.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Assert.assertEquals
-import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class AccountRepositoryImplTest {
 
     private val userEmail = "email@email.com"
@@ -37,8 +39,11 @@ class AccountRepositoryImplTest {
         photoUrl = userPhotoUrl
     )
 
-    @get:Rule
-    var coroutinesTestRule = CoroutineTestRule()
+    private val testCoroutineScope = TestCoroutineScope()
+    private val dispatchers = mock<CoroutineDispatcherProvider> {
+        on { main() }.then { testCoroutineScope.coroutineContext }
+        on { io() }.then { testCoroutineScope.coroutineContext }
+    }
 
     private val localDataStore = mock<LocalDataStore>()
     private val remoteDataStore = mock<RemoteDataStore>()
@@ -52,13 +57,13 @@ class AccountRepositoryImplTest {
         remoteDataStore = remoteDataStore,
         authDataStore = authDataStore,
         sessionManager = sessionSharedPrefsManager,
-        dispatchers = coroutinesTestRule.testDispatcherProvider
+        dispatchers = dispatchers
     )
 
     //region get user status
     @Test
     fun `GIVEN failed server response and session started WHEN getting user status THEN return VERIFIED`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val isUserVerifiedResponse = null
             whenever(authDataStore.isUserVerified()).thenReturn(Either.right(isUserVerifiedResponse))
             whenever(sessionSharedPrefsManager.isSessionStarted()).thenReturn(true)
@@ -72,7 +77,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN failed server response and session not started WHEN getting user status THEN return NON VERIFIED`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val isUserVerifiedResponse = null
             whenever(authDataStore.isUserVerified()).thenReturn(Either.right(isUserVerifiedResponse))
             whenever(sessionSharedPrefsManager.isSessionStarted()).thenReturn(false)
@@ -86,7 +91,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN non verified user response and session started WHEN getting user status THEN return NON VERIFIED`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val isUserVerifiedResponse = false
             whenever(authDataStore.isUserVerified()).thenReturn(Either.right(isUserVerifiedResponse))
 
@@ -100,7 +105,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN verified user response and session started WHEN getting user status THEN return VERIFIED`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val isUserVerifiedResponse = true
             whenever(authDataStore.isUserVerified()).thenReturn(Either.right(isUserVerifiedResponse))
 
@@ -116,7 +121,7 @@ class AccountRepositoryImplTest {
     //region sign in with google
     @Test
     fun `GIVEN success response from google WHEN signing with google THEN start session and return EitherRight`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val tokenId = "googleToken"
             whenever(authDataStore.signInWithToken(token = tokenId)).thenReturn(Either.right(Unit))
             whenever(remoteDataStore.createUser(userRemoteOne)).thenReturn(Either.right(Unit))
@@ -131,7 +136,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN error response from google WHEN signing with google THEN return EitherLeft`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val tokenId = "googleToken"
             whenever(authDataStore.signInWithToken(token = tokenId)).thenReturn(Either.left(Failure.UnknownError))
 
@@ -145,7 +150,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN error response from the server WHEN signing with google THEN return EitherLeft`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val tokenId = "googleToken"
             whenever(authDataStore.signInWithToken(token = tokenId)).thenReturn(Either.right(Unit))
             whenever(remoteDataStore.createUser(userRemoteOne)).thenReturn(Either.left(Failure.UnavailableNetwork))
@@ -162,7 +167,7 @@ class AccountRepositoryImplTest {
     //region sign in with email
     @Test
     fun `GIVEN VERIFIED user WHEN signing with email THEN start session and return VERIFIED`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val isUserVerifiedResponse = true
             whenever(
                 authDataStore.signInWithEmailAndPassword(
@@ -185,7 +190,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN NON VERIFIED user WHEN signing with email THEN start session and return VERIFIED`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val isUserVerifiedResponse = false
             whenever(
                 authDataStore.signInWithEmailAndPassword(
@@ -210,7 +215,7 @@ class AccountRepositoryImplTest {
     //region sign up with email
     @Test
     fun `GIVEN success server response WHEN signing up with email THEN return EitherRight`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val remoteUser = UserRemote(email = userEmail)
             whenever(remoteDataStore.createUser(remoteUser)).thenReturn(Either.right(Unit))
             whenever(
@@ -236,7 +241,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN failed server response WHEN creating user in firebase with email THEN return EitherLeft`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val remoteUser = UserRemote(email = userEmail)
             whenever(remoteDataStore.createUser(remoteUser)).thenReturn(Either.left(Failure.UnavailableNetwork))
             whenever(
@@ -261,7 +266,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN failed server response WHEN signing up with email THEN return EitherLeft`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(
                 authDataStore.signUpWithEmailAndPassword(
                     email = userEmail,
@@ -285,7 +290,7 @@ class AccountRepositoryImplTest {
     //region reset password
     @Test
     fun `GIVEN success server response WHEN resetting password THEN return EitherRight`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(authDataStore.resetPassword(email = userEmail)).thenReturn(Either.right(Unit))
 
             val result = repository.resetPassword(email = userEmail)
@@ -298,7 +303,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN failed server response WHEN resetting password THEN return EitherLeft`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(authDataStore.resetPassword(email = userEmail)).thenReturn(Either.left(Failure.UnknownError))
 
             val result = repository.resetPassword(email = userEmail)
@@ -313,7 +318,7 @@ class AccountRepositoryImplTest {
     //region resend verification email
     @Test
     fun `GIVEN success server response WHEN resending verification email THEN return EitherRight`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(authDataStore.resendVerificationEmail()).thenReturn(Either.right(Unit))
 
             val result = repository.resendVerificationEmail()
@@ -326,7 +331,7 @@ class AccountRepositoryImplTest {
 
     @Test
     fun `GIVEN failed server response WHEN resending verification email THEN return EitherLeft`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(authDataStore.resendVerificationEmail()).thenReturn(Either.left(Failure.UnknownError))
 
             val result = repository.resendVerificationEmail()
@@ -341,7 +346,7 @@ class AccountRepositoryImplTest {
     //region resend verification email
     @Test
     fun `GIVEN regular flow WHEN logging out THEN finish local session, logout from firebase and clear database`() {
-        runBlocking {
+        testCoroutineScope.launch {
 
             val result = repository.logOut()
 

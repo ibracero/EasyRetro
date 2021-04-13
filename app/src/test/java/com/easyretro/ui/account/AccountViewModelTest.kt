@@ -3,22 +3,23 @@ package com.easyretro.ui.account
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import arrow.core.Either
-import com.easyretro.CoroutineTestRule
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
 import com.nhaarman.mockitokotlin2.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class AccountViewModelTest {
-
-    @get:Rule
-    val coroutinesTestRule = CoroutineTestRule()
+    
+    private val testCoroutineScope = TestCoroutineScope()
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -41,8 +42,8 @@ class AccountViewModelTest {
 
     //region sign in
     @Test
-    fun `GIVEN success response AND verified usuer WHEN signing in THEN open retro list`() {
-        runBlocking {
+    fun `GIVEN success response AND verified user WHEN signing in THEN open retro list`() {
+        testCoroutineScope.launch {
             whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
                 .thenReturn(Either.right(UserStatus.VERIFIED))
             viewModel.viewStates().observeForever(viewStateObserver)
@@ -63,7 +64,7 @@ class AccountViewModelTest {
 
     @Test
     fun `GIVEN success response AND non verified user WHEN signing in THEN open email verification`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
                 .thenReturn(Either.right(UserStatus.NON_VERIFIED))
             viewModel.viewStates().observeForever(viewStateObserver)
@@ -84,7 +85,7 @@ class AccountViewModelTest {
 
     @Test
     fun `GIVEN failed response (invalid user) WHEN signing in THEN show specific error message`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
                 .thenReturn(Either.left(Failure.InvalidUserFailure))
             viewModel.viewStates().observeForever(viewStateObserver)
@@ -111,7 +112,7 @@ class AccountViewModelTest {
 
     @Test
     fun `GIVEN failed response WHEN signing in THEN show generic error message`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
                 .thenReturn(Either.left(Failure.UnknownError))
             viewModel.viewStates().observeForever(viewStateObserver)
@@ -140,7 +141,7 @@ class AccountViewModelTest {
     //region sign up
     @Test
     fun `GIVEN success response WHEN signing up THEN open verification email`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.signUpWithEmail(email = userEmail, password = userPassword))
                 .thenReturn(Either.right(Unit))
             viewModel.viewStates().observeForever(viewStateObserver)
@@ -161,7 +162,7 @@ class AccountViewModelTest {
 
     @Test
     fun `GIVEN failed response (existing user) WHEN signing up THEN show specific snackbar`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.signUpWithEmail(email = userEmail, password = userPassword))
                 .thenReturn(Either.left(Failure.UserCollisionFailure))
             viewModel.viewStates().observeForever(viewStateObserver)
@@ -188,7 +189,7 @@ class AccountViewModelTest {
 
     @Test
     fun `GIVEN failed response WHEN signing up THEN show generic snackbar`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(accountRepository.signUpWithEmail(email = userEmail, password = userPassword))
                 .thenReturn(Either.left(Failure.UnknownError))
             viewModel.viewStates().observeForever(viewStateObserver)
@@ -217,7 +218,7 @@ class AccountViewModelTest {
     //region reset password
     @Test
     fun `GIVEN reset password viewEvent WHEN user taps reset password THEN open reset password`() {
-        runBlocking {
+        testCoroutineScope.launch {
             viewModel.viewEffects().observeForever(viewEffectsObserver)
 
             viewModel.process(AccountViewEvent.ResetPassword)

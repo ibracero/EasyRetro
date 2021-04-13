@@ -1,7 +1,7 @@
 package com.easyretro.data
 
 import arrow.core.Either
-import com.easyretro.CoroutineTestRule
+import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.common.UuidProvider
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.RetroDb
@@ -21,17 +21,22 @@ import com.easyretro.domain.model.Retro
 import com.easyretro.domain.model.User
 import com.easyretro.test
 import com.nhaarman.mockitokotlin2.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class RetroRepositoryImplTest {
 
-    @get:Rule
-    var coroutinesTestRule = CoroutineTestRule()
+    private val testCoroutineScope = TestCoroutineScope()
+    private val dispatchers = mock<CoroutineDispatcherProvider> {
+        on { main() }.then { testCoroutineScope.coroutineContext }
+        on { io() }.then { testCoroutineScope.coroutineContext }
+    }
 
     private val retroUuid = "retro-uuid"
     private val retroTitle = "Retro title"
@@ -45,14 +50,12 @@ class RetroRepositoryImplTest {
     private val localDataStore = mock<LocalDataStore>()
     private val remoteDataStore = mock<RemoteDataStore>()
     private val deepLinkDataStore = mock<DeepLinkDataStore>()
-    private val retroRemoteToDbMapper =
-        RetroRemoteToDbMapper(userRemoteToDbMapper = UserRemoteToDbMapper())
-    private val retroDbToDomainMapper =
-        RetroDbToDomainMapper(userDbToDomainMapper = UserDbToDomainMapper())
-    private val authDataStore = mock<AuthDataStore>() {
+    private val retroRemoteToDbMapper = RetroRemoteToDbMapper(userRemoteToDbMapper = UserRemoteToDbMapper())
+    private val retroDbToDomainMapper = RetroDbToDomainMapper(userDbToDomainMapper = UserDbToDomainMapper())
+    private val authDataStore = mock<AuthDataStore> {
         on { getCurrentUserEmail() }.thenReturn(userEmail)
     }
-    private val uuidProvider = mock<UuidProvider>() {
+    private val uuidProvider = mock<UuidProvider> {
         on { generateUuid() }.thenReturn(retroUuid)
     }
 
@@ -64,7 +67,7 @@ class RetroRepositoryImplTest {
         uuidProvider = uuidProvider,
         retroRemoteToDbMapper = retroRemoteToDbMapper,
         retroDbToDomainMapper = retroDbToDomainMapper,
-        dispatchers = coroutinesTestRule.testDispatcherProvider
+        dispatchers = dispatchers
     )
 
     init {
@@ -73,7 +76,7 @@ class RetroRepositoryImplTest {
 
     @Before
     fun `Set up`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(deepLinkDataStore.generateDeepLink(any()))
                 .thenReturn(Either.right(retroDeepLink))
         }
@@ -82,7 +85,7 @@ class RetroRepositoryImplTest {
     //region create retro
     @Test
     fun `GIVEN a success response from Firebase WHEN trying to create a retro THEN return Right with the retro`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(
                 remoteDataStore.createRetro(
                     retroUuid = retroUuid,
@@ -101,7 +104,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN a failed response from Firebase WHEN trying to create a retro THEN return Left with the failure`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(
                 remoteDataStore.createRetro(
                     retroUuid = retroUuid,
@@ -120,7 +123,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN a failed response from Firebase WHEN trying to create a deeplink for the new retro THEN return Left with the failure`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val expectedValue = Either.left(Failure.UnknownError)
             whenever(deepLinkDataStore.generateDeepLink(any()))
                 .thenReturn(expectedValue)
@@ -136,7 +139,7 @@ class RetroRepositoryImplTest {
     //region join retro
     @Test
     fun `GIVEN a success response from Firebase WHEN trying to join a retro THEN return Right Unit`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(remoteDataStore.joinRetro(userEmail = userEmail, retroUuid = retroUuid))
                 .thenReturn(Either.right(Unit))
 
@@ -149,7 +152,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN a failed response from Firebase WHEN trying to join a retro THEN return Left with the failure`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(remoteDataStore.joinRetro(userEmail = userEmail, retroUuid = retroUuid))
                 .thenReturn(Either.left(Failure.UnknownError))
 
@@ -164,7 +167,7 @@ class RetroRepositoryImplTest {
     //region observe local retro
     @Test
     fun `GIVEN a valid retroUuid WHEN getting retro info THEN return Right with the retro`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(localDataStore.observeRetro("valid-uuid"))
                 .thenReturn(flowOf(dbRetro))
 
@@ -180,7 +183,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN an invalid retroUuid WHEN getting retro info THEN return Left with the failure`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(localDataStore.observeRetro("invalid-uuid"))
                 .thenReturn(flowOf(null))
 
@@ -198,7 +201,7 @@ class RetroRepositoryImplTest {
     //region get retros
     @Test
     fun `GIVEN local data WHEN getting retro list THEN flow emits first local data and then remote data`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val localRetros = listOf(dbRetro)
             val remoteRetros = listOf(remoteRetro)
             whenever(localDataStore.getRetros()).thenReturn(localRetros)
@@ -221,7 +224,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN no local data WHEN getting retro list THEN flow emits just remote data`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val localRetros = emptyList<RetroDb>()
             val remoteRetros = listOf(remoteRetro)
             whenever(localDataStore.getRetros()).thenReturn(localRetros)
@@ -240,7 +243,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN a remote error WHEN getting retro list THEN flow emits local data and the error`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val localRetros = listOf(dbRetro)
             whenever(localDataStore.getRetros()).thenReturn(localRetros)
             whenever(remoteDataStore.getUserRetros(userEmail)).thenReturn(Either.left(Failure.UnknownError))
@@ -262,7 +265,7 @@ class RetroRepositoryImplTest {
     //region protect retro
     @Test
     fun `GIVEN a success response WHEN protecting a retro THEN return Unit`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = true))
                 .thenReturn(Either.right(Unit))
 
@@ -276,7 +279,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN a failed response WHEN protecting a retro THEN return Failure`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(remoteDataStore.updateRetroProtection(retroUuid = retroUuid, protected = true))
                 .thenReturn(Either.left(Failure.UnknownError))
 
@@ -292,7 +295,7 @@ class RetroRepositoryImplTest {
     //region unprotect retro
     @Test
     fun `GIVEN a success response WHEN unprotecting a retro THEN return Unit`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(
                 remoteDataStore.updateRetroProtection(
                     retroUuid = retroUuid,
@@ -311,7 +314,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN a failed response WHEN unprotecting a retro THEN return Failure`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(
                 remoteDataStore.updateRetroProtection(
                     retroUuid = retroUuid,
@@ -331,7 +334,7 @@ class RetroRepositoryImplTest {
     //region start observing remote retro
     @Test
     fun `GIVEN a success response WHEN start observing a remote retro THEN return Unit`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(remoteDataStore.observeRetro(retroUuid = retroUuid))
                 .thenReturn(flowOf(Either.right(remoteRetro)))
 
@@ -347,7 +350,7 @@ class RetroRepositoryImplTest {
 
     @Test
     fun `GIVEN a failed response WHEN start observing a remote retro THEN return Failure`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(remoteDataStore.observeRetro(retroUuid = retroUuid))
                 .thenReturn(flowOf(Either.left(Failure.UnknownError)))
 
