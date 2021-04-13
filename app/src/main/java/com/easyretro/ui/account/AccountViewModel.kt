@@ -1,15 +1,17 @@
 package com.easyretro.ui.account
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class AccountViewModel @ViewModelInject constructor(
+@HiltViewModel
+class AccountViewModel @Inject constructor(
     private val repository: AccountRepository
 ) : BaseViewModel<AccountViewState, AccountViewEffect, AccountViewEvent>() {
 

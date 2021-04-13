@@ -1,6 +1,5 @@
 package com.easyretro.ui.board
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
@@ -8,11 +7,14 @@ import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.ui.FailureMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class BoardViewModel @ViewModelInject constructor(
+@HiltViewModel
+class BoardViewModel @Inject constructor(
     private val retroRepository: RetroRepository,
     private val boardRepository: BoardRepository
 ) : BaseViewModel<BoardViewState, BoardViewEffect, BoardViewEvent>() {

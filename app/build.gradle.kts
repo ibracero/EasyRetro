@@ -24,19 +24,19 @@ if (isLocalBuild) keystoreProperties.load(FileInputStream(keystorePropertiesFile
 val signingConfigName = "releaseConfig"
 
 android {
-    compileSdkVersion(AndroidSdk.compile)
+    compileSdkVersion(AndroidSdk.compileVersion)
 
     defaultConfig {
         applicationId = "com.easyretro"
-        minSdkVersion(AndroidSdk.min)
-        targetSdkVersion(AndroidSdk.target)
+        minSdkVersion(AndroidSdk.minVersion)
+        targetSdkVersion(AndroidSdk.targetVersion)
         versionCode = Project.versionCode
         versionName = Project.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = arguments + mapOf(
+                arguments += mapOf(
                     "room.schemaLocation" to "$projectDir/schemas",
                     "room.incremental" to "true"
                 )
@@ -112,13 +112,14 @@ dependencies {
     implementation(Libraries.play_services_auth)
     implementation(Libraries.glide)
     implementation(Libraries.crashlytics)
-    implementation(Libraries.dagger_hilt)
+
+    implementation(Libraries.dagger_hilt_android)
     implementation(Libraries.dagger_hilt_viewmodel)
 
     debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
+
     kapt(Libraries.dagger_hilt_compiler)
-    kapt(Libraries.dagger_hilt_android_compiler)
 
     testImplementation(TestLibraries.junit)
     testImplementation(TestLibraries.mockito_kotlin)
@@ -127,4 +128,8 @@ dependencies {
     testImplementation(TestLibraries.androidx_core_testing)
 
     androidTestImplementation(TestLibraries.androidx_test_espresso_core)
+}
+
+kapt {
+    correctErrorTypes = true
 }

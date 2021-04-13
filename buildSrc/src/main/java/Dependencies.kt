@@ -1,14 +1,14 @@
 import BuildPlugins.Versions.android_gradle_plugin_version
-import BuildPlugins.Versions.fabric_gradle_version
+import BuildPlugins.Versions.crashlytics_plugin_version
 import BuildPlugins.Versions.google_services_version
 import Libraries.Versions.androidx_compat_version
 import Libraries.Versions.androidx_constraint_layout_version
-import Libraries.Versions.androidx_hilt_version
 import Libraries.Versions.androidx_lifecycle_version
 import Libraries.Versions.androidx_navigation_version
 import Libraries.Versions.arrow_version
 import Libraries.Versions.coroutines_version
 import Libraries.Versions.crashlytics_version
+import Libraries.Versions.dagger_hilt_viewmodel_version
 import Libraries.Versions.firebase_analytics_version
 import Libraries.Versions.firebase_auth_version
 import Libraries.Versions.firebase_dynamic_links_version
@@ -25,14 +25,14 @@ import TestLibraries.Versions.junit_version
 import TestLibraries.Versions.mockito_inline_version
 import TestLibraries.Versions.mockito_version
 
-const val kotlin_version = "1.3.72"
-const val dagger_hilt_version = "2.28-alpha"
+const val kotlin_version = "1.4.32"
+const val dagger_hilt_version = "2.33-beta"
 
 
 object AndroidSdk {
-    const val min = 21
-    const val compile = 29
-    const val target = compile
+    const val minVersion = 21
+    const val compileVersion = 30
+    const val targetVersion = compileVersion
 }
 
 object Project {
@@ -42,15 +42,15 @@ object Project {
 
 object BuildPlugins {
     object Versions {
-        const val android_gradle_plugin_version = "4.0.0"
-        const val google_services_version = "4.3.3"
-        const val fabric_gradle_version = "1.31.2"
+        const val android_gradle_plugin_version = "4.1.3"
+        const val google_services_version = "4.3.5"
+        const val crashlytics_plugin_version = "2.5.2"
     }
 
     const val android_gradle_plugin = "com.android.tools.build:gradle:$android_gradle_plugin_version"
     const val kotlin_gradle_plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     const val google_services_plugin = "com.google.gms:google-services:$google_services_version"
-    const val fabric_gradle_plugin = "io.fabric.tools:gradle:$fabric_gradle_version"
+    const val crashlytics_plugin = "com.google.firebase:firebase-crashlytics-gradle:$crashlytics_plugin_version"
     const val dagger_hilt_plugin = "com.google.dagger:hilt-android-gradle-plugin:$dagger_hilt_version"
 }
 
@@ -59,32 +59,31 @@ object Plugins {
     const val kotlinAndroid = "kotlin-android"
     const val kotlinAndroidExtensions = "kotlin-android-extensions"
     const val googleServices = "com.google.gms.google-services"
+    const val crashlytics = "com.google.firebase.crashlytics"
     const val kotlinKapt = "kotlin-kapt"
-    const val crashlytics = "io.fabric"
     const val hilt = "dagger.hilt.android.plugin"
 }
 
 object Libraries {
     object Versions {
-        const val androidx_navigation_version = "2.2.1"
-        const val androidx_compat_version = "1.1.0"
-        const val androidx_constraint_layout_version = "1.1.3"
+        const val androidx_navigation_version = "2.3.5"
+        const val androidx_compat_version = "1.2.0"
+        const val androidx_constraint_layout_version = "2.0.4"
         const val androidx_lifecycle_version = "2.2.0"
-        const val androidx_hilt_version = "1.0.0-alpha01"
-        const val google_material_version = "1.0.0"
-        const val firebase_firestore_version = "21.4.3"
+        const val google_material_version = "1.3.0"
+        const val firebase_firestore_version = "22.1.2"
         const val firebase_analytics_version = "17.4.0"
-        const val firebase_dynamic_links_version = "19.1.0"
-        const val firebase_auth_version = "19.3.1"
-        const val coroutines_version = "1.3.7"
-        const val koin_version = "2.1.5"
+        const val firebase_dynamic_links_version = "19.1.1"
+        const val firebase_auth_version = "20.0.4"
+        const val coroutines_version = "1.4.2"
         const val timber_version = "4.7.1"
-        const val room_version = "2.2.5"
+        const val room_version = "2.2.6"
         const val room_debugger_version = "1.0.6"
         const val arrow_version = "0.10.3"
-        const val play_services_auth_version = "18.0.0"
-        const val glide_version = "4.11.0"
-        const val crashlytics_version = "2.10.1"
+        const val play_services_auth_version = "19.0.0"
+        const val glide_version = "4.12.0"
+        const val crashlytics_version = "18.0.3"
+        const val dagger_hilt_viewmodel_version = "1.0.0-alpha03"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -115,19 +114,19 @@ object Libraries {
     const val firebase_auth = "com.google.firebase:firebase-auth:$firebase_auth_version"
     const val play_services_auth = "com.google.android.gms:play-services-auth:$play_services_auth_version"
     const val glide = "com.github.bumptech.glide:glide:$glide_version"
-    const val crashlytics = "com.crashlytics.sdk.android:crashlytics:$crashlytics_version"
-    const val dagger_hilt = "com.google.dagger:hilt-android:$dagger_hilt_version"
-    const val dagger_hilt_viewmodel = "androidx.hilt:hilt-lifecycle-viewmodel:$androidx_hilt_version"
-    const val dagger_hilt_compiler = "androidx.hilt:hilt-compiler:$androidx_hilt_version"
-    const val dagger_hilt_android_compiler = "com.google.dagger:hilt-android-compiler:$dagger_hilt_version"
+    const val crashlytics = "com.google.firebase:firebase-analytics:$crashlytics_version"
+    const val dagger_hilt_android = "com.google.dagger:hilt-android:$dagger_hilt_version"
+//    const val dagger_hilt_android_compiler = "com.google.dagger:hilt-android-compiler:$dagger_hilt_version"
+    const val dagger_hilt_compiler = "com.google.dagger:hilt-compiler:$dagger_hilt_version"
+    const val dagger_hilt_viewmodel = "androidx.hilt:hilt-lifecycle-viewmodel:$dagger_hilt_viewmodel_version"
 }
 
 object TestLibraries {
     private object Versions {
-        const val junit_version = "4.13"
-        const val espresso_version = "3.1.1"
-        const val mockito_version = "2.2.0"
-        const val mockito_inline_version = "3.3.3"
+        const val junit_version = "4.13.2"
+        const val espresso_version = "3.3.0"
+        const val mockito_version = "2.1.0"
+        const val mockito_inline_version = "3.8.0"
         const val androidx_testing_version = "2.1.0"
     }
 

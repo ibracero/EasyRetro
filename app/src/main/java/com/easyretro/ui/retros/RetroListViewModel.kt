@@ -9,10 +9,13 @@ import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.ui.FailureMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RetroListViewModel @ViewModelInject constructor(
+@HiltViewModel
+class RetroListViewModel @Inject constructor(
     private val retroRepository: RetroRepository,
     private val accountRepository: AccountRepository
 ) : BaseViewModel<RetroListViewState, RetroListViewEffect, RetroListViewEvent>() {

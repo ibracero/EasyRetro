@@ -7,9 +7,12 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.Either
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ResetPasswordViewModel @ViewModelInject constructor(
+@HiltViewModel
+class ResetPasswordViewModel @Inject constructor(
     private val accountRepository: AccountRepository
 ) : ViewModel() {
 

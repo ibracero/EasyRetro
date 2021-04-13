@@ -1,6 +1,5 @@
 package com.easyretro.ui.welcome
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,9 +9,12 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class WelcomeViewModel @ViewModelInject constructor(
+@HiltViewModel
+class WelcomeViewModel @Inject constructor(
     private val repository: AccountRepository
 ) : ViewModel() {
 

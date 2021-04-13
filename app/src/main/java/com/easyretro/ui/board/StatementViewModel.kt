@@ -1,18 +1,20 @@
 package com.easyretro.ui.board
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.easyretro.common.BaseViewModel
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
-import com.easyretro.domain.model.Statement
 import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.FailureMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class StatementViewModel @ViewModelInject constructor(
+
+@HiltViewModel
+class StatementViewModel @Inject constructor(
     private val boardRepository: BoardRepository,
     private val retroRepository: RetroRepository
 ) : BaseViewModel<StatementListViewState, StatementListViewEffect, StatementListViewEvent>() {
