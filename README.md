@@ -26,7 +26,7 @@ The main technologies I'm using in this project:
 - **Firebase Dynamic Links** for deeplink management (https://firebase.google.com/docs/dynamic-links)
 - **Firebase Auth** for session management (https://firebase.google.com/docs/auth)
 - **Dagger Hilt** for dependency injection (https://dagger.dev/hilt/). Initially Koin (https://insert-koin.io/), recently migrated to Hilt.
-- **Coroutines & Flow** for async communication. *Coroutines* for one shot operations ((https://developer.android.com/kotlin/coroutines) and *Flow* for realtime database changes ((https://developer.android.com/kotlin/flow)
+- **Coroutines & Flow** for async communication. *Coroutines* for one shot operations (https://developer.android.com/kotlin/coroutines) and *Flow* for realtime database changes (https://developer.android.com/kotlin/flow)
 - **Room** for offline support (https://developer.android.com/training/data-storage/room)
 - **Arrow** for either encapsulation (https://github.com/arrow-kt/arrow)
 
