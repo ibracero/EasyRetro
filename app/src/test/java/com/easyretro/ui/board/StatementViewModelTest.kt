@@ -3,23 +3,25 @@ package com.easyretro.ui.board
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import arrow.core.Either
-import com.easyretro.CoroutineTestRule
+import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.*
 import com.easyretro.ui.FailureMessage
 import com.nhaarman.mockitokotlin2.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScope
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class StatementViewModelTest {
 
-    @get:Rule
-    val coroutinesTestRule = CoroutineTestRule()
+    private val testCoroutineScope = TestCoroutineScope()
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -40,17 +42,15 @@ class StatementViewModelTest {
     @Before
     fun `Set up`() {
         initModelMocks()
-        runBlocking {
-            viewModel = StatementViewModel(retroRepository = retroRepository, boardRepository = boardRepository)
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
-        }
+        viewModel = StatementViewModel(retroRepository = retroRepository, boardRepository = boardRepository)
+        viewModel.viewStates().observeForever(viewStateObserver)
+        viewModel.viewEffects().observeForever(viewEffectsObserver)
     }
 
     //region fetch statements
     @Test
     fun `GIVEN statement list saved to the database WHEN fetching statements THEN update viewState with statements`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(boardRepository.getStatements(retroUuid, StatementType.POSITIVE))
                 .thenReturn(flowOf(statementList))
 
@@ -67,7 +67,7 @@ class StatementViewModelTest {
     //region check retro protection
     @Test
     fun `GIVEN values WHEN checking retro protection THEN update the view`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val protectedRetro = Either.right(domainRetro)
             val unprotectedRetro = Either.right(domainRetro.copy(protected = false))
             whenever(retroRepository.observeRetro(retroUuid))
@@ -86,7 +86,7 @@ class StatementViewModelTest {
 
     @Test
     fun `GIVEN error WHEN checking retro protection THEN show snackbar`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(retroRepository.observeRetro(retroUuid))
                 .thenReturn(flowOf(Either.left(Failure.RetroNotFoundError)))
 
@@ -101,7 +101,7 @@ class StatementViewModelTest {
     //region add statement
     @Test
     fun `GIVEN success response WHEN adding a statement THEN update viewState`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val statementDescription = "Something new"
             whenever(
                 boardRepository.addStatement(
@@ -124,7 +124,7 @@ class StatementViewModelTest {
 
     @Test
     fun `GIVEN failed response WHEN adding a statement THEN update viewState`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val statementDescription = "Something new"
             whenever(
                 boardRepository.addStatement(
@@ -152,7 +152,7 @@ class StatementViewModelTest {
     //region remove statement
     @Test
     fun `GIVEN success response WHEN removing a statement THEN do nothing`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val statementUuid = "statement-uuid"
             whenever(boardRepository.removeStatement(retroUuid = retroUuid, statementUuid = statementUuid))
                 .thenReturn(Either.right(Unit))
@@ -170,7 +170,7 @@ class StatementViewModelTest {
 
     @Test
     fun `GIVEN failed response WHEN removing a statement THEN show snackbar`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val statementUuid = "statement-uuid"
             whenever(boardRepository.removeStatement(retroUuid = retroUuid, statementUuid = statementUuid))
                 .thenReturn(Either.left(Failure.UnknownError))

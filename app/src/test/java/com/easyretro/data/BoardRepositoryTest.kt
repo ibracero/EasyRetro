@@ -1,8 +1,7 @@
 package com.easyretro.data
 
-import android.net.Uri
 import arrow.core.Either
-import com.easyretro.CoroutineTestRule
+import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
 import com.easyretro.data.local.RetroDb
 import com.easyretro.data.local.StatementDb
@@ -17,16 +16,15 @@ import com.easyretro.domain.model.StatementType
 import com.easyretro.test
 import com.nhaarman.mockitokotlin2.*
 import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
+@ExperimentalCoroutinesApi
 class BoardRepositoryTest {
-
-    @get:Rule
-    var coroutinesTestRule = CoroutineTestRule()
 
     private val userEmail = "email@email.com"
     private val retroUuid = "retro-uuid"
@@ -38,18 +36,24 @@ class BoardRepositoryTest {
     private val statementRemoteToDbMapper = StatementRemoteToDbMapper()
     private val statementDbToDomainMapper = StatementDbToDomainMapper()
 
+    private val testCoroutineScope = TestCoroutineScope()
+    private val dispatchers = mock<CoroutineDispatcherProvider> {
+        on { main() }.then { testCoroutineScope.coroutineContext }
+        on { io() }.then { testCoroutineScope.coroutineContext }
+    }
+
     private val repository = BoardRepositoryImpl(
         localDataStore = localDataStore,
         remoteDataStore = remoteDataStore,
         authDataStore = authDataStore,
         statementRemoteToDbMapper = statementRemoteToDbMapper,
         statementDbToDomainMapper = statementDbToDomainMapper,
-        dispatchers = coroutinesTestRule.testDispatcherProvider
+        dispatchers = dispatchers
     )
 
     @Before
     fun `Set up`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(authDataStore.getCurrentUserEmail())
                 .thenReturn(userEmail)
         }
@@ -58,7 +62,7 @@ class BoardRepositoryTest {
     //region get statements
     @Test
     fun `GIVEN protected retro WHEN getting statement list THEN return statements not removable`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(localDataStore.observeRetro(retroUuid = retroUuid))
                 .thenReturn(flowOf(getMockLocalRetro().copy(isProtected = true)))
             whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
@@ -81,7 +85,7 @@ class BoardRepositoryTest {
 
     @Test
     fun `GIVEN non-protected retro WHEN getting statement list THEN return statements original removable value`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(localDataStore.observeRetro(retroUuid = retroUuid))
                 .thenReturn(flowOf(getMockLocalRetro().copy(isProtected = false)))
             whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
@@ -103,7 +107,7 @@ class BoardRepositoryTest {
 
     @Test
     fun `GIVEN positive type WHEN getting statement list THEN requests positive statements`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(localDataStore.observeRetro(retroUuid = retroUuid))
                 .thenReturn(flowOf(getMockLocalRetro()))
             whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
@@ -117,7 +121,7 @@ class BoardRepositoryTest {
 
     @Test
     fun `GIVEN negative type WHEN getting statement list THEN requests negative statements`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(localDataStore.observeRetro(retroUuid = retroUuid))
                 .thenReturn(flowOf(getMockLocalRetro()))
             whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
@@ -131,7 +135,7 @@ class BoardRepositoryTest {
 
     @Test
     fun `GIVEN actions type WHEN getting statement list THEN requests actions statements`() {
-        runBlocking {
+        testCoroutineScope.launch {
             whenever(localDataStore.observeRetro(retroUuid = retroUuid))
                 .thenReturn(flowOf(getMockLocalRetro()))
             whenever(localDataStore.observePositiveStatements(retroUuid = retroUuid))
@@ -150,7 +154,7 @@ class BoardRepositoryTest {
     //region add statement
     @Test
     fun `GIVEN success server response WHEN adding a new statement THEN return EitherRight`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val statementDescription = "This is a positive description"
             val statementType = StatementType.POSITIVE
             val statementToAdd = StatementRemote(
@@ -180,7 +184,7 @@ class BoardRepositoryTest {
 
     @Test
     fun `GIVEN failed server response WHEN adding a new statement THEN return EitherLeft`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val statementDescription = "This is a positive description"
             val statementType = StatementType.POSITIVE
             val statementToAdd = StatementRemote(
@@ -211,7 +215,7 @@ class BoardRepositoryTest {
     //region remove statement
     @Test
     fun `GIVEN success server response WHEN removing a statement THEN return EitherRight`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val statementUuid = "statement-uuid"
             whenever(
                 remoteDataStore.removeStatement(
@@ -234,7 +238,7 @@ class BoardRepositoryTest {
 
     @Test
     fun `GIVEN failed server response WHEN removing a statement THEN return EitherLeft`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val statementUuid = "statement-uuid"
             whenever(remoteDataStore.removeStatement(retroUuid, statementUuid))
                 .thenReturn(Either.left(Failure.UnknownError))
@@ -255,7 +259,7 @@ class BoardRepositoryTest {
     //region start observing statements
     @Test
     fun `GIVEN some statements coming from the server WHEN start observing them THEN store them locally`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val serverFlow = flowOf(
                 Either.right(emptyList()),
                 Either.right(getMockRemoteStatementList())
@@ -281,7 +285,7 @@ class BoardRepositoryTest {
 
     @Test
     fun `GIVEN error coming from the server WHEN start observing statements THEN pass the error through`() {
-        runBlocking {
+        testCoroutineScope.launch {
             val serverFlow = flowOf<Either<Failure, List<StatementRemote>>>(
                 Either.left(Failure.UnknownError)
             )
