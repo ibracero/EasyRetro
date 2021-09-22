@@ -86,10 +86,10 @@ class BoardViewModel @Inject constructor(
         statementObserverJob?.cancel()
         retroObserverJob?.cancel()
         statementObserverJob = viewModelScope.launch {
-            boardRepository.startObservingStatements(retroUuid).collect()//todo handle failure
+            boardRepository.startObservingStatements(retroUuid).collect()
         }
         retroObserverJob = viewModelScope.launch {
-            retroRepository.startObservingRetroDetails(retroUuid).collect()//todo handle failure
+            retroRepository.startObservingRetroDetails(retroUuid).collect()
         }
     }
 
