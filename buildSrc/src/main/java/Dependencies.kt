@@ -56,7 +56,7 @@ object BuildPlugins {
 object Plugins {
     const val androidApplication = "com.android.application"
     const val kotlinAndroid = "kotlin-android"
-    const val kotlinAndroidExtensions = "kotlin-android-extensions"
+    const val kotlinParcelize = "kotlin-parcelize"
     const val googleServices = "com.google.gms.google-services"
     const val crashlytics = "com.google.firebase.crashlytics"
     const val kotlinKapt = "kotlin-kapt"
@@ -93,6 +93,8 @@ object Libraries {
         "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidx_lifecycle_version"
     const val androidx_lifecycle_livedata_extensions =
         "androidx.lifecycle:lifecycle-livedata-ktx:$androidx_lifecycle_version"
+    const val androidx_lifecycle_common_java =
+        "androidx.lifecycle:lifecycle-common-java8:$androidx_lifecycle_version"
     const val androidx_constraint_layout =
         "androidx.constraintlayout:constraintlayout:$androidx_constraint_layout_version"
     const val androidx_navigation_fragment_ktx =

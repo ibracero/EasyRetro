@@ -24,12 +24,12 @@ import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.*
+import com.easyretro.databinding.FragmentBoardBinding
 import com.easyretro.ui.board.action.ActionsFragment
 import com.easyretro.ui.board.negative.NegativeFragment
 import com.easyretro.ui.board.positive.PositiveFragment
 import com.easyretro.ui.board.users.UserListAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_board.*
 import kotlin.math.min
 
 
@@ -39,6 +39,8 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     companion object {
         const val ARGUMENT_RETRO_UUID = "arg_retro_uuid"
     }
+
+    private val binding by viewBinding(FragmentBoardBinding::bind)
 
     override val viewModel: BoardViewModel by viewModels()
 
@@ -57,21 +59,17 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        users_recyclerview.adapter = userListAdapter
+        binding.usersRecyclerview.adapter = userListAdapter
 
         getRetroUuidArgument()?.let { uuid ->
             viewModel.process(BoardViewEvent.JoinRetro(retroUuid = uuid))
             viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid = uuid))
         }
 
-        dismiss_protected_message_button.setOnClickListener {
-            protected_message.gone()
-            dismiss_protected_message_button.gone()
+        binding.dismissProtectedMessageButton.setOnClickListener {
+            binding.protectedMessage.gone()
+            binding.dismissProtectedMessageButton.gone()
         }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
 
         if (!isPortraitMode() && isTablet()) initLandscapeUi()
         else initPortraitUi()
@@ -106,20 +104,21 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     @Suppress("IMPLICIT_CAST_TO_ANY")
     override fun renderViewEffect(viewEffect: BoardViewEffect) {
         when (viewEffect) {
-            is BoardViewEffect.ShowSnackBar -> board_root.showErrorSnackbar(message = viewEffect.errorMessage)
+            is BoardViewEffect.ShowSnackBar -> binding.boardRoot.showErrorSnackbar(message = viewEffect.errorMessage)
             is BoardViewEffect.ShowShareSheet ->
                 displayShareSheet(retroName = viewEffect.retroTitle, shortLink = viewEffect.deepLink)
         }.exhaustive
     }
 
     private fun initToolbar(retroUuid: String, retroTitle: String?) {
-        board_toolbar?.run {
+        binding.boardToolbar.run {
             title = retroTitle
             setNavigationOnClickListener {
-                reportAnalytics(event = TapEvent(
-                    screen = Screen.RETRO_BOARD,
-                    uiValue = UiValue.BACK
-                )
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RETRO_BOARD,
+                        uiValue = UiValue.BACK
+                    )
                 )
                 backPressedCallback.handleOnBackPressed()
             }
@@ -136,19 +135,19 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
 
     private fun setupLockMode(retroProtected: Boolean, lockingAllowed: Boolean) {
         if (lockingAllowed) {
-            board_toolbar.menu.findItem(R.id.action_lock).isVisible = !retroProtected
-            board_toolbar.menu.findItem(R.id.action_unlock).isVisible = retroProtected
+            binding.boardToolbar.menu.findItem(R.id.action_lock).isVisible = !retroProtected
+            binding.boardToolbar.menu.findItem(R.id.action_unlock).isVisible = retroProtected
         }
-        protected_message.visibleOrGone(retroProtected && !lockingAllowed)
-        dismiss_protected_message_button.visibleOrGone(retroProtected && !lockingAllowed)
+        binding.protectedMessage.visibleOrGone(retroProtected && !lockingAllowed)
+        binding.dismissProtectedMessageButton.visibleOrGone(retroProtected && !lockingAllowed)
     }
 
     private fun initPortraitUi() {
         val navController = findNavController(requireActivity(), R.id.bottom_nav_host_fragment)
             .apply { setGraph(R.navigation.board_nav_graph, arguments) }
 
-        nav_view?.setupWithNavController(navController)
-        nav_view?.setOnNavigationItemSelectedListener { menuItem ->
+        binding.navView?.setupWithNavController(navController)
+        binding.navView?.setOnItemSelectedListener { menuItem ->
             onTabSelected(menuItem, navController)
             true
         }
@@ -243,10 +242,11 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private fun createLockConfirmationDialog(context: Context, retroUuid: String): AlertDialog {
-        reportAnalytics(event = TapEvent(
-            screen = Screen.RETRO_BOARD,
-            uiValue = UiValue.RETRO_PROTECT
-        )
+        reportAnalytics(
+            event = TapEvent(
+                screen = Screen.RETRO_BOARD,
+                uiValue = UiValue.RETRO_PROTECT
+            )
         )
         return AlertDialog.Builder(context)
             .setCancelable(true)
@@ -256,10 +256,11 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
                 onProtectConfirmed(retroUuid = retroUuid)
             }
             .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
-                reportAnalytics(event = TapEvent(
-                    screen = Screen.RETRO_BOARD,
-                    uiValue = UiValue.RETRO_PROTECT_DISMISS
-                )
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RETRO_BOARD,
+                        uiValue = UiValue.RETRO_PROTECT_DISMISS
+                    )
                 )
                 dialogInterface.dismiss()
             }
@@ -267,28 +268,31 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
     }
 
     private fun onProtectConfirmed(retroUuid: String) {
-        reportAnalytics(event = TapEvent(
-            screen = Screen.RETRO_BOARD,
-            uiValue = UiValue.RETRO_PROTECT_CONFIRMATION
-        )
+        reportAnalytics(
+            event = TapEvent(
+                screen = Screen.RETRO_BOARD,
+                uiValue = UiValue.RETRO_PROTECT_CONFIRMATION
+            )
         )
         viewModel.process(BoardViewEvent.ProtectRetro(retroUuid = retroUuid))
     }
 
     private fun onUnprotectClicked(retroUuid: String) {
-        reportAnalytics(event = TapEvent(
-            screen = Screen.RETRO_BOARD,
-            uiValue = UiValue.RETRO_UNPROTECT
-        )
+        reportAnalytics(
+            event = TapEvent(
+                screen = Screen.RETRO_BOARD,
+                uiValue = UiValue.RETRO_UNPROTECT
+            )
         )
         viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid = retroUuid))
     }
 
     private fun onInviteClicked() {
-        reportAnalytics(event = TapEvent(
-            screen = Screen.RETRO_BOARD,
-            uiValue = UiValue.RETRO_INVITE
-        )
+        reportAnalytics(
+            event = TapEvent(
+                screen = Screen.RETRO_BOARD,
+                uiValue = UiValue.RETRO_INVITE
+            )
         )
         viewModel.process(BoardViewEvent.ShareRetroLink)
     }

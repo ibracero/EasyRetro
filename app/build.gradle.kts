@@ -11,7 +11,7 @@ import java.util.*
 plugins {
     id(Plugins.androidApplication)
     id(Plugins.kotlinAndroid)
-    id(Plugins.kotlinAndroidExtensions)
+    id(Plugins.kotlinParcelize)
     id(Plugins.kotlinKapt)
     id(Plugins.googleServices)
     id(Plugins.crashlytics)
@@ -89,6 +89,10 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
+
+    viewBinding {
+        isEnabled = true
+    }
 }
 
 tasks.withType<KotlinCompile> {
@@ -96,38 +100,39 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
 }
 
-androidExtensions {
-    isExperimental = true
-}
-
 dependencies {
     implementation(Libraries.kotlin_std)
+
     implementation(Libraries.androidx_appcompat)
     implementation(Libraries.androidx_material)
     implementation(Libraries.androidx_constraint_layout)
     implementation(Libraries.androidx_lifecycle_viewmodel_extensions)
     implementation(Libraries.androidx_lifecycle_livedata_extensions)
+    implementation(Libraries.androidx_lifecycle_common_java)
     implementation(Libraries.androidx_navigation_fragment_ktx)
     implementation(Libraries.androidx_navigation_ui_ktx)
+
     implementation(Libraries.firebase_firestore)
     implementation(Libraries.firebase_analytics)
     implementation(Libraries.firebase_dynamic_links)
     implementation(Libraries.firebase_auth)
+    implementation(Libraries.firebase_crashlytics)
+
     implementation(Libraries.coroutines_core)
     implementation(Libraries.coroutines_android)
-    implementation(Libraries.timber)
+
     implementation(Libraries.androidx_room)
     implementation(Libraries.androidx_room_ktx)
-    implementation(Libraries.arrow)
-    implementation(Libraries.play_services_auth)
-    implementation(Libraries.glide)
-    implementation(Libraries.firebase_crashlytics)
 
     implementation(Libraries.dagger_hilt_android)
     implementation(Libraries.dagger_hilt_viewmodel)
 
-    kapt(Libraries.androidx_room_compiler)
+    implementation(Libraries.timber)
+    implementation(Libraries.arrow)
+    implementation(Libraries.play_services_auth)
+    implementation(Libraries.glide)
 
+    kapt(Libraries.androidx_room_compiler)
     kapt(Libraries.dagger_hilt_compiler)
 
     testImplementation(TestLibraries.junit)

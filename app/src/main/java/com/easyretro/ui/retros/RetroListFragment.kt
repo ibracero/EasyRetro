@@ -18,6 +18,8 @@ import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.common.extensions.showErrorSnackbar
+import com.easyretro.common.extensions.viewBinding
+import com.easyretro.databinding.FragmentRetroListBinding
 import com.easyretro.domain.model.Retro
 import com.easyretro.ui.Payload
 import com.easyretro.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
@@ -25,7 +27,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_retro_list.*
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -33,6 +34,8 @@ class RetroListFragment :
     BaseFragment<RetroListViewState, RetroListViewEffect, RetroListViewEvent, RetroListViewModel>() {
 
     override val viewModel: RetroListViewModel by viewModels()
+
+    private val binding by viewBinding(FragmentRetroListBinding::bind)
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -94,6 +97,7 @@ class RetroListFragment :
     override fun renderViewState(viewState: RetroListViewState) {
         when (viewState.fetchRetrosStatus) {
             is FetchRetrosStatus.Fetched -> showRetros(viewState.fetchRetrosStatus.retros)
+            else -> Unit
         }
 
         when (viewState.retroCreationStatus) {
@@ -101,6 +105,7 @@ class RetroListFragment :
                 retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(true))
             }
             RetroCreationStatus.NotCreated -> retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(false))
+            else -> Unit
         }
     }
 
@@ -116,9 +121,9 @@ class RetroListFragment :
     }
 
     private fun initUi() {
-        retro_list_toolbar.title = ""
-        (requireActivity() as AppCompatActivity).setSupportActionBar(retro_list_toolbar)
-        retro_recycler_view?.adapter = retroListAdapter
+        binding.retroListToolbar.title = ""
+        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.retroListToolbar)
+        binding.retroRecyclerView.adapter = retroListAdapter
     }
 
     private fun onRetroClicked(retro: Retro) {
@@ -142,7 +147,7 @@ class RetroListFragment :
     }
 
     private fun showError(@StringRes errorMessage: Int) {
-        retro_list_root.showErrorSnackbar(message = errorMessage)
+        binding.root.showErrorSnackbar(message = errorMessage)
     }
 
     private fun showLogoutConfirmationDialog() {
@@ -201,8 +206,8 @@ class RetroListFragment :
                 .getDynamicLink(intent)
                 .addOnSuccessListener {
                     activity?.intent = null
-                    Timber.d("User is logged in. Handling deeplink: ${it?.link?.toString()}")
-                    it?.link?.let { uri ->
+                    Timber.d("User is logged in. Handling deeplink: ${it.link?.toString()}")
+                    it.link?.let { uri ->
                         navigateToRetroBoard(uri.lastPathSegment.orEmpty())
                     }
                 }
