@@ -206,8 +206,8 @@ class RetroListFragment :
                 .getDynamicLink(intent)
                 .addOnSuccessListener {
                     activity?.intent = null
-                    Timber.d("User is logged in. Handling deeplink: ${it.link?.toString()}")
-                    it.link?.let { uri ->
+                    Timber.d("User is logged in. Handling deeplink: ${it?.link?.toString()}")
+                    it?.link?.let { uri ->
                         navigateToRetroBoard(uri.lastPathSegment.orEmpty())
                     }
                 }

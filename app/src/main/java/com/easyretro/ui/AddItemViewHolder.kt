@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.easyretro.R
 import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.extensions.*
-import kotlinx.android.synthetic.main.item_add.*
+import com.easyretro.databinding.ItemAddBinding
 
 
 class AddItemViewHolder(
@@ -22,10 +22,12 @@ class AddItemViewHolder(
         STATEMENT
     }
 
-    init {
-        containerView.setOnClickListener { showTitleInput() }
+    val binding = ItemAddBinding.bind(itemView)
 
-        (add_title as EditText).setOnEditorActionListener { _, actionId, keyEvent ->
+    init {
+        itemView.setOnClickListener { showTitleInput() }
+
+        binding.addTitle.setOnEditorActionListener { _, actionId, keyEvent ->
             if (actionId == IME_ACTION_DONE && keyEvent.keyCode == KEYCODE_ENTER) {
                 addItemIfFilled()
                 true
@@ -36,9 +38,11 @@ class AddItemViewHolder(
     }
 
     fun bindResult(success: Boolean) {
-        loading.gone()
-        add_icon.visible()
-        if (success) add_title.setText("")
+        with(binding) {
+            loading.gone()
+            addIcon.visible()
+            if (success) addTitle.setText("")
+        }
     }
 
     fun bindLockMode(retroProtected: Boolean) {
@@ -48,25 +52,29 @@ class AddItemViewHolder(
     }
 
     private fun setupVariant(type: ItemType) {
-        val hint = if (type == ItemType.RETRO) containerView.context.getString(R.string.add_retro_hint)
-        else containerView.context.getString(R.string.add_statement_hint)
-        add_title.hint = hint
+        with(binding) {
+            val hint = if (type == ItemType.RETRO) itemView.context.getString(R.string.add_retro_hint)
+            else itemView.context.getString(R.string.add_statement_hint)
+            addTitle.hint = hint
 
-        create_label.visibleOrGone(type == ItemType.RETRO)
-        welcome_label.visibleOrGone(type == ItemType.RETRO)
+            createLabel.visibleOrGone(type == ItemType.RETRO)
+            welcomeLabel.visibleOrGone(type == ItemType.RETRO)
+        }
     }
 
     private fun showTitleInput() {
-        add_title.visible()
-        add_title.showKeyboard()
-        add_icon.setOnClickListener { addItemIfFilled() }
+        binding.addTitle.visible()
+        binding.addTitle.showKeyboard()
+        binding.addIcon.setOnClickListener { addItemIfFilled() }
     }
 
     private fun addItemIfFilled() {
-        if (add_title.text.isNotEmpty()) {
-            onAddClicked(add_title.text.toString())
-            loading.visible()
-            add_icon.invisible()
+        with(binding) {
+            if (binding.addTitle.text.isNotEmpty()) {
+                onAddClicked(binding.addTitle.text.toString())
+                loading.visible()
+                binding.addIcon.invisible()
+            }
         }
     }
 }

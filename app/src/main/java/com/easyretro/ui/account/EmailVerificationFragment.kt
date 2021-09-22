@@ -3,6 +3,7 @@ package com.easyretro.ui.account
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
@@ -19,12 +20,13 @@ import com.easyretro.analytics.events.UserSignedUpEvent
 import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.extensions.showErrorSnackbar
 import com.easyretro.common.extensions.showSuccessSnackbar
+import com.easyretro.common.extensions.viewBinding
+import com.easyretro.databinding.FragmentEmailVerificationBinding
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_email_verification.*
 
 
 @AndroidEntryPoint
@@ -34,16 +36,17 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
         private const val USER_VERIFIED_NAVIGATION_DELAY = 1000L
     }
 
+    private val binding by viewBinding(FragmentEmailVerificationBinding::bind)
     private val viewModel: EmailVerificationViewModel by viewModels()
     private val userStatusObserver = Observer<Either<Failure, UserStatus>> { processUserStatus(it) }
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initUi()
 
-        viewModel.sendVerificationLiveData.observe(viewLifecycleOwner, Observer { processResendEmailResult(it) })
+        viewModel.sendVerificationLiveData.observe(viewLifecycleOwner, { processResendEmailResult(it) })
     }
 
     override fun onStart() {
@@ -65,7 +68,7 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
     }
 
     private fun initUi() {
-        email_verification_toolbar.setNavigationOnClickListener {
+        binding.emailVerificationToolbar.setNavigationOnClickListener {
             reportAnalytics(
                 event = TapEvent(
                     screen = Screen.VERIFY_EMAIL,
@@ -74,7 +77,7 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
             )
             findNavController().popBackStack()
         }
-        resend_verification_email.setOnClickListener {
+        binding.resendVerificationEmail.setOnClickListener {
             reportAnalytics(
                 event = TapEvent(
                     screen = Screen.VERIFY_EMAIL,
@@ -83,7 +86,7 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
             )
             viewModel.resendVerificationEmail()
         }
-        open_email_app_button.setOnClickListener {
+        binding.openEmailAppButton.setOnClickListener {
             reportAnalytics(
                 event = TapEvent(
                     screen = Screen.VERIFY_EMAIL,
@@ -101,9 +104,9 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
 
     private fun processResendEmailResult(result: Either<Failure, Unit>) {
         result.fold({
-            verification_root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
+            binding.root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
         }, {
-            verification_root.showSuccessSnackbar(
+            binding.root.showSuccessSnackbar(
                 message = R.string.confirmation_email_sent,
                 duration = Snackbar.LENGTH_LONG
             )
@@ -119,7 +122,7 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
             {
                 when (it) {
                     UserStatus.VERIFIED -> {
-                        verification_root.showSuccessSnackbar(message = R.string.confirmation_user_verified)
+                        binding.root.showSuccessSnackbar(message = R.string.confirmation_user_verified)
                         reportAnalytics(event = UserSignedUpEvent)
                         navigateToRetroList()
                     }
@@ -130,7 +133,7 @@ class EmailVerificationFragment : Fragment(R.layout.fragment_email_verification)
     }
 
     private fun showError(@StringRes message: Int) =
-        verification_root.showErrorSnackbar(message = message, duration = Snackbar.LENGTH_LONG)
+        binding.root.showErrorSnackbar(message = message, duration = Snackbar.LENGTH_LONG)
 
     private fun navigateToRetroList() {
         handler.postDelayed({

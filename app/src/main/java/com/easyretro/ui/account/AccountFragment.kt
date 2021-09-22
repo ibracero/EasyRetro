@@ -75,7 +75,7 @@ class AccountFragment : BaseFragment<AccountViewState, AccountViewEffect, Accoun
     }
 
     private fun initUi(isNewAccount: Boolean) {
-        binding.run {
+        with(binding) {
             if (isNewAccount) setupSignUp()
             else setupSignIn()
 

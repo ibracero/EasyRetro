@@ -3,12 +3,10 @@ package com.easyretro.ui.welcome
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.view.LayoutInflater
+import android.os.Looper
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import arrow.core.Either
 import com.easyretro.R
@@ -18,10 +16,8 @@ import com.easyretro.analytics.events.PageEnterEvent
 import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.events.UserGoogleSignedInEvent
 import com.easyretro.analytics.reportAnalytics
-import com.easyretro.common.extensions.gone
-import com.easyretro.common.extensions.invisible
-import com.easyretro.common.extensions.showErrorSnackbar
-import com.easyretro.common.extensions.visible
+import com.easyretro.common.extensions.*
+import com.easyretro.databinding.FragmentWelcomeBinding
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
@@ -31,31 +27,27 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_welcome.*
 import timber.log.Timber
 
 
 @AndroidEntryPoint
-class WelcomeFragment : Fragment() {
+class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
 
     companion object {
         const val GOOGLE_SIGN_IN_REQUEST_CODE = 2901
         const val STARTUP_DELAY = 1500L
     }
 
-    private val buttonsLayoutHandler = Handler()
+    private val binding by viewBinding(FragmentWelcomeBinding::bind)
+    private val buttonsLayoutHandler = Handler(Looper.getMainLooper())
     private val welcomeViewModel: WelcomeViewModel by viewModels()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_welcome, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initUi()
-        welcomeViewModel.googleSignInLiveData.observe(viewLifecycleOwner, Observer { processGoogleSignInResponse(it) })
-        welcomeViewModel.userSessionLiveData.observe(viewLifecycleOwner, Observer { processUserSession(it) })
+        welcomeViewModel.googleSignInLiveData.observe(viewLifecycleOwner, { processGoogleSignInResponse(it) })
+        welcomeViewModel.userSessionLiveData.observe(viewLifecycleOwner, { processUserSession(it) })
     }
 
     override fun onStart() {
@@ -67,8 +59,8 @@ class WelcomeFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
             try {
-                group_buttons.invisible()
-                loading.visible()
+                binding.groupButtons.invisible()
+                binding.loading.visible()
                 val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                 val account = task?.getResult(ApiException::class.java)
                 welcomeViewModel.handleSignInResult(account)
@@ -98,9 +90,9 @@ class WelcomeFragment : Fragment() {
 
     private fun processGoogleSignInResponse(response: Either<Failure, Unit>) {
         response.fold({
-            welcome_root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
-            loading.gone()
-            group_buttons.visible()
+            binding.root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
+            binding.loading.gone()
+            binding.groupButtons.visible()
         }, {
             reportAnalytics(event = UserGoogleSignedInEvent)
             navigateToRetroList()
@@ -108,39 +100,41 @@ class WelcomeFragment : Fragment() {
     }
 
     private fun initUi() {
-        group_post_it.visible()
+        with(binding) {
+            groupPostIt.visible()
 
-        google_sign_in.setOnClickListener {
-            reportAnalytics(
-                event = TapEvent(
-                    screen = Screen.WELCOME,
-                    uiValue = UiValue.GOOGLE_SIGN_IN
+            googleSignIn.setOnClickListener {
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.WELCOME,
+                        uiValue = UiValue.GOOGLE_SIGN_IN
+                    )
                 )
-            )
-            launchGoogleSignIn(it)
-        }
-        email_sign_in.setOnClickListener {
-            reportAnalytics(
-                event = TapEvent(
-                    screen = Screen.WELCOME,
-                    uiValue = UiValue.WELCOME_EMAIL_SIGN_IN
+                launchGoogleSignIn(it)
+            }
+            emailSignIn.setOnClickListener {
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.WELCOME,
+                        uiValue = UiValue.WELCOME_EMAIL_SIGN_IN
+                    )
                 )
-            )
-            navigateToLogin()
-        }
-        sign_up_button.setOnClickListener {
-            reportAnalytics(
-                event = TapEvent(
-                    screen = Screen.WELCOME,
-                    uiValue = UiValue.WELCOME_EMAIL_SIGN_UP
+                navigateToLogin()
+            }
+            signUpButton.setOnClickListener {
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.WELCOME,
+                        uiValue = UiValue.WELCOME_EMAIL_SIGN_UP
+                    )
                 )
-            )
-            navigateToRegister()
+                navigateToRegister()
+            }
         }
     }
 
     private fun showButtons() {
-        group_buttons.visible()
+        binding.groupButtons.visible()
     }
 
     private fun launchGoogleSignIn(it: View) {

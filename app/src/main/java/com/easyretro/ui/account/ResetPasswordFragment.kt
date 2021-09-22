@@ -14,14 +14,11 @@ import com.easyretro.analytics.UiValue
 import com.easyretro.analytics.events.PageEnterEvent
 import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.reportAnalytics
-import com.easyretro.common.extensions.addTextWatcher
-import com.easyretro.common.extensions.hasValidText
-import com.easyretro.common.extensions.showErrorSnackbar
-import com.easyretro.common.extensions.showSuccessSnackbar
+import com.easyretro.common.extensions.*
+import com.easyretro.databinding.FragmentResetPasswordBinding
 import com.easyretro.domain.model.Failure
 import com.easyretro.ui.FailureMessage
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_reset_password.*
 
 @AndroidEntryPoint
 class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
@@ -30,6 +27,7 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         const val ARG_EMAIL = "arg_email"
     }
 
+    private val binding by viewBinding(FragmentResetPasswordBinding::bind)
     private val resetPasswordViewModel: ResetPasswordViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -37,7 +35,7 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
 
         initUi(arguments?.getString(ARG_EMAIL).orEmpty())
 
-        resetPasswordViewModel.resetPasswordLiveData.observe(viewLifecycleOwner, Observer {
+        resetPasswordViewModel.resetPasswordLiveData.observe(viewLifecycleOwner, {
             processResetPasswordResponse(it)
         })
     }
@@ -48,48 +46,48 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
     }
 
     private fun initUi(email: String) {
-
-        reset_password_toolbar.setNavigationOnClickListener {
-            reportAnalytics(
-                event = TapEvent(
-                    screen = Screen.RESET_PASSWORD,
-                    uiValue = UiValue.BACK
+        with(binding) {
+            resetPasswordToolbar.setNavigationOnClickListener {
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RESET_PASSWORD,
+                        uiValue = UiValue.BACK
+                    )
                 )
-            )
-            findNavController().navigateUp()
-        }
+                findNavController().navigateUp()
+            }
 
-        email_input_field.setText(email)
+            emailInputField.setText(email)
+            emailInputField.addTextWatcher(afterTextChanged = {
+                if (Patterns.EMAIL_ADDRESS.toRegex().matches(emailInputField.text.toString())) {
+                    emailInputLayout.error = null
+                } else emailInputLayout.error = getString(R.string.email_validation_error)
 
-        email_input_field.addTextWatcher(afterTextChanged = {
-            if (Patterns.EMAIL_ADDRESS.toRegex().matches(email_input_field.text.toString())) {
-                email_input_layout.error = null
-            } else email_input_layout.error = getString(R.string.email_validation_error)
+                checkEmailField()
+            })
 
+            confirmButton.setOnClickListener {
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = Screen.RESET_PASSWORD,
+                        uiValue = UiValue.RESET_PASSWORD_CONFIRM
+                    )
+                )
+                resetPasswordViewModel.resetPassword(emailInputField.text.toString())
+            }
             checkEmailField()
-        })
-
-        confirm_button.setOnClickListener {
-            reportAnalytics(
-                event = TapEvent(
-                    screen = Screen.RESET_PASSWORD,
-                    uiValue = UiValue.RESET_PASSWORD_CONFIRM
-                )
-            )
-            resetPasswordViewModel.resetPassword(email_input_field.text.toString())
         }
-        checkEmailField()
     }
 
     private fun checkEmailField() {
-        confirm_button.isEnabled = email_input_layout.hasValidText()
+        binding.confirmButton.isEnabled = binding.emailInputLayout.hasValidText()
     }
 
     private fun processResetPasswordResponse(response: Either<Failure, Unit>) {
         response.fold({
-            reset_password_root.showErrorSnackbar(FailureMessage.parse(it))
+            binding.root.showErrorSnackbar(FailureMessage.parse(it))
         }, {
-            reset_password_root.showSuccessSnackbar(R.string.reset_password_success)
+            binding.root.showSuccessSnackbar(R.string.reset_password_success)
             findNavController().navigateUp()
         })
     }
