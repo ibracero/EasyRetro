@@ -17,10 +17,10 @@ import com.easyretro.analytics.events.UserSignedInEvent
 import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFragment
 import com.easyretro.common.extensions.*
+import com.easyretro.databinding.FragmentAccountBinding
 import com.easyretro.ui.account.ResetPasswordFragment.Companion.ARG_EMAIL
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_account.*
 
 
 @AndroidEntryPoint
@@ -33,6 +33,9 @@ class AccountFragment : BaseFragment<AccountViewState, AccountViewEffect, Accoun
     }
 
     override val viewModel: AccountViewModel by viewModels()
+
+    private val binding by viewBinding(FragmentAccountBinding::bind)
+
     private val passwordRegex = PASSWORD_PATTERN.toRegex()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -51,8 +54,8 @@ class AccountFragment : BaseFragment<AccountViewState, AccountViewEffect, Accoun
     override fun renderViewState(viewState: AccountViewState) {
         view?.hideKeyboard()
         when (viewState.signingState) {
-            SigningState.Loading -> showLoading()
-            SigningState.RequestDone -> hideLoading()
+            SigningState.Loading -> binding.showLoading()
+            SigningState.RequestDone -> binding.hideLoading()
         }
     }
 
@@ -72,19 +75,79 @@ class AccountFragment : BaseFragment<AccountViewState, AccountViewEffect, Accoun
     }
 
     private fun initUi(isNewAccount: Boolean) {
-        if (isNewAccount) setupSignUp()
-        else setupSignIn()
+        with(binding) {
+            if (isNewAccount) setupSignUp()
+            else setupSignIn()
 
-        sign_in_toolbar.setNavigationOnClickListener {
-            reportAnalytics(
-                event = TapEvent(
-                    screen = getAnalyticsScreen(),
-                    uiValue = UiValue.BACK
+            binding.signInToolbar.setNavigationOnClickListener {
+                reportAnalytics(
+                    event = TapEvent(
+                        screen = getAnalyticsScreen(),
+                        uiValue = UiValue.BACK
+                    )
                 )
-            )
-            findNavController().navigateUp()
-        }
+                findNavController().navigateUp()
+            }
 
+            setupResetPassword()
+            setupTextWatchers()
+
+            signInButton.setOnClickListener { onSignInButtonClicked() }
+
+            checkFieldErrors()
+        }
+    }
+
+    private fun FragmentAccountBinding.onSignInButtonClicked() {
+        reportAnalytics(
+            event = TapEvent(
+                screen = getAnalyticsScreen(),
+                uiValue = if (getAnalyticsScreen() == Screen.SIGN_IN) UiValue.ACCOUNT_SIGN_IN else UiValue.ACCOUNT_SIGN_UP
+            )
+        )
+
+        val email = emailInputField.text.toString()
+        val password = passwordInputField.text.toString()
+
+        if (!confirmPasswordInputLayout.isVisible())
+            viewModel.process(viewEvent = AccountViewEvent.SignIn(email, password))
+        else viewModel.process(viewEvent = AccountViewEvent.SignUp(email, password))
+    }
+
+    private fun FragmentAccountBinding.setupTextWatchers() {
+        emailInputField.addTextWatcher(afterTextChanged = {
+            if (Patterns.EMAIL_ADDRESS.toRegex().matches(emailInputField.text.toString())) {
+                emailInputLayout.error = null
+            } else emailInputLayout.error = getString(R.string.email_validation_error)
+
+            checkFieldErrors()
+        })
+
+        passwordInputField.addTextWatcher(afterTextChanged = {
+            when {
+                passwordRegex.matches(passwordInputField.text.toString()) -> passwordInputLayout.error = null
+                passwordInputField.length() < MINIMUM_PASSWORD_LENGHT -> {
+                    passwordInputLayout.error = getString(R.string.password_minimum_length_validation_error)
+                }
+                else -> passwordInputLayout.error = getString(R.string.password_alphanumeric_validation_error)
+            }
+
+            checkFieldErrors()
+        })
+
+        confirmPasswordInputField.addTextWatcher(afterTextChanged = {
+            when {
+                confirmPasswordInputField.length() == 0 -> confirmPasswordInputLayout.error = null
+                passwordInputField.text.toString() == confirmPasswordInputField.text.toString() ->
+                    confirmPasswordInputLayout.error = null
+                else -> confirmPasswordInputLayout.error = getString(R.string.confirm_password_validation_error)
+            }
+
+            checkFieldErrors()
+        })
+    }
+
+    private fun FragmentAccountBinding.setupResetPassword() {
         val resetPasswordClickListener = { _: View ->
             reportAnalytics(
                 event = TapEvent(
@@ -94,100 +157,45 @@ class AccountFragment : BaseFragment<AccountViewState, AccountViewEffect, Accoun
             )
             viewModel.process(AccountViewEvent.ResetPassword)
         }
-        reset_password_button.setOnClickListener(resetPasswordClickListener)
-        reset_password_label.setOnClickListener(resetPasswordClickListener)
-
-        email_input_field.addTextWatcher(afterTextChanged = {
-            if (Patterns.EMAIL_ADDRESS.toRegex().matches(email_input_field.text.toString())) {
-                email_input_layout.error = null
-            } else email_input_layout.error = getString(R.string.email_validation_error)
-
-            checkFieldErrors()
-        })
-
-        password_input_field.addTextWatcher(afterTextChanged = {
-            when {
-                passwordRegex.matches(password_input_field.text.toString()) -> password_input_layout.error =
-                    null
-                password_input_field.length() < MINIMUM_PASSWORD_LENGHT -> {
-                    password_input_layout.error =
-                        getString(R.string.password_minimum_length_validation_error)
-                }
-                else -> password_input_layout.error =
-                    getString(R.string.password_alphanumeric_validation_error)
-            }
-
-            checkFieldErrors()
-        })
-
-        confirm_password_input_field.addTextWatcher(afterTextChanged = {
-            when {
-                confirm_password_input_field.length() == 0 -> confirm_password_input_layout.error =
-                    null
-                password_input_field.text.toString() == confirm_password_input_field.text.toString() ->
-                    confirm_password_input_layout.error = null
-                else -> confirm_password_input_layout.error = getString(R.string.confirm_password_validation_error)
-            }
-
-            checkFieldErrors()
-        })
-
-        sign_in_button.setOnClickListener {
-            reportAnalytics(
-                event = TapEvent(
-                    screen = getAnalyticsScreen(),
-                    uiValue = if (getAnalyticsScreen() == Screen.SIGN_IN) UiValue.ACCOUNT_SIGN_IN else UiValue.ACCOUNT_SIGN_UP
-                )
-            )
-
-            val email = email_input_field.text.toString()
-            val password = password_input_field.text.toString()
-
-            if (!confirm_password_input_layout.isVisible())
-                viewModel.process(viewEvent = AccountViewEvent.SignIn(email, password))
-            else viewModel.process(viewEvent = AccountViewEvent.SignUp(email, password))
-        }
-
-        checkFieldErrors()
+        resetPasswordButton.setOnClickListener(resetPasswordClickListener)
+        resetPasswordLabel.setOnClickListener(resetPasswordClickListener)
     }
 
-    private fun setupSignUp() {
-        sign_in_toolbar.setTitle(R.string.sign_up_with_email)
-        sign_in_button.setText(R.string.sign_up)
-        confirm_password_input_layout.visible()
-        reset_password_label.gone()
-        reset_password_button.gone()
+    private fun FragmentAccountBinding.setupSignUp() {
+        signInToolbar.setTitle(R.string.sign_up_with_email)
+        signInButton.setText(R.string.sign_up)
+        confirmPasswordInputLayout.visible()
+        resetPasswordLabel.gone()
+        resetPasswordButton.gone()
     }
 
-    private fun setupSignIn() {
-        sign_in_toolbar.setTitle(R.string.sign_in_with_email)
-        sign_in_button.setText(R.string.sign_in)
-        confirm_password_input_layout.gone()
-        reset_password_label.visible()
-        reset_password_button.visible()
+    private fun FragmentAccountBinding.setupSignIn() {
+        signInToolbar.setTitle(R.string.sign_in_with_email)
+        signInButton.setText(R.string.sign_in)
+        confirmPasswordInputLayout.gone()
+        resetPasswordLabel.visible()
+        resetPasswordButton.visible()
     }
 
-    private fun checkFieldErrors() {
+    private fun FragmentAccountBinding.checkFieldErrors() {
         val signInEnabled = when {
-            !confirm_password_input_layout.isVisible() -> {
-                email_input_layout.hasValidText() && password_input_layout.hasValidText()
+            !confirmPasswordInputLayout.isVisible() -> {
+                emailInputLayout.hasValidText() && passwordInputLayout.hasValidText()
             }
-            else -> email_input_layout.hasValidText()
-                    && password_input_layout.hasValidText()
-                    && confirm_password_input_layout.hasValidText()
+            else -> emailInputLayout.hasValidText()
+                    && passwordInputLayout.hasValidText()
+                    && confirmPasswordInputLayout.hasValidText()
         }
 
-        sign_in_button.isEnabled = signInEnabled
+        signInButton.isEnabled = signInEnabled
 
-        if (email_input_field.text.toString().isEmpty()) email_input_layout.error = null
-        if (password_input_field.text.toString().isEmpty()) password_input_layout.error = null
-        if (confirm_password_input_field.text.toString()
-                .isEmpty()
-        ) confirm_password_input_layout.error = null
+        if (emailInputField.text.toString().isEmpty()) emailInputLayout.error = null
+        if (passwordInputField.text.toString().isEmpty()) passwordInputLayout.error = null
+        if (confirmPasswordInputField.text.toString().isEmpty()) confirmPasswordInputLayout.error = null
     }
 
     private fun showError(@StringRes messageRes: Int) {
-        account_root.showErrorSnackbar(message = messageRes, duration = Snackbar.LENGTH_LONG)
+        binding.root.showErrorSnackbar(message = messageRes, duration = Snackbar.LENGTH_LONG)
     }
 
     private fun navigateToRetroList() {
@@ -199,42 +207,42 @@ class AccountFragment : BaseFragment<AccountViewState, AccountViewEffect, Accoun
     }
 
     private fun navigateToResetPassword() {
-        val bundle = Bundle().apply { putString(ARG_EMAIL, email_input_field.text.toString()) }
+        val bundle = Bundle().apply { putString(ARG_EMAIL, binding.emailInputField.text.toString()) }
         findNavController().navigate(R.id.action_reset_password, bundle)
     }
 
     private fun showUnknownUserError(): Snackbar {
-        return account_root.showErrorSnackbar(
+        return binding.root.showErrorSnackbar(
             message = R.string.error_invalid_user,
             duration = Snackbar.LENGTH_INDEFINITE,
             actionText = R.string.sign_up
         ) {
-            setupSignUp()
+            binding.setupSignUp()
         }
     }
 
     private fun showExistingUserError(): Snackbar {
-        return account_root.showErrorSnackbar(
+        return binding.root.showErrorSnackbar(
             message = R.string.error_user_collision,
             duration = Snackbar.LENGTH_INDEFINITE,
             actionText = R.string.sign_in
         ) {
-            setupSignIn()
+            binding.setupSignIn()
         }
     }
 
-    private fun showLoading() {
-        sign_in_button?.gone()
-        reset_password_button?.gone()
-        reset_password_label?.gone()
-        loading?.visible()
+    private fun FragmentAccountBinding.showLoading() {
+        signInButton.gone()
+        resetPasswordButton.gone()
+        resetPasswordLabel.gone()
+        loading.visible()
     }
 
-    private fun hideLoading() {
-        sign_in_button?.visible()
-        reset_password_button?.visible()
-        reset_password_label?.visible()
-        loading?.gone()
+    private fun FragmentAccountBinding.hideLoading() {
+        signInButton.visible()
+        resetPasswordButton.visible()
+        resetPasswordLabel.visible()
+        loading.gone()
     }
 
     private fun getIsNewAccountArgument(): Boolean = arguments?.getBoolean(ARG_IS_NEW_ACCOUNT) ?: false

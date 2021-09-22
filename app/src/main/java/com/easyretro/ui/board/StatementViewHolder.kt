@@ -6,29 +6,33 @@ import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.extensions.getColor
 import com.easyretro.common.extensions.inflate
 import com.easyretro.common.extensions.visibleOrGone
+import com.easyretro.databinding.ItemStatementBinding
 import com.easyretro.domain.model.Statement
 import com.easyretro.domain.model.StatementType
-import kotlinx.android.synthetic.main.item_statement.*
 
 class StatementViewHolder(
     parent: ViewGroup,
     val onRemoveClicked: (Statement) -> Unit
 ) : BaseViewHolder(parent.inflate(R.layout.item_statement)) {
 
+    private val binding = ItemStatementBinding.bind(itemView)
+
     fun bindTo(statement: Statement) {
-        user_email.text = statement.userEmail
-        description.text = statement.description
-        action_delete.visibleOrGone(statement.removable)
-        action_delete.setOnClickListener { onRemoveClicked(statement) }
-        when (statement.type) {
-            StatementType.POSITIVE -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.positiveBackgroundColor))
-            StatementType.NEGATIVE -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.negativeBackgroundColor))
-            StatementType.ACTION_POINT -> statement_card.setCardBackgroundColor(containerView.getColor(R.color.actionsBackgroundColor))
+        with(binding) {
+            userEmail.text = statement.userEmail
+            description.text = statement.description
+            actionDelete.visibleOrGone(statement.removable)
+            actionDelete.setOnClickListener { onRemoveClicked(statement) }
+            when (statement.type) {
+                StatementType.POSITIVE -> statementCard.setCardBackgroundColor(itemView.getColor(R.color.positiveBackgroundColor))
+                StatementType.NEGATIVE -> statementCard.setCardBackgroundColor(itemView.getColor(R.color.negativeBackgroundColor))
+                StatementType.ACTION_POINT -> statementCard.setCardBackgroundColor(itemView.getColor(R.color.actionsBackgroundColor))
+            }
         }
     }
 
     fun onContentChanged(descriptionText: String, isRemovable: Boolean) {
-        description.text = descriptionText
-        action_delete.visibleOrGone(isRemovable)
+        binding.description.text = descriptionText
+        binding.actionDelete.visibleOrGone(isRemovable)
     }
 }
