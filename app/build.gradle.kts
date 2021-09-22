@@ -4,6 +4,7 @@ import Name.ENABLE_ANALYTICS
 import Type.TYPE_BOOLEAN
 import Value.FALSE
 import Value.TRUE
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileInputStream
 import java.util.*
 
@@ -24,12 +25,12 @@ if (isLocalBuild) keystoreProperties.load(FileInputStream(keystorePropertiesFile
 val signingConfigName = "releaseConfig"
 
 android {
-    compileSdkVersion(AndroidSdk.compileVersion)
+    compileSdk = AndroidSdk.compileVersion
 
     defaultConfig {
         applicationId = "com.easyretro"
-        minSdkVersion(AndroidSdk.minVersion)
-        targetSdkVersion(AndroidSdk.targetVersion)
+        minSdk = AndroidSdk.minVersion
+        targetSdk = AndroidSdk.targetVersion
         versionCode = Project.versionCode
         versionName = Project.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -80,9 +81,19 @@ android {
         }
     }
 
-    kotlinOptions.apply {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
 }
 
 androidExtensions {
@@ -94,7 +105,6 @@ dependencies {
     implementation(Libraries.androidx_appcompat)
     implementation(Libraries.androidx_material)
     implementation(Libraries.androidx_constraint_layout)
-    implementation(Libraries.androidx_lifecycle_extensions)
     implementation(Libraries.androidx_lifecycle_viewmodel_extensions)
     implementation(Libraries.androidx_lifecycle_livedata_extensions)
     implementation(Libraries.androidx_navigation_fragment_ktx)
@@ -111,12 +121,11 @@ dependencies {
     implementation(Libraries.arrow)
     implementation(Libraries.play_services_auth)
     implementation(Libraries.glide)
-    implementation(Libraries.crashlytics)
+    implementation(Libraries.firebase_crashlytics)
 
     implementation(Libraries.dagger_hilt_android)
     implementation(Libraries.dagger_hilt_viewmodel)
 
-    debugImplementation(Libraries.room_debugger)
     kapt(Libraries.androidx_room_compiler)
 
     kapt(Libraries.dagger_hilt_compiler)

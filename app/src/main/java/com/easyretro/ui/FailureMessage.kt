@@ -18,8 +18,8 @@ class FailureMessage {
                 Failure.TooManyRequestsFailure -> R.string.error_too_many_requests
                 Failure.RetroNotFoundError -> R.string.error_retro_not_found
                 Failure.CreateRetroError -> R.string.error_generic
-                Failure.CreateStatementError -> TODO()
-                Failure.RemoveStatementError -> TODO()
+                Failure.CreateStatementError -> R.string.error_generic
+                Failure.RemoveStatementError -> R.string.error_generic
             }
         }
     }
