@@ -1,10 +1,10 @@
 package com.easyretro.ui.welcome
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -34,7 +34,6 @@ import timber.log.Timber
 class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
 
     companion object {
-        const val GOOGLE_SIGN_IN_REQUEST_CODE = 2901
         const val STARTUP_DELAY = 1500L
     }
 
@@ -42,35 +41,31 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
     private val buttonsLayoutHandler = Handler(Looper.getMainLooper())
     private val welcomeViewModel: WelcomeViewModel by viewModels()
 
+    private val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        try {
+            binding.groupButtons.invisible()
+            binding.loading.visible()
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val account = task.getResult(ApiException::class.java)
+            welcomeViewModel.handleSignInResult(account)
+        } catch (e: ApiException) {
+            Timber.e(e)
+            processGoogleSignInResponse(Either.left(Failure.UnknownError))
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initUi()
-        welcomeViewModel.googleSignInLiveData.observe(viewLifecycleOwner, { processGoogleSignInResponse(it) })
-        welcomeViewModel.userSessionLiveData.observe(viewLifecycleOwner, { processUserSession(it) })
+        welcomeViewModel.googleSignInLiveData.observe(viewLifecycleOwner) { processGoogleSignInResponse(it) }
+        welcomeViewModel.userSessionLiveData.observe(viewLifecycleOwner) { processUserSession(it) }
     }
 
     override fun onStart() {
         super.onStart()
         reportAnalytics(event = PageEnterEvent(screen = Screen.WELCOME))
     }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
-            try {
-                binding.groupButtons.invisible()
-                binding.loading.visible()
-                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-                val account = task?.getResult(ApiException::class.java)
-                welcomeViewModel.handleSignInResult(account)
-            } catch (e: ApiException) {
-                Timber.e(e)
-                processGoogleSignInResponse(Either.left(Failure.UnknownError))
-            }
-        }
-    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -139,7 +134,7 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
 
     private fun launchGoogleSignIn(it: View) {
         val signInIntent = GoogleSignIn.getClient(it.context, getSignInOptions()).signInIntent
-        startActivityForResult(signInIntent, GOOGLE_SIGN_IN_REQUEST_CODE)
+        resultLauncher.launch(signInIntent)
     }
 
     private fun navigateToRetroList() {
