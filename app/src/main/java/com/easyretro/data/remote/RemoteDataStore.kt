@@ -38,7 +38,7 @@ class RemoteDataStore @Inject constructor(
                 .document(retroUuid)
                 .addSnapshotListener { snapshot, exception ->
                     if (exception != null)
-                        offer(Either.left(Failure.parse(exception)))
+                        trySend(Either.left(Failure.parse(exception)))
 
                     val userDocs =
                         (snapshot?.get(FirestoreField.RETRO_USERS) as List<DocumentReference>?) ?: emptyList()
@@ -68,7 +68,7 @@ class RemoteDataStore @Inject constructor(
                                 users = users
                             )
 
-                            offer(Either.right(retro))
+                            trySend(Either.right(retro))
                             Timber.d("Retro update $retro")
                         }
                 }
@@ -90,7 +90,7 @@ class RemoteDataStore @Inject constructor(
             .collection(FirestoreCollection.COLLECTION_STATEMENTS)
             .addSnapshotListener { snapshot, exception ->
                 if (exception != null)
-                    offer(Either.left(Failure.parse(exception)))
+                    trySend(Either.left(Failure.parse(exception)))
 
                 val statements = snapshot?.documents?.map { doc ->
                     val author = doc.getString(FirestoreField.STATEMENT_AUTHOR).orEmpty()
@@ -107,7 +107,7 @@ class RemoteDataStore @Inject constructor(
 
                 if (statements != null && !snapshot.metadata.hasPendingWrites()) {
                     Timber.d("Statements update $statements")
-                    offer(Either.right(statements.toList()))
+                    trySend(Either.right(statements.toList()))
                 }
             }
 

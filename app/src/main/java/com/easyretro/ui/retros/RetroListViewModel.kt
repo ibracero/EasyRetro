@@ -1,6 +1,5 @@
 package com.easyretro.ui.retros
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.easyretro.analytics.events.RetroCreatedEvent
 import com.easyretro.analytics.reportAnalytics
@@ -10,7 +9,6 @@ import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.ui.FailureMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

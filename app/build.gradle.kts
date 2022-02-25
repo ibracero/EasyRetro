@@ -125,12 +125,12 @@ dependencies {
     implementation(Libraries.androidx_room_ktx)
 
     implementation(Libraries.dagger_hilt_android)
-    implementation(Libraries.dagger_hilt_viewmodel)
 
     implementation(Libraries.timber)
     implementation(Libraries.arrow)
     implementation(Libraries.play_services_auth)
     implementation(Libraries.glide)
+    implementation(Libraries.gson)
 
     kapt(Libraries.androidx_room_compiler)
     kapt(Libraries.dagger_hilt_compiler)
