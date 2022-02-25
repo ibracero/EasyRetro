@@ -1,26 +1,20 @@
 package com.easyretro.ui.welcome
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.Fragment
+import androidx.annotation.StringRes
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import arrow.core.Either
 import com.easyretro.R
 import com.easyretro.analytics.Screen
-import com.easyretro.analytics.UiValue
 import com.easyretro.analytics.events.PageEnterEvent
-import com.easyretro.analytics.events.TapEvent
-import com.easyretro.analytics.events.UserGoogleSignedInEvent
 import com.easyretro.analytics.reportAnalytics
+import com.easyretro.common.BaseFlowFragment
 import com.easyretro.common.extensions.*
 import com.easyretro.databinding.FragmentWelcomeBinding
-import com.easyretro.domain.model.Failure
-import com.easyretro.domain.model.UserStatus
-import com.easyretro.ui.FailureMessage
 import com.easyretro.ui.account.AccountFragment.Companion.ARG_IS_NEW_ACCOUNT
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -31,35 +25,31 @@ import timber.log.Timber
 
 
 @AndroidEntryPoint
-class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
+class WelcomeFragment :
+    BaseFlowFragment<WelcomeViewState, WelcomeViewEffect, WelcomeViewEvent, WelcomeViewModel>(R.layout.fragment_welcome) {
 
-    companion object {
-        const val STARTUP_DELAY = 1500L
-    }
+    override val viewModel: WelcomeViewModel by viewModels()
 
     private val binding by viewBinding(FragmentWelcomeBinding::bind)
-    private val buttonsLayoutHandler = Handler(Looper.getMainLooper())
     private val welcomeViewModel: WelcomeViewModel by viewModels()
 
     private val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         try {
-            binding.groupButtons.invisible()
-            binding.loading.visible()
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             val account = task.getResult(ApiException::class.java)
-            welcomeViewModel.handleSignInResult(account)
+            welcomeViewModel.process(WelcomeViewEvent.GoogleSignInResultReceived(account))
         } catch (e: ApiException) {
             Timber.e(e)
-            processGoogleSignInResponse(Either.left(Failure.UnknownError))
+            welcomeViewModel.process(WelcomeViewEvent.GoogleSignInResultReceived(null))
         }
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_welcome, container, false)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         initUi()
-        welcomeViewModel.googleSignInLiveData.observe(viewLifecycleOwner) { processGoogleSignInResponse(it) }
-        welcomeViewModel.userSessionLiveData.observe(viewLifecycleOwner) { processUserSession(it) }
     }
 
     override fun onStart() {
@@ -67,73 +57,53 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
         reportAnalytics(event = PageEnterEvent(screen = Screen.WELCOME))
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        buttonsLayoutHandler.removeCallbacksAndMessages(null)
-    }
-
-    private fun processUserSession(userStatus: Either<Failure, UserStatus>) {
-        userStatus.fold({
-            showButtons()
-        }, {
-            when (it) {
-                UserStatus.VERIFIED -> buttonsLayoutHandler.postDelayed({ navigateToRetroList() }, STARTUP_DELAY)
-                else -> showButtons()
+    override fun renderViewState(viewState: WelcomeViewState) {
+        when (viewState) {
+            WelcomeViewState.Splash -> {
+                binding.groupPostIt.visible()
+                binding.groupButtons.gone()
             }
-        })
+            WelcomeViewState.LoginInProgress -> {
+                binding.groupPostIt.visible()
+                binding.groupButtons.invisible()
+                binding.loading.visible()
+            }
+            WelcomeViewState.LoginOptionsDisplayed -> showButtons()
+        }
     }
 
-    private fun processGoogleSignInResponse(response: Either<Failure, Unit>) {
-        response.fold({
-            binding.root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
-            binding.loading.gone()
-            binding.groupButtons.visible()
-        }, {
-            reportAnalytics(event = UserGoogleSignedInEvent)
-            navigateToRetroList()
-        })
+    override fun renderViewEffect(viewEffect: WelcomeViewEffect) {
+        when (viewEffect) {
+            WelcomeViewEffect.NavigateToGoogleSignIn -> launchGoogleSignIn()
+            WelcomeViewEffect.NavigateToEmailLogin -> navigateToLogin()
+            WelcomeViewEffect.NavigateToRetros -> navigateToRetroList()
+            WelcomeViewEffect.NavigateToSignUp -> navigateToRegister()
+            is WelcomeViewEffect.GoogleSignInError -> onGoogleSignInError(viewEffect.errorRes)
+        }
+    }
+
+    private fun onGoogleSignInError(@StringRes errorRes: Int) {
+        binding.root.showErrorSnackbar(message = errorRes, duration = Snackbar.LENGTH_LONG)
+        binding.loading.gone()
+        binding.groupButtons.visible()
     }
 
     private fun initUi() {
         with(binding) {
-            groupPostIt.visible()
-
             googleSignIn.setOnClickListener {
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.WELCOME,
-                        uiValue = UiValue.GOOGLE_SIGN_IN
-                    )
-                )
-                launchGoogleSignIn(it)
+                viewModel.process(WelcomeViewEvent.GoogleSignInClicked)
             }
             emailSignIn.setOnClickListener {
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.WELCOME,
-                        uiValue = UiValue.WELCOME_EMAIL_SIGN_IN
-                    )
-                )
-                navigateToLogin()
+                viewModel.process(WelcomeViewEvent.EmailSignInClicked)
             }
             signUpButton.setOnClickListener {
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.WELCOME,
-                        uiValue = UiValue.WELCOME_EMAIL_SIGN_UP
-                    )
-                )
-                navigateToRegister()
+                viewModel.process(WelcomeViewEvent.SignUpClicked)
             }
         }
     }
 
-    private fun showButtons() {
-        binding.groupButtons.visible()
-    }
-
-    private fun launchGoogleSignIn(it: View) {
-        val signInIntent = GoogleSignIn.getClient(it.context, getSignInOptions()).signInIntent
+    private fun launchGoogleSignIn() {
+        val signInIntent = GoogleSignIn.getClient(requireActivity(), getSignInOptions()).signInIntent
         resultLauncher.launch(signInIntent)
     }
 
@@ -148,6 +118,12 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
     private fun navigateToRegister() {
         val bundle = Bundle().apply { putBoolean(ARG_IS_NEW_ACCOUNT, true) }
         findNavController().navigate(R.id.action_register, bundle)
+    }
+
+    private fun showButtons() {
+        binding.groupPostIt.visible()
+        binding.loading.gone()
+        binding.groupButtons.visible()
     }
 
     private fun getSignInOptions() =
