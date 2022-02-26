@@ -18,6 +18,7 @@ import Libraries.Versions.gson_version
 import Libraries.Versions.play_services_auth_version
 import Libraries.Versions.room_version
 import Libraries.Versions.timber_version
+import Libraries.Versions.turbine_version
 import TestLibraries.Versions.androidx_testing_version
 import TestLibraries.Versions.espresso_version
 import TestLibraries.Versions.junit_version
@@ -82,6 +83,7 @@ object Libraries {
         const val play_services_auth_version = "20.1.0"
         const val glide_version = "4.13.1"
         const val gson_version = "2.9.0"
+        const val turbine_version = "0.7.0"
     }
 
     const val kotlin_std = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -135,4 +137,5 @@ object TestLibraries {
     const val coroutines_test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     const val androidx_core_testing = "androidx.arch.core:core-testing:$androidx_testing_version"
     const val androidx_test_espresso_core = "androidx.test.espresso:espresso-core:$espresso_version"
+    const val turbine = "app.cash.turbine:turbine:$turbine_version"
 }

@@ -1,5 +1,6 @@
 package com.easyretro.data
 
+import app.cash.turbine.test
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.common.UuidProvider
@@ -19,7 +20,6 @@ import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Retro
 import com.easyretro.domain.model.User
-import com.easyretro.test
 import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -175,8 +175,8 @@ class RetroRepositoryImplTest {
 
             flow.test {
                 val expectedValue = Either.right(retroDbToDomainMapper.map(dbRetro, userEmail))
-                assertEquals(expectedValue, expectItem())
-                expectComplete()
+                assertEquals(expectedValue, awaitItem())
+                awaitComplete()
             }
         }
     }
@@ -191,8 +191,8 @@ class RetroRepositoryImplTest {
 
             flow.test {
                 val expectedValue = Either.left(Failure.RetroNotFoundError)
-                assertEquals(expectedValue, expectItem())
-                expectComplete()
+                assertEquals(expectedValue, awaitItem())
+                awaitComplete()
             }
         }
     }
@@ -214,10 +214,10 @@ class RetroRepositoryImplTest {
                     remoteRetros.map(retroRemoteToDbMapper::map).map(retroDbToDomainMapper::map)
                 assertEquals(
                     Either.Right(localRetros.map(retroDbToDomainMapper::map)),
-                    expectItem()
+                    awaitItem()
                 )
-                assertEquals(Either.Right(remoteToDomainRetros), expectItem())
-                expectComplete()
+                assertEquals(Either.Right(remoteToDomainRetros), awaitItem())
+                awaitComplete()
             }
         }
     }
@@ -235,8 +235,8 @@ class RetroRepositoryImplTest {
             flow.test {
                 val remoteToDomainRetros =
                     remoteRetros.map(retroRemoteToDbMapper::map).map(retroDbToDomainMapper::map)
-                assertEquals(Either.Right(remoteToDomainRetros), expectItem())
-                expectComplete()
+                assertEquals(Either.Right(remoteToDomainRetros), awaitItem())
+                awaitComplete()
             }
         }
     }
@@ -253,10 +253,10 @@ class RetroRepositoryImplTest {
             flow.test {
                 assertEquals(
                     Either.Right(localRetros.map(retroDbToDomainMapper::map)),
-                    expectItem()
+                    awaitItem()
                 )
-                assertEquals(Either.Left(Failure.UnknownError), expectItem())
-                expectComplete()
+                assertEquals(Either.Left(Failure.UnknownError), awaitItem())
+                awaitComplete()
             }
         }
     }
@@ -341,8 +341,8 @@ class RetroRepositoryImplTest {
             val flow = repository.startObservingRetroDetails(retroUuid)
 
             flow.test {
-                assertEquals(Either.right(Unit), expectItem())
-                expectComplete()
+                assertEquals(Either.right(Unit), awaitItem())
+                awaitComplete()
                 verify(localDataStore).updateRetro(dbRetro)
             }
         }
@@ -357,8 +357,8 @@ class RetroRepositoryImplTest {
             val flow = repository.startObservingRetroDetails(retroUuid)
 
             flow.test {
-                assertEquals(Either.left(Failure.UnknownError), expectItem())
-                expectComplete()
+                assertEquals(Either.left(Failure.UnknownError), awaitItem())
+                awaitComplete()
                 verifyZeroInteractions(localDataStore)
             }
         }

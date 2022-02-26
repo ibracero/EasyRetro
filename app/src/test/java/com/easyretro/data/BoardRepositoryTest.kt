@@ -1,5 +1,6 @@
 package com.easyretro.data
 
+import app.cash.turbine.test
 import arrow.core.Either
 import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.data.local.LocalDataStore
@@ -13,7 +14,6 @@ import com.easyretro.data.remote.firestore.StatementRemote
 import com.easyretro.data.remote.mapper.StatementRemoteToDbMapper
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.StatementType
-import com.easyretro.test
 import com.nhaarman.mockitokotlin2.*
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -77,8 +77,8 @@ class BoardRepositoryTest {
                 val expected = getMockLocalStatementList()
                     .map { it.copy(removable = false) }
                     .map(statementDbToDomainMapper::map)
-                assertEquals(expected, expectItem())
-                expectComplete()
+                assertEquals(expected, awaitItem())
+                awaitComplete()
             }
         }
     }
@@ -99,8 +99,8 @@ class BoardRepositoryTest {
             resultFlow.test {
                 val expected = getMockLocalStatementList()
                     .map(statementDbToDomainMapper::map)
-                assertEquals(expected, expectItem())
-                expectComplete()
+                assertEquals(expected, awaitItem())
+                awaitComplete()
             }
         }
     }
@@ -270,15 +270,15 @@ class BoardRepositoryTest {
             val resultFlow = repository.startObservingStatements(retroUuid = retroUuid)
 
             resultFlow.test {
-                assertEquals(Either.right(Unit), expectItem())
-                assertEquals(Either.right(Unit), expectItem())
+                assertEquals(Either.right(Unit), awaitItem())
+                assertEquals(Either.right(Unit), awaitItem())
                 verify(localDataStore).saveStatements(
                     getMockRemoteStatementList().map(
                         statementRemoteToDbMapper::map
                     )
                 )
                 verifyNoMoreInteractions(localDataStore)
-                expectComplete()
+                awaitComplete()
             }
         }
     }
@@ -295,9 +295,9 @@ class BoardRepositoryTest {
             val resultFlow = repository.startObservingStatements(retroUuid = retroUuid)
 
             resultFlow.test {
-                assertEquals(Either.left(Failure.UnknownError), expectItem())
+                assertEquals(Either.left(Failure.UnknownError), awaitItem())
                 verifyZeroInteractions(localDataStore)
-                expectComplete()
+                awaitComplete()
             }
         }
     }

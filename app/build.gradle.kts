@@ -140,6 +140,7 @@ dependencies {
     testImplementation(TestLibraries.mockito_inline)
     testImplementation(TestLibraries.coroutines_test)
     testImplementation(TestLibraries.androidx_core_testing)
+    testImplementation(TestLibraries.turbine)
 
     androidTestImplementation(TestLibraries.androidx_test_espresso_core)
 }

@@ -44,6 +44,11 @@ class WelcomeFragment :
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        welcomeViewModel.process(WelcomeViewEvent.ScreenLoaded)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_welcome, container, false)
 

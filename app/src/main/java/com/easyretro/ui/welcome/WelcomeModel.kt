@@ -18,6 +18,7 @@ sealed class WelcomeViewEffect {
 }
 
 sealed class WelcomeViewEvent {
+    object ScreenLoaded : WelcomeViewEvent()
     object GoogleSignInClicked : WelcomeViewEvent()
     object EmailSignInClicked : WelcomeViewEvent()
     object SignUpClicked : WelcomeViewEvent()
