@@ -1,9 +1,7 @@
 package com.easyretro.ui.welcome
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.fragment.app.viewModels
@@ -44,16 +42,9 @@ class WelcomeFragment : BaseFlowFragment<State, Effect, Event, WelcomeViewModel>
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        welcomeViewModel.process(Event.ScreenLoaded)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_welcome, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        welcomeViewModel.process(Event.ScreenLoaded)
         initUi()
     }
 
