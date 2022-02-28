@@ -8,37 +8,45 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 
-abstract class BaseFlowViewModel<STATE, EFFECT, EVENT>(
-    initialViewState: STATE
-) : ViewModel(), ViewModelContract<EVENT> {
+abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), ViewModelContract<UiEvent> {
+
+    private val initialState: UiState by lazy { createInitialState() }
+    private val currentState: UiState
+        get() = viewStates.value
 
     abstract val dispatchers: CoroutineDispatcherProvider
 
-    protected open val viewStates: MutableStateFlow<STATE> = MutableStateFlow(initialViewState)
-    protected open val viewEffects: MutableSharedFlow<EFFECT> = MutableSharedFlow()
+    protected open val viewStates: MutableStateFlow<UiState> = MutableStateFlow(initialState)
+    protected open val viewEffects: MutableSharedFlow<UiEffect> = MutableSharedFlow()
 
-    fun viewStates(): StateFlow<STATE> = viewStates.asStateFlow()
+    abstract fun createInitialState(): UiState
 
-    fun viewEffects(): SharedFlow<EFFECT> = viewEffects.asSharedFlow()
+    fun viewStates(): StateFlow<UiState> = viewStates.asStateFlow()
+
+    fun viewEffects(): SharedFlow<UiEffect> = viewEffects.asSharedFlow()
 
     @CallSuper
-    override fun process(viewEvent: EVENT) {
+    override fun process(viewEvent: UiEvent) {
         Timber.d("processing viewEvent: $viewEvent")
     }
 
-    protected fun emitViewState(viewState: STATE) {
+    protected fun emitViewState(reduce: UiState.() -> UiState) {
         viewModelScope.launch(dispatchers.main()) {
-            viewStates.value = viewState
+            viewStates.value = currentState.reduce()
         }
     }
 
-    protected fun emitViewEffect(viewEffect: EFFECT) {
+    protected fun emitViewEffect(viewEffect: UiEffect) {
         viewModelScope.launch(dispatchers.main()) {
             viewEffects.emit(viewEffect)
         }
     }
 }
 
-internal interface ViewModelFlowContract<EVENT> {
-    fun process(viewEvent: EVENT)
+interface UiState
+interface UiEvent
+interface UiEffect
+
+internal interface ViewModelFlowContract<UiEvent> {
+    fun process(viewEvent: UiEvent)
 }

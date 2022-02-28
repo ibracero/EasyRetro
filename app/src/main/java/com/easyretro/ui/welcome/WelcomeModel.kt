@@ -1,26 +1,32 @@
 package com.easyretro.ui.welcome
 
 import androidx.annotation.StringRes
+import com.easyretro.common.UiEffect
+import com.easyretro.common.UiEvent
+import com.easyretro.common.UiState
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 
-sealed class WelcomeViewState {
-    object Splash : WelcomeViewState()
-    object LoginOptionsDisplayed : WelcomeViewState()
-    object LoginInProgress : WelcomeViewState()
-}
+class WelcomeContract {
 
-sealed class WelcomeViewEffect {
-    object NavigateToGoogleSignIn : WelcomeViewEffect()
-    object NavigateToEmailLogin : WelcomeViewEffect()
-    object NavigateToSignUp : WelcomeViewEffect()
-    object NavigateToRetros : WelcomeViewEffect()
-    data class GoogleSignInError(@StringRes val errorRes: Int) : WelcomeViewEffect()
-}
+    data class State(
+        val isLoadingShown: Boolean = false,
+        val areLoginButtonsShown: Boolean = false
+    ) : UiState
 
-sealed class WelcomeViewEvent {
-    object ScreenLoaded : WelcomeViewEvent()
-    object GoogleSignInClicked : WelcomeViewEvent()
-    object EmailSignInClicked : WelcomeViewEvent()
-    object SignUpClicked : WelcomeViewEvent()
-    data class GoogleSignInResultReceived(val account: GoogleSignInAccount?) : WelcomeViewEvent()
+    sealed class Effect : UiEffect {
+        object NavigateToGoogleSignIn : Effect()
+        object NavigateToEmailLogin : Effect()
+        object NavigateToSignUp : Effect()
+        object NavigateToRetros : Effect()
+        data class GoogleSignInError(@StringRes val errorRes: Int) : Effect()
+    }
+
+    sealed class Event : UiEvent {
+        object ScreenLoaded : Event()
+        object GoogleSignInClicked : Event()
+        object EmailSignInClicked : Event()
+        object SignUpClicked : Event()
+        data class GoogleSignInResultReceived(val account: GoogleSignInAccount?) : Event()
+    }
+
 }

@@ -14,6 +14,7 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
+import com.easyretro.ui.welcome.WelcomeContract.*
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -24,33 +25,35 @@ import javax.inject.Inject
 class WelcomeViewModel @Inject constructor(
     private val repository: AccountRepository,
     override val dispatchers: CoroutineDispatcherProvider
-) : BaseFlowViewModel<WelcomeViewState, WelcomeViewEffect, WelcomeViewEvent>(WelcomeViewState.Splash),
-    ViewModelFlowContract<WelcomeViewEvent> {
+) : BaseFlowViewModel<State, Effect, Event>(),
+    ViewModelFlowContract<Event> {
 
     companion object {
         private const val STARTUP_DELAY = 1500L
     }
 
-    override fun process(viewEvent: WelcomeViewEvent) {
+    override fun createInitialState(): State = State(isLoadingShown = false, areLoginButtonsShown = false)
+
+    override fun process(viewEvent: Event) {
         super.process(viewEvent)
         when (viewEvent) {
-            WelcomeViewEvent.ScreenLoaded -> checkUserSession()
-            WelcomeViewEvent.GoogleSignInClicked -> {
+            Event.ScreenLoaded -> checkUserSession()
+            Event.GoogleSignInClicked -> {
                 reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.GOOGLE_SIGN_IN))
-                emitViewEffect(WelcomeViewEffect.NavigateToGoogleSignIn)
+                emitViewEffect(Effect.NavigateToGoogleSignIn)
             }
-            WelcomeViewEvent.EmailSignInClicked -> {
+            Event.EmailSignInClicked -> {
                 reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_IN))
-                emitViewEffect(WelcomeViewEffect.NavigateToEmailLogin)
+                emitViewEffect(Effect.NavigateToEmailLogin)
             }
-            WelcomeViewEvent.SignUpClicked -> {
+            Event.SignUpClicked -> {
                 reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_UP))
-                emitViewEffect(WelcomeViewEffect.NavigateToSignUp)
+                emitViewEffect(Effect.NavigateToSignUp)
             }
-            is WelcomeViewEvent.GoogleSignInResultReceived -> {
-                emitViewState(WelcomeViewState.LoginInProgress)
+            is Event.GoogleSignInResultReceived -> {
+                emitViewState { copy(isLoadingShown = true, areLoginButtonsShown = false) }
                 if (viewEvent.account != null) firebaseAuthWithGoogle(viewEvent.account)
-                else emitViewEffect(WelcomeViewEffect.GoogleSignInError(FailureMessage.parse(Failure.UnknownError)))
+                else emitViewEffect(Effect.GoogleSignInError(FailureMessage.parse(Failure.UnknownError)))
             }
         }
     }
@@ -58,13 +61,13 @@ class WelcomeViewModel @Inject constructor(
     private fun checkUserSession() {
         viewModelScope.launch(dispatchers.io()) {
             repository.getUserStatus().fold({
-                emitViewState(WelcomeViewState.LoginOptionsDisplayed)
+                emitViewState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
             }, {
                 delay(STARTUP_DELAY)
                 if (it == UserStatus.VERIFIED) {
-                    emitViewEffect(WelcomeViewEffect.NavigateToRetros)
+                    emitViewEffect(Effect.NavigateToRetros)
                 } else {
-                    emitViewState(WelcomeViewState.LoginOptionsDisplayed)
+                    emitViewState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
                 }
             })
         }
@@ -83,10 +86,10 @@ class WelcomeViewModel @Inject constructor(
                     photoUrl = account.photoUrl?.toString().orEmpty()
                 )
             ).fold({
-                emitViewEffect(WelcomeViewEffect.GoogleSignInError(FailureMessage.parse(it)))
+                emitViewEffect(Effect.GoogleSignInError(FailureMessage.parse(it)))
             }, {
                 reportAnalytics(event = UserGoogleSignedInEvent)
-                emitViewEffect(WelcomeViewEffect.NavigateToRetros)
+                emitViewEffect(Effect.NavigateToRetros)
             })
         }
     }

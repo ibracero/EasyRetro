@@ -7,15 +7,15 @@ import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
+import com.easyretro.ui.welcome.WelcomeContract.*
 import com.easyretro.ui.FailureMessage
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
@@ -49,13 +49,15 @@ class WelcomeViewModelTest {
             whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.VERIFIED))
 
             viewModel.viewStates().test {
-                assertEquals(WelcomeViewState.Splash, awaitItem())
+                val state = awaitItem()
+                assertFalse(state.areLoginButtonsShown)
+                assertFalse(state.isLoadingShown)
                 cancelAndConsumeRemainingEvents()
             }
 
             viewModel.viewEffects().test {
-                viewModel.process(WelcomeViewEvent.ScreenLoaded)
-                assertEquals(WelcomeViewEffect.NavigateToRetros, awaitItem())
+                viewModel.process(Event.ScreenLoaded)
+                assertEquals(Effect.NavigateToRetros, awaitItem())
                 cancelAndConsumeRemainingEvents()
             }
         }
@@ -65,9 +67,13 @@ class WelcomeViewModelTest {
         whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
         viewModel.viewStates().test {
-            assertEquals(WelcomeViewState.Splash, awaitItem())
-            viewModel.process(WelcomeViewEvent.ScreenLoaded)
-            assertEquals(WelcomeViewState.LoginOptionsDisplayed, awaitItem())
+            val splashState = awaitItem()
+            assertFalse(splashState.areLoginButtonsShown)
+            assertFalse(splashState.isLoadingShown)
+            viewModel.process(Event.ScreenLoaded)
+            val buttonsState = awaitItem()
+            assertTrue(buttonsState.areLoginButtonsShown)
+            assertFalse(buttonsState.isLoadingShown)
             cancelAndConsumeRemainingEvents()
         }
     }
@@ -77,9 +83,9 @@ class WelcomeViewModelTest {
         whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
         viewModel.viewEffects().test {
-            viewModel.process(WelcomeViewEvent.GoogleSignInClicked)
+            viewModel.process(Event.GoogleSignInClicked)
 
-            assertEquals(WelcomeViewEffect.NavigateToGoogleSignIn, awaitItem())
+            assertEquals(Effect.NavigateToGoogleSignIn, awaitItem())
             cancelAndConsumeRemainingEvents()
         }
     }
@@ -89,9 +95,9 @@ class WelcomeViewModelTest {
         whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
         viewModel.viewEffects().test {
-            viewModel.process(WelcomeViewEvent.EmailSignInClicked)
+            viewModel.process(Event.EmailSignInClicked)
 
-            assertEquals(WelcomeViewEffect.NavigateToEmailLogin, awaitItem())
+            assertEquals(Effect.NavigateToEmailLogin, awaitItem())
             cancelAndConsumeRemainingEvents()
         }
     }
@@ -101,9 +107,9 @@ class WelcomeViewModelTest {
         whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
         viewModel.viewEffects().test {
-            viewModel.process(WelcomeViewEvent.SignUpClicked)
+            viewModel.process(Event.SignUpClicked)
 
-            assertEquals(WelcomeViewEffect.NavigateToSignUp, awaitItem())
+            assertEquals(Effect.NavigateToSignUp, awaitItem())
             cancelAndConsumeRemainingEvents()
         }
     }
@@ -114,9 +120,9 @@ class WelcomeViewModelTest {
         whenever(accountRepository.signWithGoogleAccount(idToken, user)).thenReturn(Either.right(Unit))
 
         viewModel.viewEffects().test {
-            viewModel.process(WelcomeViewEvent.GoogleSignInResultReceived(googleAccount))
+            viewModel.process(Event.GoogleSignInResultReceived(googleAccount))
 
-            assertEquals(WelcomeViewEffect.NavigateToRetros, awaitItem())
+            assertEquals(Effect.NavigateToRetros, awaitItem())
             cancelAndConsumeRemainingEvents()
         }
     }
@@ -126,9 +132,9 @@ class WelcomeViewModelTest {
         whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
         viewModel.viewEffects().test {
-            viewModel.process(WelcomeViewEvent.GoogleSignInResultReceived(null))
+            viewModel.process(Event.GoogleSignInResultReceived(null))
 
-            assertEquals(WelcomeViewEffect.GoogleSignInError(FailureMessage.parse(Failure.UnknownError)), awaitItem())
+            assertEquals(Effect.GoogleSignInError(FailureMessage.parse(Failure.UnknownError)), awaitItem())
             cancelAndConsumeRemainingEvents()
         }
     }
