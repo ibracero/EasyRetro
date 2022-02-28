@@ -107,12 +107,6 @@ class WelcomeFragment : BaseFlowFragment<State, Effect, Event, WelcomeViewModel>
         findNavController().navigate(R.id.action_register, bundle)
     }
 
-    private fun showButtons() {
-        binding.groupPostIt.visible()
-        binding.loading.gone()
-        binding.groupButtons.visible()
-    }
-
     private fun getSignInOptions() =
         GoogleSignInOptions.Builder()
             .requestEmail()
