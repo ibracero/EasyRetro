@@ -14,8 +14,6 @@ abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), View
     private val currentState: UiState
         get() = viewStates.value
 
-    abstract val dispatchers: CoroutineDispatcherProvider
-
     protected open val viewStates: MutableStateFlow<UiState> = MutableStateFlow(initialState)
     protected open val viewEffects: MutableSharedFlow<UiEffect> = MutableSharedFlow()
 
@@ -31,13 +29,13 @@ abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), View
     }
 
     protected fun emitViewState(reduce: UiState.() -> UiState) {
-        viewModelScope.launch(dispatchers.main()) {
+        viewModelScope.launch() {
             viewStates.value = currentState.reduce()
         }
     }
 
     protected fun emitViewEffect(viewEffect: UiEffect) {
-        viewModelScope.launch(dispatchers.main()) {
+        viewModelScope.launch() {
             viewEffects.emit(viewEffect)
         }
     }

@@ -7,7 +7,6 @@ import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.events.UserGoogleSignedInEvent
 import com.easyretro.analytics.reportAnalytics
 import com.easyretro.common.BaseFlowViewModel
-import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.common.ViewModelFlowContract
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
@@ -23,13 +22,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WelcomeViewModel @Inject constructor(
-    private val repository: AccountRepository,
-    override val dispatchers: CoroutineDispatcherProvider
+    private val repository: AccountRepository
 ) : BaseFlowViewModel<State, Effect, Event>(),
     ViewModelFlowContract<Event> {
 
     companion object {
-        private const val STARTUP_DELAY = 1500L
+        const val STARTUP_DELAY = 1500L
     }
 
     override fun createInitialState(): State = State(isLoadingShown = false, areLoginButtonsShown = false)
@@ -59,7 +57,7 @@ class WelcomeViewModel @Inject constructor(
     }
 
     private fun checkUserSession() {
-        viewModelScope.launch(dispatchers.io()) {
+        viewModelScope.launch {
             repository.getUserStatus().fold({
                 emitViewState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
             }, {
@@ -76,7 +74,7 @@ class WelcomeViewModel @Inject constructor(
     private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
         val safeTokenId = account.idToken ?: return
 
-        viewModelScope.launch(dispatchers.io()) {
+        viewModelScope.launch {
             repository.signWithGoogleAccount(
                 idToken = safeTokenId,
                 user = User(
