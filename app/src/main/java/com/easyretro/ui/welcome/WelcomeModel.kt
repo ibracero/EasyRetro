@@ -18,7 +18,7 @@ class WelcomeContract {
         object NavigateToEmailLogin : Effect()
         object NavigateToSignUp : Effect()
         object NavigateToRetros : Effect()
-        data class GoogleSignInError(@StringRes val errorRes: Int) : Effect()
+        data class ShowError(@StringRes val errorRes: Int) : Effect()
     }
 
     sealed class Event : UiEvent {
@@ -28,5 +28,4 @@ class WelcomeContract {
         object SignUpClicked : Event()
         data class GoogleSignInResultReceived(val account: GoogleSignInAccount?) : Event()
     }
-
 }

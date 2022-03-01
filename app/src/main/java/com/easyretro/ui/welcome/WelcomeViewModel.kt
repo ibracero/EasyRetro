@@ -32,9 +32,9 @@ class WelcomeViewModel @Inject constructor(
 
     override fun createInitialState(): State = State(isLoadingShown = false, areLoginButtonsShown = false)
 
-    override fun process(viewEvent: Event) {
-        super.process(viewEvent)
-        when (viewEvent) {
+    override fun process(uiEvent: Event) {
+        super.process(uiEvent)
+        when (uiEvent) {
             Event.ScreenLoaded -> checkUserSession()
             Event.GoogleSignInClicked -> {
                 reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.GOOGLE_SIGN_IN))
@@ -50,8 +50,8 @@ class WelcomeViewModel @Inject constructor(
             }
             is Event.GoogleSignInResultReceived -> {
                 emitViewState { copy(isLoadingShown = true, areLoginButtonsShown = false) }
-                if (viewEvent.account != null) firebaseAuthWithGoogle(viewEvent.account)
-                else emitViewEffect(Effect.GoogleSignInError(FailureMessage.parse(Failure.UnknownError)))
+                if (uiEvent.account != null) firebaseAuthWithGoogle(uiEvent.account)
+                else emitViewEffect(Effect.ShowError(FailureMessage.parse(Failure.UnknownError)))
             }
         }
     }
@@ -84,7 +84,7 @@ class WelcomeViewModel @Inject constructor(
                     photoUrl = account.photoUrl?.toString().orEmpty()
                 )
             ).fold({
-                emitViewEffect(Effect.GoogleSignInError(FailureMessage.parse(it)))
+                emitViewEffect(Effect.ShowError(FailureMessage.parse(it)))
             }, {
                 reportAnalytics(event = UserGoogleSignedInEvent)
                 emitViewEffect(Effect.NavigateToRetros)

@@ -44,5 +44,5 @@ open class BaseViewModel<STATE, EFFECT, EVENT> : ViewModel(), ViewModelContract<
 }
 
 internal interface ViewModelContract<EVENT> {
-    fun process(viewEvent: EVENT)
+    fun process(uiEvent: EVENT)
 }

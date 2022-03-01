@@ -10,9 +10,10 @@ import timber.log.Timber
 
 abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), ViewModelContract<UiEvent> {
 
-    private val initialState: UiState by lazy { createInitialState() }
-    private val currentState: UiState
+    val currentState: UiState
         get() = viewStates.value
+
+    private val initialState: UiState by lazy { createInitialState() }
 
     protected open val viewStates: MutableStateFlow<UiState> = MutableStateFlow(initialState)
     protected open val viewEffects: MutableSharedFlow<UiEffect> = MutableSharedFlow()
@@ -24,8 +25,8 @@ abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), View
     fun viewEffects(): SharedFlow<UiEffect> = viewEffects.asSharedFlow()
 
     @CallSuper
-    override fun process(viewEvent: UiEvent) {
-        Timber.d("processing viewEvent: $viewEvent")
+    override fun process(uiEvent: UiEvent) {
+        Timber.d("processing viewEvent: $uiEvent")
     }
 
     protected fun emitViewState(reduce: UiState.() -> UiState) {
@@ -34,9 +35,9 @@ abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), View
         }
     }
 
-    protected fun emitViewEffect(viewEffect: UiEffect) {
+    protected fun emitViewEffect(uiEffect: UiEffect) {
         viewModelScope.launch() {
-            viewEffects.emit(viewEffect)
+            viewEffects.emit(uiEffect)
         }
     }
 }

@@ -138,7 +138,7 @@ class WelcomeViewModelTest {
         viewModel.viewEffects().test {
             viewModel.process(Event.GoogleSignInResultReceived(null))
 
-            assertEquals(Effect.GoogleSignInError(FailureMessage.parse(Failure.UnknownError)), awaitItem())
+            assertEquals(Effect.ShowError(FailureMessage.parse(Failure.UnknownError)), awaitItem())
             cancelAndConsumeRemainingEvents()
         }
     }

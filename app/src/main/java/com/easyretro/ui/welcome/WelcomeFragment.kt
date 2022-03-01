@@ -27,24 +27,22 @@ import timber.log.Timber
 class WelcomeFragment : BaseFlowFragment<State, Effect, Event, WelcomeViewModel>(R.layout.fragment_welcome) {
 
     override val viewModel: WelcomeViewModel by viewModels()
-
     private val binding by viewBinding(FragmentWelcomeBinding::bind)
-    private val welcomeViewModel: WelcomeViewModel by viewModels()
 
     private val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         try {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             val account = task.getResult(ApiException::class.java)
-            welcomeViewModel.process(Event.GoogleSignInResultReceived(account))
+            this.viewModel.process(Event.GoogleSignInResultReceived(account))
         } catch (e: ApiException) {
             Timber.e(e)
-            welcomeViewModel.process(Event.GoogleSignInResultReceived(null))
+            this.viewModel.process(Event.GoogleSignInResultReceived(null))
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        welcomeViewModel.process(Event.ScreenLoaded)
+        this.viewModel.process(Event.ScreenLoaded)
         initUi()
     }
 
@@ -65,7 +63,7 @@ class WelcomeFragment : BaseFlowFragment<State, Effect, Event, WelcomeViewModel>
             Effect.NavigateToEmailLogin -> navigateToLogin()
             Effect.NavigateToRetros -> navigateToRetroList()
             Effect.NavigateToSignUp -> navigateToRegister()
-            is Effect.GoogleSignInError -> onGoogleSignInError(uiEffect.errorRes)
+            is Effect.ShowError -> onGoogleSignInError(uiEffect.errorRes)
         }
     }
 
@@ -78,13 +76,13 @@ class WelcomeFragment : BaseFlowFragment<State, Effect, Event, WelcomeViewModel>
     private fun initUi() {
         with(binding) {
             googleSignIn.setOnClickListener {
-                viewModel.process(Event.GoogleSignInClicked)
+                this@WelcomeFragment.viewModel.process(Event.GoogleSignInClicked)
             }
             emailSignIn.setOnClickListener {
-                viewModel.process(Event.EmailSignInClicked)
+                this@WelcomeFragment.viewModel.process(Event.EmailSignInClicked)
             }
             signUpButton.setOnClickListener {
-                viewModel.process(Event.SignUpClicked)
+                this@WelcomeFragment.viewModel.process(Event.SignUpClicked)
             }
         }
     }
