@@ -2,6 +2,8 @@
 
 This is a 100% working app which I use as a playground for the emerging technologies, patterns and practices I feel attracted by.
 
+[Check it out in Google Play](https://play.google.com/store/apps/details?id=com.easyretro)
+
 ## Context
 This app is a tool for building Sprint retros in an easy, fast and collaborative (realtime) way.
 
@@ -37,3 +39,5 @@ The main technologies I'm using in this project:
 
 The data flow would be like this:
 ![schema](https://github.com/ibracero/EasyRetro/blob/master/images/easyretro_schema.png)
+
+ **[EDIT] LiveData has been replaced by StateFlow for UiState management, UiEffects will be emitted using SharedFlow**
