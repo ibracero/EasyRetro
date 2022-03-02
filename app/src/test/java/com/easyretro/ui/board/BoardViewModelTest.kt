@@ -39,8 +39,8 @@ class BoardViewModelTest {
 
     private val viewModel = BoardViewModel(retroRepository = retroRepository, boardRepository = boardRepository)
 
-    private val viewStateObserver = mock<Observer<BoardViewState>>()
-    private val viewEffectsObserver = mock<Observer<BoardViewEffect>>()
+    private val viewStateObserver = mock<Observer<State>>()
+    private val viewEffectsObserver = mock<Observer<Effect>>()
 
     @Before
     fun `Set up`() {
@@ -62,10 +62,10 @@ class BoardViewModelTest {
             whenever(retroRepository.observeRetro(retroUuid))
                 .thenReturn(flowOf(Either.right(domainRetro)))
 
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid))
+            viewModel.process(Event.GetRetroInfo(retroUuid))
 
             verifyZeroInteractions(viewEffectsObserver)
-            verify(viewStateObserver).onChanged(BoardViewState(domainRetro))
+            verify(viewStateObserver).onChanged(State(domainRetro))
         }
     }
 
@@ -75,10 +75,10 @@ class BoardViewModelTest {
             whenever(retroRepository.observeRetro(retroUuid))
                 .thenReturn(flowOf(Either.left(Failure.UnknownError)))
 
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid))
+            viewModel.process(Event.GetRetroInfo(retroUuid))
 
             verifyZeroInteractions(viewStateObserver)
-            verify(viewEffectsObserver).onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)))
+            verify(viewEffectsObserver).onChanged(Effect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)))
         }
     }
     //endregion
@@ -90,7 +90,7 @@ class BoardViewModelTest {
             whenever(retroRepository.joinRetro(retroUuid))
                 .thenReturn(Either.right(Unit))
 
-            viewModel.process(BoardViewEvent.JoinRetro(retroUuid))
+            viewModel.process(Event.JoinRetro(retroUuid))
 
             verifyZeroInteractions(viewEffectsObserver)
             verifyZeroInteractions(viewStateObserver)
@@ -103,11 +103,11 @@ class BoardViewModelTest {
             whenever(retroRepository.joinRetro(retroUuid))
                 .thenReturn(Either.left(Failure.UnavailableNetwork))
 
-            viewModel.process(BoardViewEvent.JoinRetro(retroUuid))
+            viewModel.process(Event.JoinRetro(retroUuid))
 
             verifyZeroInteractions(viewStateObserver)
             verify(viewEffectsObserver)
-                .onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
+                .onChanged(Effect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
         }
     }
     //endregion
@@ -118,14 +118,14 @@ class BoardViewModelTest {
         testCoroutineScope.launch {
             whenever(retroRepository.observeRetro(retroUuid))
                 .thenReturn(flowOf(Either.right(domainRetro)))
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid))
+            viewModel.process(Event.GetRetroInfo(retroUuid))
 
-            viewModel.process(BoardViewEvent.ShareRetroLink)
+            viewModel.process(Event.ShareRetroLink)
 
             inOrder(viewStateObserver, viewEffectsObserver) {
-                verify(viewStateObserver).onChanged(BoardViewState(domainRetro))
+                verify(viewStateObserver).onChanged(State(domainRetro))
                 verify(viewEffectsObserver).onChanged(
-                    BoardViewEffect.ShowShareSheet(
+                    Effect.ShowShareSheet(
                         retroTitle = retroTitle,
                         deepLink = retroDeepLink
                     )
@@ -141,14 +141,14 @@ class BoardViewModelTest {
             val retroWithoutDeepLink = domainRetro.copy(deepLink = "")
             whenever(retroRepository.observeRetro(retroUuid))
                 .thenReturn(flowOf(Either.right(retroWithoutDeepLink)))
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid))
+            viewModel.process(Event.GetRetroInfo(retroUuid))
 
-            viewModel.process(BoardViewEvent.ShareRetroLink)
+            viewModel.process(Event.ShareRetroLink)
 
             inOrder(viewStateObserver, viewEffectsObserver) {
-                verify(viewStateObserver).onChanged(BoardViewState(retroWithoutDeepLink))
+                verify(viewStateObserver).onChanged(State(retroWithoutDeepLink))
                 verify(viewEffectsObserver)
-                    .onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)))
+                    .onChanged(Effect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)))
                 verifyNoMoreInteractions(viewEffectsObserver)
             }
         }
@@ -162,7 +162,7 @@ class BoardViewModelTest {
             whenever(retroRepository.protectRetro(retroUuid))
                 .thenReturn(Either.right(Unit))
 
-            viewModel.process(BoardViewEvent.ProtectRetro(retroUuid))
+            viewModel.process(Event.ProtectRetro(retroUuid))
 
             verifyZeroInteractions(viewEffectsObserver)
             verifyZeroInteractions(viewStateObserver)
@@ -175,10 +175,10 @@ class BoardViewModelTest {
             whenever(retroRepository.protectRetro(retroUuid))
                 .thenReturn(Either.left(Failure.UnavailableNetwork))
 
-            viewModel.process(BoardViewEvent.ProtectRetro(retroUuid))
+            viewModel.process(Event.ProtectRetro(retroUuid))
 
             verify(viewEffectsObserver)
-                .onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
+                .onChanged(Effect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
         }
     }
     //endregion
@@ -190,7 +190,7 @@ class BoardViewModelTest {
             whenever(retroRepository.unprotectRetro(retroUuid))
                 .thenReturn(Either.right(Unit))
 
-            viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid))
+            viewModel.process(Event.UnprotectRetro(retroUuid))
 
             verifyZeroInteractions(viewEffectsObserver)
             verifyZeroInteractions(viewStateObserver)
@@ -203,10 +203,10 @@ class BoardViewModelTest {
             whenever(retroRepository.unprotectRetro(retroUuid))
                 .thenReturn(Either.left(Failure.UnavailableNetwork))
 
-            viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid))
+            viewModel.process(Event.UnprotectRetro(retroUuid))
 
             verify(viewEffectsObserver)
-                .onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
+                .onChanged(Effect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
         }
     }
     //endregion
@@ -218,7 +218,7 @@ class BoardViewModelTest {
             whenever(retroRepository.startObservingRetroDetails(retroUuid)).thenReturn(flowOf(Either.right(Unit)))
             whenever(boardRepository.startObservingStatements(retroUuid)).thenReturn(flowOf(Either.right(Unit)))
 
-            viewModel.process(BoardViewEvent.SubscribeRetroDetails(retroUuid))
+            viewModel.process(Event.SubscribeRetroDetails(retroUuid))
 
             verify(retroRepository).startObservingRetroDetails(retroUuid)
             verify(boardRepository).startObservingStatements(retroUuid)
