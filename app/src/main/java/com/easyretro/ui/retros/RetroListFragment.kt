@@ -91,7 +91,7 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
 
     override fun renderViewState(uiState: State) {
         when (val retroListState = uiState.retroListState) {
-            is RetroListState.ShowRetroList -> showRetros(retroListState.retros)
+            is RetroListState.RetroListShown -> showRetros(retroListState.retros)
             else -> Unit
         }
 
@@ -110,6 +110,7 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
     }
 
     private fun showRetros(retros: List<Retro>?) {
+        if (retros == null) return
         retroListAdapter.submitList(retros)
     }
 

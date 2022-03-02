@@ -37,10 +37,10 @@ class RetroListViewModel @Inject constructor(
             retroRepository.getRetros()
                 .collect {
                     it.fold({ failure ->
-                        emitUiState { copy(retroListState = RetroListState.ShowRetroList(emptyList())) }
+                        emitUiState { copy(retroListState = RetroListState.RetroListShown(null)) }
                         emitUiEffect(failure.toUiEffect())
                     }, { retros ->
-                        emitUiState { copy(retroListState = RetroListState.ShowRetroList(retros)) }
+                        emitUiState { copy(retroListState = RetroListState.RetroListShown(retros)) }
                     })
                 }
         }

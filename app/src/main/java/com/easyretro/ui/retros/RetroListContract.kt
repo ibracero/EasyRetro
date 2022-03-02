@@ -8,7 +8,7 @@ class RetroListContract {
 
     sealed class RetroListState {
         object Loading : RetroListState()
-        data class ShowRetroList(val retros: List<Retro>) : RetroListState()
+        data class RetroListShown(val retros: List<Retro>? = null) : RetroListState()
     }
 
     sealed class NewRetroState {
