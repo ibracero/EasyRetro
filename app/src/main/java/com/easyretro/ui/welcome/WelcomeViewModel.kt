@@ -38,20 +38,20 @@ class WelcomeViewModel @Inject constructor(
             Event.ScreenLoaded -> checkUserSession()
             Event.GoogleSignInClicked -> {
                 reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.GOOGLE_SIGN_IN))
-                emitViewEffect(Effect.NavigateToGoogleSignIn)
+                emitUiEffect(Effect.NavigateToGoogleSignIn)
             }
             Event.EmailSignInClicked -> {
                 reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_IN))
-                emitViewEffect(Effect.NavigateToEmailLogin)
+                emitUiEffect(Effect.NavigateToEmailLogin)
             }
             Event.SignUpClicked -> {
                 reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_UP))
-                emitViewEffect(Effect.NavigateToSignUp)
+                emitUiEffect(Effect.NavigateToSignUp)
             }
             is Event.GoogleSignInResultReceived -> {
-                emitViewState { copy(isLoadingShown = true, areLoginButtonsShown = false) }
+                emitUiState { copy(isLoadingShown = true, areLoginButtonsShown = false) }
                 if (uiEvent.account != null) firebaseAuthWithGoogle(uiEvent.account)
-                else emitViewEffect(Effect.ShowError(FailureMessage.parse(Failure.UnknownError)))
+                else emitUiEffect(Effect.ShowError(FailureMessage.parse(Failure.UnknownError)))
             }
         }
     }
@@ -59,13 +59,13 @@ class WelcomeViewModel @Inject constructor(
     private fun checkUserSession() {
         viewModelScope.launch {
             repository.getUserStatus().fold({
-                emitViewState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
+                emitUiState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
             }, {
                 delay(STARTUP_DELAY)
                 if (it == UserStatus.VERIFIED) {
-                    emitViewEffect(Effect.NavigateToRetros)
+                    emitUiEffect(Effect.NavigateToRetros)
                 } else {
-                    emitViewState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
+                    emitUiState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
                 }
             })
         }
@@ -84,10 +84,10 @@ class WelcomeViewModel @Inject constructor(
                     photoUrl = account.photoUrl?.toString().orEmpty()
                 )
             ).fold({
-                emitViewEffect(Effect.ShowError(FailureMessage.parse(it)))
+                emitUiEffect(Effect.ShowError(FailureMessage.parse(it)))
             }, {
                 reportAnalytics(event = UserGoogleSignedInEvent)
-                emitViewEffect(Effect.NavigateToRetros)
+                emitUiEffect(Effect.NavigateToRetros)
             })
         }
     }

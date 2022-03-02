@@ -8,7 +8,6 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,23 +21,23 @@ class AccountViewModel @Inject constructor(
     override fun process(uiEvent: Event) {
         super.process(uiEvent)
         when (uiEvent) {
-            is Event.ScreenLoaded -> emitViewState {
+            is Event.ScreenLoaded -> emitUiState {
                 val formState = if (uiEvent.isNewAccount) FormState.SignUpForm else FormState.SignInForm
                 copy(formState = formState)
             }
             is Event.SignInClicked -> signIn(email = uiEvent.email, password = uiEvent.password)
             is Event.SignUpClicked -> signUp(email = uiEvent.email, password = uiEvent.password)
-            Event.ResetPasswordClicked -> emitViewEffect(Effect.OpenResetPassword)
-            Event.SnackBarSignInClicked -> emitViewState { copy(formState = FormState.SignInForm) }
-            Event.SnackBarSignUpClicked -> emitViewState { copy(formState = FormState.SignUpForm) }
+            Event.ResetPasswordClicked -> emitUiEffect(Effect.OpenResetPassword)
+            Event.SnackBarSignInClicked -> emitUiState { copy(formState = FormState.SignInForm) }
+            Event.SnackBarSignUpClicked -> emitUiState { copy(formState = FormState.SignUpForm) }
         }
     }
 
     private fun signIn(email: String, password: String) {
         viewModelScope.launch {
-            emitViewState { copy(formState = FormState.Loading) }
+            emitUiState { copy(formState = FormState.Loading) }
             val signInResult = repository.signInWithEmail(email, password)
-            emitViewState { copy(formState = FormState.SignInForm) }
+            emitUiState { copy(formState = FormState.SignInForm) }
             signInResult.fold(
                 { error -> handleSignInError(error) },
                 { userStatus -> handleUserSignedIn(userStatus) })
@@ -47,12 +46,12 @@ class AccountViewModel @Inject constructor(
 
     private fun signUp(email: String, password: String) {
         viewModelScope.launch {
-            emitViewState { copy(formState = FormState.Loading) }
+            emitUiState { copy(formState = FormState.Loading) }
             val signInResult = repository.signUpWithEmail(email, password)
-            emitViewState { copy(formState = FormState.SignUpForm) }
+            emitUiState { copy(formState = FormState.SignUpForm) }
             signInResult.fold(
                 { error -> handleSignUpError(error) },
-                { emitViewEffect(Effect.OpenEmailVerification) })
+                { emitUiEffect(Effect.OpenEmailVerification) })
         }
     }
 
@@ -60,7 +59,7 @@ class AccountViewModel @Inject constructor(
         val effect = if (error is Failure.UserCollisionFailure) {
             Effect.ShowExistingUserError(FailureMessage.parse(error))
         } else Effect.ShowGenericError(FailureMessage.parse(error))
-        emitViewEffect(effect)
+        emitUiEffect(effect)
     }
 
     private fun handleUserSignedIn(userStatus: UserStatus) {
@@ -68,13 +67,13 @@ class AccountViewModel @Inject constructor(
             UserStatus.VERIFIED -> Effect.OpenRetroList
             UserStatus.NON_VERIFIED -> Effect.OpenEmailVerification
         }
-        emitViewEffect(effect)
+        emitUiEffect(effect)
     }
 
     private fun handleSignInError(error: Failure) {
         val effect = if (error is Failure.InvalidUserFailure) {
             Effect.ShowUnknownUserError(FailureMessage.parse(error))
         } else Effect.ShowGenericError(FailureMessage.parse(error))
-        emitViewEffect(effect)
+        emitUiEffect(effect)
     }
 }
