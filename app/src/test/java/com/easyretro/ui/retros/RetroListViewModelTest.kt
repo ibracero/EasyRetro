@@ -1,173 +1,151 @@
 package com.easyretro.ui.retros
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
+import app.cash.turbine.test
 import arrow.core.Either
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Retro
+import com.easyretro.ui.CoroutinesTestRule
 import com.easyretro.ui.FailureMessage
 import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineScope
-import org.junit.After
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class RetroListViewModelTest {
 
-
-    private val testCoroutineScope = TestCoroutineScope()
-
     @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
+    var coroutinesTestRule = CoroutinesTestRule()
 
     private val retroRepository = mock<RetroRepository>()
     private val accountRepository = mock<AccountRepository>()
 
-    lateinit var viewModel: RetroListViewModel
+    private val viewModel = RetroListViewModel(retroRepository = retroRepository, accountRepository = accountRepository)
 
-    private val viewStateObserver = mock<Observer<RetroListViewState>>()
-    private val viewEffectsObserver = mock<Observer<RetroListViewEffect>>()
-
-    @Before
-    fun `Set up`() {
-        viewModel = RetroListViewModel(
-            retroRepository = retroRepository,
-            accountRepository = accountRepository
-        )
-    }
-
-    @After
-    fun `Tear down`() {
-        viewModel.viewStates().removeObserver(viewStateObserver)
-        viewModel.viewEffects().removeObserver(viewEffectsObserver)
-    }
-
-    //region fetch retros
     @Test
-    fun `GIVEN success response WHEN FetchRetros view event THEN modify view state with retro list`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.getRetros()).thenReturn(flowOf(Either.right(getMockRetroList())))
-            viewModel.viewStates().observeForever(viewStateObserver)
+    fun `GIVEN success response WHEN screen loaded ui event THEN modify view state with retro list`() = runTest {
+        whenever(retroRepository.getRetros()).thenReturn(flowOf(Either.right(getMockRetroList())))
 
-            viewModel.process(RetroListViewEvent.FetchRetros)
+        viewModel.viewStates().test {
+            viewModel.process(RetroListContract.Event.ScreenLoaded)
 
-            inOrder(viewStateObserver) {
-                val argumentCaptor = argumentCaptor<RetroListViewState>()
-                verify(viewStateObserver, times(3)).onChanged(argumentCaptor.capture())
-                assertEquals(FetchRetrosStatus.NotFetched, argumentCaptor.firstValue.fetchRetrosStatus)
-                assertEquals(FetchRetrosStatus.Loading, argumentCaptor.secondValue.fetchRetrosStatus)
-                assertEquals(FetchRetrosStatus.Fetched(getMockRetroList()), argumentCaptor.thirdValue.fetchRetrosStatus)
-                verifyNoMoreInteractions(viewStateObserver)
-            }
+            val state = expectMostRecentItem()
+            assertEquals(RetroListContract.RetroListState.RetroListShown(getMockRetroList()), state.retroListState)
+            assertEquals(RetroListContract.NewRetroState.AddRetroShown, state.newRetroState)
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN failed response WHEN FetchRetros view event THEN modify view state and view effect`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.getRetros()).thenReturn(flowOf(Either.left(Failure.UnavailableNetwork)))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN failed response WHEN screen loaded ui event THEN show retros null value`() = runTest {
+        whenever(retroRepository.getRetros()).thenReturn(flowOf(Either.left(Failure.UnknownError)))
 
-            viewModel.process(RetroListViewEvent.FetchRetros)
+        viewModel.viewStates().test {
+            viewModel.process(RetroListContract.Event.ScreenLoaded)
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val argumentCaptor = argumentCaptor<RetroListViewState>()
-                verify(viewStateObserver, times(3)).onChanged(argumentCaptor.capture())
-                assertEquals(FetchRetrosStatus.NotFetched, argumentCaptor.firstValue.fetchRetrosStatus)
-                assertEquals(FetchRetrosStatus.Loading, argumentCaptor.secondValue.fetchRetrosStatus)
-                assertEquals(FetchRetrosStatus.NotFetched, argumentCaptor.thirdValue.fetchRetrosStatus)
-                verify(viewEffectsObserver)
-                    .onChanged(RetroListViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
-                verifyNoMoreInteractions(viewStateObserver)
-                verifyNoMoreInteractions(viewEffectsObserver)
-            }
-        }
-    }
-    //endregion
-
-    //region retro clicked
-    @Test
-    fun `GIVEN a retro uuid WHEN retro clicked THEN cause a viewEffect to open that retro`() {
-        testCoroutineScope.launch {
-            val retroUuid = "retro-uuid"
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
-
-            viewModel.process(RetroListViewEvent.RetroClicked(retroUuid = retroUuid))
-
-            verify(viewEffectsObserver).onChanged(RetroListViewEffect.OpenRetroDetail(retroUuid = retroUuid))
-        }
-    }
-    //endregion
-
-    //region create retro clicked
-    @Test
-    fun `GIVEN server response success WHEN create retro clicked THEN update the viewState and open the detail`() {
-        testCoroutineScope.launch {
-            val retroTitle = "Sample title"
-            val retro = getMockRetroList()[0]
-            whenever(retroRepository.createRetro(retroTitle)).thenReturn(Either.right(retro))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
-
-            viewModel.process(RetroListViewEvent.CreateRetroClicked(retroTitle = retroTitle))
-
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val argumentCaptor = argumentCaptor<RetroListViewState>()
-                verify(viewStateObserver, times(3)).onChanged(argumentCaptor.capture())
-                verify(viewEffectsObserver).onChanged(RetroListViewEffect.OpenRetroDetail(retro.uuid))
-                assertEquals(RetroCreationStatus.NotCreated, argumentCaptor.firstValue.retroCreationStatus)
-                assertEquals(RetroCreationStatus.Loading, argumentCaptor.secondValue.retroCreationStatus)
-                assertEquals(RetroCreationStatus.Created, argumentCaptor.thirdValue.retroCreationStatus)
-            }
+            val state = expectMostRecentItem()
+            assertEquals(RetroListContract.RetroListState.RetroListShown(null), state.retroListState)
+            assertEquals(RetroListContract.NewRetroState.AddRetroShown, state.newRetroState)
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN server response failed WHEN create retro clicked THEN update the viewState and open the detail`() {
-        testCoroutineScope.launch {
-            val retroTitle = "Sample title"
-            whenever(retroRepository.createRetro(retroTitle)).thenReturn(Either.left(Failure.CreateRetroError))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN failed response WHEN fetching retros THEN show error message`() = runTest {
+        whenever(retroRepository.getRetros()).thenReturn(flowOf(Either.left(Failure.UnknownError)))
 
-            viewModel.process(RetroListViewEvent.CreateRetroClicked(retroTitle = retroTitle))
+        viewModel.viewEffects().test {
+            viewModel.process(RetroListContract.Event.ScreenLoaded)
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val argumentCaptor = argumentCaptor<RetroListViewState>()
-                verify(viewStateObserver, times(3)).onChanged(argumentCaptor.capture())
-                verify(viewEffectsObserver)
-                    .onChanged(RetroListViewEffect.ShowSnackBar(FailureMessage.parse(Failure.CreateRetroError)))
-                assertEquals(argumentCaptor.firstValue.retroCreationStatus, RetroCreationStatus.NotCreated)
-                assertEquals(argumentCaptor.secondValue.retroCreationStatus, RetroCreationStatus.Loading)
-                assertEquals(argumentCaptor.thirdValue.retroCreationStatus, RetroCreationStatus.NotCreated)
-            }
+            val effect = awaitItem()
+            assertEquals(RetroListContract.Effect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)), effect)
+            cancelAndConsumeRemainingEvents()
         }
     }
-    //endregion
 
-    //region logout
     @Test
-    fun `GIVEN viewEvent WHEN logout THEN calls account repository`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.logOut()).thenReturn(Unit)
+    fun `GIVEN success response WHEN creating a retro THEN reset ui state`() = runTest {
+        val title = "My retro"
+        whenever(retroRepository.createRetro(title)).thenReturn(Either.right(getMockRetroList()[0]))
 
-            viewModel.process(RetroListViewEvent.LogoutClicked)
+        viewModel.viewStates().test {
+            viewModel.process(RetroListContract.Event.CreateRetroClicked(title))
 
-            verify(accountRepository).logOut()
-            verifyNoMoreInteractions(accountRepository)
-            verifyZeroInteractions(retroRepository)
+            val state = expectMostRecentItem()
+            assertEquals(RetroListContract.RetroListState.Loading, state.retroListState)
+            assertEquals(RetroListContract.NewRetroState.AddRetroShown, state.newRetroState)
+            cancelAndConsumeRemainingEvents()
         }
     }
-    //endregion
+
+    @Test
+    fun `GIVEN success response WHEN creating a retro THEN open retro`() = runTest {
+        val title = "My retro"
+        whenever(retroRepository.createRetro(title)).thenReturn(Either.right(getMockRetroList()[0]))
+
+        viewModel.viewEffects().test {
+            viewModel.process(RetroListContract.Event.CreateRetroClicked(title))
+
+            val effect = awaitItem()
+            assertEquals(RetroListContract.Effect.OpenRetroDetail(getMockRetroList()[0].uuid), effect)
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `GIVEN failed response WHEN creating a retro THEN keep show input`() = runTest {
+        val title = "My retro"
+        whenever(retroRepository.createRetro(title)).thenReturn(Either.left(Failure.UnknownError))
+
+        viewModel.viewStates().test {
+            viewModel.process(RetroListContract.Event.CreateRetroClicked(title))
+
+            val state = expectMostRecentItem()
+            assertEquals(RetroListContract.RetroListState.Loading, state.retroListState)
+            assertEquals(RetroListContract.NewRetroState.TextInputShown, state.newRetroState)
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `GIVEN failed response WHEN creating a retro THEN show error`() = runTest {
+        val title = "My retro"
+        whenever(retroRepository.createRetro(title)).thenReturn(Either.left(Failure.UnknownError))
+
+        viewModel.viewEffects().test {
+            viewModel.process(RetroListContract.Event.CreateRetroClicked(title))
+
+            val effect = awaitItem()
+            assertEquals(RetroListContract.Effect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)), effect)
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `GIVEN open retro ui event THEN open retro`() = runTest {
+        val retroUuid = "retroUuid"
+
+        viewModel.viewEffects().test {
+            viewModel.process(RetroListContract.Event.RetroClicked(retroUuid))
+
+            val effect = awaitItem()
+            assertEquals(RetroListContract.Effect.OpenRetroDetail(retroUuid), effect)
+        }
+    }
+
+    @Test
+    fun `GIVEN logout ui event THEN execute logout`() = runTest {
+        whenever(accountRepository.logOut()).thenReturn(Unit)
+
+        viewModel.process(RetroListContract.Event.LogoutClicked)
+
+        verify(accountRepository).logOut()
+    }
 
     private fun getMockRetroList(): List<Retro> {
         return listOf(

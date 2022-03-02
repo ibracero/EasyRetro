@@ -1,14 +1,14 @@
 package com.easyretro.ui.board
 
 import androidx.lifecycle.viewModelScope
-import com.easyretro.common.BaseViewModel
+import com.easyretro.common.BaseFlowViewModel
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.FailureMessage
+import com.easyretro.ui.board.StatementListContract.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,26 +17,24 @@ import javax.inject.Inject
 class StatementViewModel @Inject constructor(
     private val boardRepository: BoardRepository,
     private val retroRepository: RetroRepository
-) : BaseViewModel<StatementListViewState, StatementListViewEffect, StatementListViewEvent>() {
+) : BaseFlowViewModel<State, Effect, Event>() {
 
-    init {
-        viewState = StatementListViewState(statements = emptyList(), addState = StatementAddState.Hidden)
-    }
+    override fun createInitialState(): State = State(statements = emptyList(), addState = StatementAddState.Hidden)
 
-    override fun process(viewEvent: StatementListViewEvent) {
-        super.process(viewEvent)
-        when (viewEvent) {
-            is StatementListViewEvent.CheckRetroLock -> checkRetroLock(retroUuid = viewEvent.retroUuid)
-            is StatementListViewEvent.RemoveStatement ->
-                removeStatement(retroUuid = viewEvent.retroUuid, statementUuid = viewEvent.statementUuid)
-            is StatementListViewEvent.AddStatement ->
+    override fun process(uiEvent: Event) {
+        super.process(uiEvent)
+        when (uiEvent) {
+            is Event.CheckRetroLock -> checkRetroLock(retroUuid = uiEvent.retroUuid)
+            is Event.RemoveStatement ->
+                removeStatement(retroUuid = uiEvent.retroUuid, statementUuid = uiEvent.statementUuid)
+            is Event.AddStatement ->
                 addStatement(
-                    retroUuid = viewEvent.retroUuid,
-                    description = viewEvent.description,
-                    type = viewEvent.type
+                    retroUuid = uiEvent.retroUuid,
+                    description = uiEvent.description,
+                    type = uiEvent.type
                 )
-            is StatementListViewEvent.FetchStatements ->
-                fetchStatements(retroUuid = viewEvent.retroUuid, type = viewEvent.type)
+            is Event.FetchStatements ->
+                fetchStatements(retroUuid = uiEvent.retroUuid, type = uiEvent.type)
         }.exhaustive
     }
 
@@ -44,7 +42,7 @@ class StatementViewModel @Inject constructor(
         viewModelScope.launch {
             boardRepository.getStatements(retroUuid = retroUuid, statementType = type)
                 .collect {
-                    viewState = viewState.copy(statements = it)
+                    emitUiState { copy(statements = it) }
                 }
         }
     }
@@ -54,11 +52,9 @@ class StatementViewModel @Inject constructor(
             retroRepository.observeRetro(retroUuid = retroUuid)
                 .collect {
                     it.fold({ failure ->
-                        viewEffect = StatementListViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(failure))
+                        emitUiEffect(Effect.ShowSnackBar(errorMessage = FailureMessage.parse(failure)))
                     }, { retro ->
-                        viewState = viewState.copy(
-                            addState = if (retro.protected) StatementAddState.Hidden else StatementAddState.Shown
-                        )
+                        emitUiState { copy(addState = if (retro.protected) StatementAddState.Hidden else StatementAddState.Shown) }
                     })
                 }
         }
@@ -68,10 +64,10 @@ class StatementViewModel @Inject constructor(
         viewModelScope.launch {
             boardRepository.addStatement(retroUuid = retroUuid, description = description, type = type)
                 .fold({
-                    viewEffect = StatementListViewEffect.ShowSnackBar(FailureMessage.parse(it))
-                    viewEffect = StatementListViewEffect.CreateItemFailed
+                    emitUiEffect(Effect.ShowSnackBar(FailureMessage.parse(it)))
+                    emitUiEffect(Effect.CreateItemFailed)
                 }, {
-                    viewEffect = StatementListViewEffect.CreateItemSuccess
+                    emitUiEffect(Effect.CreateItemSuccess)
                 })
         }
     }
@@ -80,7 +76,7 @@ class StatementViewModel @Inject constructor(
         viewModelScope.launch {
             boardRepository.removeStatement(retroUuid = retroUuid, statementUuid = statementUuid)
                 .mapLeft {
-                    viewEffect = StatementListViewEffect.ShowSnackBar(FailureMessage.parse(it))
+                    emitUiEffect(Effect.ShowSnackBar(FailureMessage.parse(it)))
                 }
         }
     }

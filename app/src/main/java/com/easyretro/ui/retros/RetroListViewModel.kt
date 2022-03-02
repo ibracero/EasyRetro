@@ -3,7 +3,8 @@ package com.easyretro.ui.retros
 import androidx.lifecycle.viewModelScope
 import com.easyretro.analytics.events.RetroCreatedEvent
 import com.easyretro.analytics.reportAnalytics
-import com.easyretro.common.BaseViewModel
+import com.easyretro.common.BaseFlowViewModel
+import com.easyretro.ui.retros.RetroListContract.*
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
@@ -16,56 +17,51 @@ import javax.inject.Inject
 class RetroListViewModel @Inject constructor(
     private val retroRepository: RetroRepository,
     private val accountRepository: AccountRepository
-) : BaseViewModel<RetroListViewState, RetroListViewEffect, RetroListViewEvent>() {
+) : BaseFlowViewModel<State, Effect, Event>() {
 
-    init {
-        viewState = RetroListViewState(
-            fetchRetrosStatus = FetchRetrosStatus.NotFetched,
-            retroCreationStatus = RetroCreationStatus.NotCreated
-        )
-    }
+    override fun createInitialState(): State = State(RetroListState.Loading, NewRetroState.AddRetroShown)
 
-    override fun process(viewEvent: RetroListViewEvent) {
-        super.process(viewEvent)
-        when (viewEvent) {
-            RetroListViewEvent.FetchRetros -> fetchRetros()
-            is RetroListViewEvent.RetroClicked -> openRetro(viewEvent.retroUuid)
-            is RetroListViewEvent.CreateRetroClicked -> createRetro(viewEvent.retroTitle)
-            RetroListViewEvent.LogoutClicked -> logout()
+    override fun process(uiEvent: Event) {
+        super.process(uiEvent)
+        when (uiEvent) {
+            Event.ScreenLoaded -> fetchRetros()
+            is Event.CreateRetroClicked -> createRetro(uiEvent.retroTitle)
+            is Event.RetroClicked -> openRetro(uiEvent.retroUuid)
+            Event.LogoutClicked -> logout()
         }
     }
 
     private fun fetchRetros() {
-        viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.Loading)
         viewModelScope.launch {
+            emitUiState { copy(retroListState = RetroListState.Loading) }
             retroRepository.getRetros()
                 .collect {
                     it.fold({ failure ->
-                        viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.NotFetched)
-                        viewEffect = failure.toViewEffect()
+                        emitUiState { copy(retroListState = RetroListState.RetroListShown(null)) }
+                        emitUiEffect(failure.toUiEffect())
                     }, { retros ->
-                        viewState = viewState.copy(fetchRetrosStatus = FetchRetrosStatus.Fetched(retros = retros))
+                        emitUiState { copy(retroListState = RetroListState.RetroListShown(retros)) }
                     })
                 }
         }
     }
 
     private fun createRetro(title: String) {
-        viewState = viewState.copy(retroCreationStatus = RetroCreationStatus.Loading)
         viewModelScope.launch {
+            emitUiState { copy(newRetroState = NewRetroState.Loading) }
             retroRepository.createRetro(title).fold({ failure ->
-                viewState = viewState.copy(retroCreationStatus = RetroCreationStatus.NotCreated)
-                viewEffect = failure.toViewEffect()
+                emitUiState { copy(newRetroState = NewRetroState.TextInputShown) }
+                emitUiEffect(failure.toUiEffect())
             }, { retro ->
                 reportAnalytics(event = RetroCreatedEvent)
-                viewState = viewState.copy(retroCreationStatus = RetroCreationStatus.Created)
-                viewEffect = RetroListViewEffect.OpenRetroDetail(retroUuid = retro.uuid)
+                emitUiState { copy(newRetroState = NewRetroState.AddRetroShown) }
+                openRetro(retro.uuid)
             })
         }
     }
 
     private fun openRetro(retroUuid: String) {
-        viewEffect = RetroListViewEffect.OpenRetroDetail(retroUuid = retroUuid)
+        emitUiEffect(Effect.OpenRetroDetail(retroUuid))
     }
 
     private fun logout() {
@@ -74,5 +70,5 @@ class RetroListViewModel @Inject constructor(
         }
     }
 
-    private fun Failure.toViewEffect() = RetroListViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(this))
+    private fun Failure.toUiEffect() = Effect.ShowSnackBar(errorMessage = FailureMessage.parse(this))
 }

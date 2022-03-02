@@ -9,9 +9,9 @@ data class PageEnterEvent(private val screen: Screen) :
     AnalyticsEvent {
 
     override val type: String
-        get() = EventType.PAGE_ENTER.toString().toLowerCase(Locale.getDefault())
+        get() = EventType.PAGE_ENTER.toString().lowercase(Locale.getDefault())
 
     override val properties: Map<String, String>
-        get() = mapOf("screen" to screen.name.toLowerCase(Locale.getDefault()))
+        get() = mapOf("screen" to screen.name.lowercase(Locale.getDefault()))
 
 }

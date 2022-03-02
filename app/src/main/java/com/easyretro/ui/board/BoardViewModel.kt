@@ -1,12 +1,13 @@
 package com.easyretro.ui.board
 
 import androidx.lifecycle.viewModelScope
-import com.easyretro.common.BaseViewModel
+import com.easyretro.common.BaseFlowViewModel
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.ui.FailureMessage
+import com.easyretro.ui.board.BoardContract.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -17,21 +18,23 @@ import javax.inject.Inject
 class BoardViewModel @Inject constructor(
     private val retroRepository: RetroRepository,
     private val boardRepository: BoardRepository
-) : BaseViewModel<BoardViewState, BoardViewEffect, BoardViewEvent>() {
+) : BaseFlowViewModel<State, Effect, Event>() {
 
     private var statementObserverJob: Job? = null
     private var retroObserverJob: Job? = null
 
-    override fun process(viewEvent: BoardViewEvent) {
-        super.process(viewEvent)
-        when (viewEvent) {
-            is BoardViewEvent.GetRetroInfo -> getRetroInfo(retroUuid = viewEvent.retroUuid)
-            is BoardViewEvent.JoinRetro -> joinRetro(retroUuid = viewEvent.retroUuid)
-            is BoardViewEvent.ShareRetroLink -> shareRetroLink()
-            is BoardViewEvent.SubscribeRetroDetails -> startObservingRetro(retroUuid = viewEvent.retroUuid)
-            is BoardViewEvent.ProtectRetro -> lockRetro(retroUuid = viewEvent.retroUuid)
-            is BoardViewEvent.UnprotectRetro -> unlockRetro(retroUuid = viewEvent.retroUuid)
-            BoardViewEvent.UnsubscribeRetroDetails -> stopObservingRetro()
+    override fun createInitialState(): State = State(RetroState.Loading)
+
+    override fun process(uiEvent: Event) {
+        super.process(uiEvent)
+        when (uiEvent) {
+            is Event.GetRetroInfo -> getRetroInfo(retroUuid = uiEvent.retroUuid)
+            is Event.JoinRetro -> joinRetro(retroUuid = uiEvent.retroUuid)
+            is Event.ShareRetroLink -> shareRetroLink()
+            is Event.SubscribeRetroDetails -> startObservingRetro(retroUuid = uiEvent.retroUuid)
+            is Event.ProtectRetro -> lockRetro(retroUuid = uiEvent.retroUuid)
+            is Event.UnprotectRetro -> unlockRetro(retroUuid = uiEvent.retroUuid)
+            Event.UnsubscribeRetroDetails -> stopObservingRetro()
         }.exhaustive
     }
 
@@ -40,9 +43,9 @@ class BoardViewModel @Inject constructor(
             retroRepository.observeRetro(retroUuid).collect { either ->
                 either.fold(
                     {
-                        viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
+                        emitUiEffect(Effect.ShowSnackBar(errorMessage = FailureMessage.parse(it)))
                     }, {
-                        viewState = BoardViewState(retro = it)
+                        emitUiState { copy(retroState = RetroState.RetroLoaded(it)) }
                     }
                 )
             }
@@ -52,23 +55,25 @@ class BoardViewModel @Inject constructor(
     private fun joinRetro(retroUuid: String) {
         viewModelScope.launch {
             retroRepository.joinRetro(retroUuid).mapLeft {
-                viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
+                emitUiEffect(Effect.ShowSnackBar(errorMessage = FailureMessage.parse(it)))
             }
         }
     }
 
     private fun shareRetroLink() {
-        val retro = viewState.retro
-        viewEffect = if (retro.deepLink.isNotEmpty())
-            BoardViewEffect.ShowShareSheet(retroTitle = retro.title, deepLink = retro.deepLink)
-        else BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(Failure.UnknownError))
+        val retroState = currentState.retroState
+        emitUiEffect(
+            if (retroState is RetroState.RetroLoaded && retroState.retro.deepLink.isNotEmpty())
+                Effect.ShowShareSheet(retroTitle = retroState.retro.title, deepLink = retroState.retro.deepLink)
+            else Effect.ShowSnackBar(errorMessage = FailureMessage.parse(Failure.UnknownError))
+        )
     }
 
     private fun unlockRetro(retroUuid: String) {
         viewModelScope.launch {
             retroRepository.unprotectRetro(retroUuid = retroUuid)
                 .mapLeft {
-                    viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
+                    emitUiEffect(Effect.ShowSnackBar(errorMessage = FailureMessage.parse(it)))
                 }
         }
     }
@@ -77,7 +82,7 @@ class BoardViewModel @Inject constructor(
         viewModelScope.launch {
             retroRepository.protectRetro(retroUuid = retroUuid)
                 .mapLeft {
-                    viewEffect = BoardViewEffect.ShowSnackBar(errorMessage = FailureMessage.parse(it))
+                    emitUiEffect(Effect.ShowSnackBar(errorMessage = FailureMessage.parse(it)))
                 }
         }
     }

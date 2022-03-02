@@ -1,20 +1,23 @@
 package com.easyretro.ui.welcome
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
+import app.cash.turbine.test
 import arrow.core.Either
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
+import com.easyretro.ui.CoroutinesTestRule
+import com.easyretro.ui.FailureMessage
+import com.easyretro.ui.welcome.WelcomeContract.Effect
+import com.easyretro.ui.welcome.WelcomeContract.Event
+import com.easyretro.ui.welcome.WelcomeViewModel.Companion.STARTUP_DELAY
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 
@@ -22,16 +25,11 @@ import org.junit.Test
 class WelcomeViewModelTest {
 
     @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
+    var coroutinesTestRule = CoroutinesTestRule()
 
     private val accountRepository = mock<AccountRepository>()
 
-    private val testCoroutineScope = TestCoroutineScope()
-    
-    private lateinit var viewModel: WelcomeViewModel
-
-    private val userSessionObserver = mock<Observer<Either<Failure, UserStatus>>>()
-    private val googleSignInObserver = mock<Observer<Either<Failure, Unit>>>()
+    private val viewModel = WelcomeViewModel(repository = accountRepository)
 
     private val idToken = "token"
     private val userEmail = "user@email.com"
@@ -46,85 +44,102 @@ class WelcomeViewModelTest {
         on { photoUrl }.thenReturn(null)
     }
 
-    //region welcome launch
     @Test
-    fun `GIVEN user verified WHEN welcome page launches THEN return VERIFIED to view`() {
-        testCoroutineScope.launch {
+    fun `GIVEN user session already started WHEN welcome screen finishes loading THEN navigate to retro list`() =
+        runTest {
             whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.VERIFIED))
-            viewModel = WelcomeViewModel(repository = accountRepository)
-            viewModel.userSessionLiveData.observeForever(userSessionObserver)
 
-            verify(userSessionObserver).onChanged(Either.right(UserStatus.VERIFIED))
-            verifyNoMoreInteractions(userSessionObserver)
+            viewModel.viewStates().test {
+                val state = expectMostRecentItem()
+                assertFalse(state.areLoginButtonsShown)
+                assertFalse(state.isLoadingShown)
+                cancelAndConsumeRemainingEvents()
+            }
+
+            viewModel.viewEffects().test() {
+                viewModel.process(Event.ScreenLoaded)
+                advanceTimeBy(STARTUP_DELAY)
+                assertEquals(Effect.NavigateToRetros, awaitItem())
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `GIVEN user session not started WHEN welcome screen finishes loading THEN show buttons`() = runTest {
+        whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
+
+        viewModel.viewStates().test {
+            val splashState = expectMostRecentItem()
+            assertFalse(splashState.areLoginButtonsShown)
+            assertFalse(splashState.isLoadingShown)
+            viewModel.process(Event.ScreenLoaded)
+            advanceTimeBy(STARTUP_DELAY)
+            val buttonsState = awaitItem()
+            assertTrue(buttonsState.areLoginButtonsShown)
+            assertFalse(buttonsState.isLoadingShown)
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN user non verified WHEN welcome page launches THEN pass NON VERIFIED to view`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
-            viewModel = WelcomeViewModel(repository = accountRepository)
-            viewModel.userSessionLiveData.observeForever(userSessionObserver)
+    fun `WHEN google sign in clicked THEN open google sign in flow`() = runTest {
+        whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
-            verify(userSessionObserver).onChanged(Either.right(UserStatus.NON_VERIFIED))
-            verifyNoMoreInteractions(userSessionObserver)
+        viewModel.viewEffects().test {
+            viewModel.process(Event.GoogleSignInClicked)
+
+            assertEquals(Effect.NavigateToGoogleSignIn, awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN failed response WHEN welcome page launches THEN pass the error to view`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.getUserStatus()).thenReturn(Either.left(Failure.UnknownError))
-            viewModel = WelcomeViewModel(repository = accountRepository)
-            viewModel.userSessionLiveData.observeForever(userSessionObserver)
+    fun `WHEN email sign in clicked THEN navigate to login screen`() = runTest {
+        whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
-            verify(userSessionObserver).onChanged(Either.left(Failure.UnknownError))
-            verifyNoMoreInteractions(userSessionObserver)
-        }
-    }
-    //endregion
+        viewModel.viewEffects().test {
+            viewModel.process(Event.EmailSignInClicked)
 
-    //region sign in with google
-    @Test
-    fun `GIVEN success response WHEN logging in with Google THEN pass success to view`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signWithGoogleAccount(idToken, user)).thenReturn(Either.right(Unit))
-            viewModel = WelcomeViewModel(repository = accountRepository)
-            viewModel.googleSignInLiveData.observeForever(googleSignInObserver)
-
-            viewModel.handleSignInResult(googleAccount)
-
-            verify(googleSignInObserver).onChanged(Either.right(Unit))
-            verifyNoMoreInteractions(googleSignInObserver)
+            assertEquals(Effect.NavigateToEmailLogin, awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN null google account WHEN logging in with Google THEN pass unknown error`() {
-        testCoroutineScope.launch {
-            viewModel = WelcomeViewModel(repository = accountRepository)
-            viewModel.googleSignInLiveData.observeForever(googleSignInObserver)
+    fun `WHEN sign up clicked THEN navigate to sign up screen`() = runTest {
+        whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
-            viewModel.handleSignInResult(null)
 
-            verify(googleSignInObserver).onChanged(Either.left(Failure.UnknownError))
-            verifyNoMoreInteractions(googleSignInObserver)
+        viewModel.viewEffects().test {
+            viewModel.process(Event.SignUpClicked)
+
+            assertEquals(Effect.NavigateToSignUp, awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN failed respon se WHEN logging in with Google THEN pass error`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signWithGoogleAccount(idToken, user))
-                .thenReturn(Either.left(Failure.UnavailableNetwork))
-            viewModel = WelcomeViewModel(repository = accountRepository)
-            viewModel.googleSignInLiveData.observeForever(googleSignInObserver)
+    fun `GIVEN successful response WHEN logging in with Google THEN navigate to retro list`() = runTest {
+        whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
+        whenever(accountRepository.signWithGoogleAccount(idToken, user)).thenReturn(Either.right(Unit))
 
-            viewModel.handleSignInResult(googleAccount)
+        viewModel.viewEffects().test {
+            viewModel.process(Event.GoogleSignInResultReceived(googleAccount))
 
-            verify(googleSignInObserver).onChanged(Either.left(Failure.UnavailableNetwork))
-            verifyNoMoreInteractions(googleSignInObserver)
+            assertEquals(Effect.NavigateToRetros, awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
-    //endregion
+
+    @Test
+    fun `GIVEN error response WHEN logging in with Google THEN navigate to retro list`() = runTest {
+        whenever(accountRepository.getUserStatus()).thenReturn(Either.right(UserStatus.NON_VERIFIED))
+
+        viewModel.viewEffects().test {
+            viewModel.process(Event.GoogleSignInResultReceived(null))
+
+            assertEquals(Effect.ShowError(FailureMessage.parse(Failure.UnknownError)), awaitItem())
+            cancelAndConsumeRemainingEvents()
+        }
+    }
 }

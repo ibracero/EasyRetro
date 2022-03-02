@@ -1,38 +1,73 @@
 package com.easyretro.ui.welcome
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import arrow.core.Either
+import com.easyretro.analytics.Screen
+import com.easyretro.analytics.UiValue
+import com.easyretro.analytics.events.TapEvent
+import com.easyretro.analytics.events.UserGoogleSignedInEvent
+import com.easyretro.analytics.reportAnalytics
+import com.easyretro.common.BaseFlowViewModel
+import com.easyretro.common.ViewModelFlowContract
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.User
 import com.easyretro.domain.model.UserStatus
+import com.easyretro.ui.FailureMessage
+import com.easyretro.ui.welcome.WelcomeContract.*
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class WelcomeViewModel @Inject constructor(
     private val repository: AccountRepository
-) : ViewModel() {
+) : BaseFlowViewModel<State, Effect, Event>(),
+    ViewModelFlowContract<Event> {
 
-    val googleSignInLiveData = MutableLiveData<Either<Failure, Unit>>()
-    val userSessionLiveData = MutableLiveData<Either<Failure, UserStatus>>()
-
-    init {
-        checkUserSession()
+    companion object {
+        const val STARTUP_DELAY = 1500L
     }
 
-    fun handleSignInResult(account: GoogleSignInAccount?) {
-        if (account != null) firebaseAuthWithGoogle(account)
-        else googleSignInLiveData.postValue(Either.left(Failure.UnknownError))
+    override fun createInitialState(): State = State(isLoadingShown = false, areLoginButtonsShown = false)
+
+    override fun process(uiEvent: Event) {
+        super.process(uiEvent)
+        when (uiEvent) {
+            Event.ScreenLoaded -> checkUserSession()
+            Event.GoogleSignInClicked -> {
+                reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.GOOGLE_SIGN_IN))
+                emitUiEffect(Effect.NavigateToGoogleSignIn)
+            }
+            Event.EmailSignInClicked -> {
+                reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_IN))
+                emitUiEffect(Effect.NavigateToEmailLogin)
+            }
+            Event.SignUpClicked -> {
+                reportAnalytics(TapEvent(screen = Screen.WELCOME, uiValue = UiValue.WELCOME_EMAIL_SIGN_UP))
+                emitUiEffect(Effect.NavigateToSignUp)
+            }
+            is Event.GoogleSignInResultReceived -> {
+                emitUiState { copy(isLoadingShown = true, areLoginButtonsShown = false) }
+                if (uiEvent.account != null) firebaseAuthWithGoogle(uiEvent.account)
+                else emitUiEffect(Effect.ShowError(FailureMessage.parse(Failure.UnknownError)))
+            }
+        }
     }
 
     private fun checkUserSession() {
         viewModelScope.launch {
-            userSessionLiveData.postValue(repository.getUserStatus())
+            repository.getUserStatus().fold({
+                emitUiState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
+            }, {
+                delay(STARTUP_DELAY)
+                if (it == UserStatus.VERIFIED) {
+                    emitUiEffect(Effect.NavigateToRetros)
+                } else {
+                    emitUiState { copy(isLoadingShown = false, areLoginButtonsShown = true) }
+                }
+            })
         }
     }
 
@@ -40,7 +75,7 @@ class WelcomeViewModel @Inject constructor(
         val safeTokenId = account.idToken ?: return
 
         viewModelScope.launch {
-            val result = repository.signWithGoogleAccount(
+            repository.signWithGoogleAccount(
                 idToken = safeTokenId,
                 user = User(
                     email = account.email.orEmpty(),
@@ -48,8 +83,12 @@ class WelcomeViewModel @Inject constructor(
                     lastName = account.familyName.orEmpty(),
                     photoUrl = account.photoUrl?.toString().orEmpty()
                 )
-            )
-            googleSignInLiveData.postValue(result)
+            ).fold({
+                emitUiEffect(Effect.ShowError(FailureMessage.parse(it)))
+            }, {
+                reportAnalytics(event = UserGoogleSignedInEvent)
+                emitUiEffect(Effect.NavigateToRetros)
+            })
         }
     }
 }

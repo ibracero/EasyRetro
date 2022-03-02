@@ -4,10 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
@@ -22,9 +20,10 @@ import com.easyretro.analytics.UiValue
 import com.easyretro.analytics.events.PageEnterEvent
 import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.reportAnalytics
-import com.easyretro.common.BaseFragment
+import com.easyretro.common.BaseFlowFragment
 import com.easyretro.common.extensions.*
 import com.easyretro.databinding.FragmentBoardBinding
+import com.easyretro.ui.board.BoardContract.*
 import com.easyretro.ui.board.action.ActionsFragment
 import com.easyretro.ui.board.negative.NegativeFragment
 import com.easyretro.ui.board.positive.PositiveFragment
@@ -34,7 +33,7 @@ import kotlin.math.min
 
 
 @AndroidEntryPoint
-class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEvent, BoardViewModel>() {
+class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.layout.fragment_board) {
 
     companion object {
         const val ARGUMENT_RETRO_UUID = "arg_retro_uuid"
@@ -52,18 +51,14 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
 
     private val userListAdapter = UserListAdapter()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_board, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.usersRecyclerview.adapter = userListAdapter
 
         getRetroUuidArgument()?.let { uuid ->
-            viewModel.process(BoardViewEvent.JoinRetro(retroUuid = uuid))
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid = uuid))
+            viewModel.process(Event.JoinRetro(retroUuid = uuid))
+            viewModel.process(Event.GetRetroInfo(retroUuid = uuid))
         }
 
         binding.dismissProtectedMessageButton.setOnClickListener {
@@ -82,31 +77,38 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
         requireActivity().onBackPressedDispatcher.addCallback(backPressedCallback)
 
         getRetroUuidArgument()?.let {
-            viewModel.process(BoardViewEvent.SubscribeRetroDetails(it))
+            viewModel.process(Event.SubscribeRetroDetails(it))
         }
     }
 
     override fun onStop() {
         super.onStop()
-        viewModel.process(BoardViewEvent.UnsubscribeRetroDetails)
+        viewModel.process(Event.UnsubscribeRetroDetails)
 
         backPressedCallback.remove()
 
         view.hideKeyboard()
     }
 
-    override fun renderViewState(viewState: BoardViewState) {
-        initToolbar(retroUuid = viewState.retro.uuid, retroTitle = viewState.retro.title)
-        userListAdapter.submitList(viewState.retro.users)
-        setupLockMode(retroProtected = viewState.retro.protected, lockingAllowed = viewState.retro.lockingAllowed)
+    override fun renderViewState(uiState: State) {
+        when (val retroState = uiState.retroState) {
+            is RetroState.RetroLoaded -> {
+                initToolbar(retroUuid = retroState.retro.uuid, retroTitle = retroState.retro.title)
+                userListAdapter.submitList(retroState.retro.users)
+                setupLockMode(
+                    retroProtected = retroState.retro.protected,
+                    lockingAllowed = retroState.retro.lockingAllowed
+                )
+            }
+            else -> Unit
+        }
     }
 
     @Suppress("IMPLICIT_CAST_TO_ANY")
-    override fun renderViewEffect(viewEffect: BoardViewEffect) {
-        when (viewEffect) {
-            is BoardViewEffect.ShowSnackBar -> binding.boardRoot.showErrorSnackbar(message = viewEffect.errorMessage)
-            is BoardViewEffect.ShowShareSheet ->
-                displayShareSheet(retroName = viewEffect.retroTitle, shortLink = viewEffect.deepLink)
+    override fun renderViewEffect(uiEffect: Effect) {
+        when (uiEffect) {
+            is Effect.ShowSnackBar -> binding.boardRoot.showErrorSnackbar(message = uiEffect.errorMessage)
+            is Effect.ShowShareSheet -> displayShareSheet(retroName = uiEffect.retroTitle, shortLink = uiEffect.deepLink)
         }.exhaustive
     }
 
@@ -274,7 +276,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
                 uiValue = UiValue.RETRO_PROTECT_CONFIRMATION
             )
         )
-        viewModel.process(BoardViewEvent.ProtectRetro(retroUuid = retroUuid))
+        viewModel.process(Event.ProtectRetro(retroUuid = retroUuid))
     }
 
     private fun onUnprotectClicked(retroUuid: String) {
@@ -284,7 +286,7 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
                 uiValue = UiValue.RETRO_UNPROTECT
             )
         )
-        viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid = retroUuid))
+        viewModel.process(Event.UnprotectRetro(retroUuid = retroUuid))
     }
 
     private fun onInviteClicked() {
@@ -294,6 +296,6 @@ class BoardFragment : BaseFragment<BoardViewState, BoardViewEffect, BoardViewEve
                 uiValue = UiValue.RETRO_INVITE
             )
         )
-        viewModel.process(BoardViewEvent.ShareRetroLink)
+        viewModel.process(Event.ShareRetroLink)
     }
 }

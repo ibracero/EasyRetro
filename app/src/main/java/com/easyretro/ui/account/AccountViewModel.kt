@@ -1,8 +1,9 @@
 package com.easyretro.ui.account
 
 import androidx.lifecycle.viewModelScope
-import com.easyretro.common.BaseViewModel
+import com.easyretro.common.BaseFlowViewModel
 import com.easyretro.domain.AccountRepository
+import com.easyretro.ui.account.AccountContract.*
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
@@ -13,49 +14,66 @@ import javax.inject.Inject
 @HiltViewModel
 class AccountViewModel @Inject constructor(
     private val repository: AccountRepository
-) : BaseViewModel<AccountViewState, AccountViewEffect, AccountViewEvent>() {
+) : BaseFlowViewModel<State, Effect, Event>() {
 
-    override fun process(viewEvent: AccountViewEvent) {
-        super.process(viewEvent)
-        when (viewEvent) {
-            AccountViewEvent.ResetPassword -> viewEffect = AccountViewEffect.OpenResetPassword
-            is AccountViewEvent.SignIn -> signIn(email = viewEvent.email, password = viewEvent.password)
-            is AccountViewEvent.SignUp -> signUp(email = viewEvent.email, password = viewEvent.password)
+    override fun createInitialState(): State = State(FormState.SignInForm)
+
+    override fun process(uiEvent: Event) {
+        super.process(uiEvent)
+        when (uiEvent) {
+            is Event.ScreenLoaded -> emitUiState {
+                val formState = if (uiEvent.isNewAccount) FormState.SignUpForm else FormState.SignInForm
+                copy(formState = formState)
+            }
+            is Event.SignInClicked -> signIn(email = uiEvent.email, password = uiEvent.password)
+            is Event.SignUpClicked -> signUp(email = uiEvent.email, password = uiEvent.password)
+            Event.ResetPasswordClicked -> emitUiEffect(Effect.OpenResetPassword)
+            Event.SnackBarSignInClicked -> emitUiState { copy(formState = FormState.SignInForm) }
+            Event.SnackBarSignUpClicked -> emitUiState { copy(formState = FormState.SignUpForm) }
         }
     }
 
     private fun signIn(email: String, password: String) {
-        viewState = AccountViewState(signingState = SigningState.Loading)
         viewModelScope.launch {
+            emitUiState { copy(formState = FormState.Loading) }
             val signInResult = repository.signInWithEmail(email, password)
-            viewState = AccountViewState(signingState = SigningState.RequestDone)
+            emitUiState { copy(formState = FormState.SignInForm) }
             signInResult.fold(
-                { error ->
-                    viewEffect = if (error is Failure.InvalidUserFailure) {
-                        AccountViewEffect.ShowUnknownUserSnackBar(FailureMessage.parse(error))
-                    } else AccountViewEffect.ShowGenericSnackBar(FailureMessage.parse(error))
-                }, { userStatus ->
-                    viewEffect = when (userStatus) {
-                        UserStatus.VERIFIED -> AccountViewEffect.OpenRetroList
-                        UserStatus.NON_VERIFIED -> AccountViewEffect.OpenEmailVerification
-                    }
-                })
+                { error -> handleSignInError(error) },
+                { userStatus -> handleUserSignedIn(userStatus) })
         }
     }
 
     private fun signUp(email: String, password: String) {
-        viewState = AccountViewState(signingState = SigningState.Loading)
         viewModelScope.launch {
+            emitUiState { copy(formState = FormState.Loading) }
             val signInResult = repository.signUpWithEmail(email, password)
-            viewState = AccountViewState(signingState = SigningState.RequestDone)
+            emitUiState { copy(formState = FormState.SignUpForm) }
             signInResult.fold(
-                { error ->
-                    viewEffect = if (error is Failure.UserCollisionFailure) {
-                        AccountViewEffect.ShowExistingUserSnackBar(FailureMessage.parse(error))
-                    } else AccountViewEffect.ShowGenericSnackBar(FailureMessage.parse(error))
-                }, {
-                    viewEffect = AccountViewEffect.OpenEmailVerification
-                })
+                { error -> handleSignUpError(error) },
+                { emitUiEffect(Effect.OpenEmailVerification) })
         }
+    }
+
+    private fun handleSignUpError(error: Failure) {
+        val effect = if (error is Failure.UserCollisionFailure) {
+            Effect.ShowExistingUserError(FailureMessage.parse(error))
+        } else Effect.ShowGenericError(FailureMessage.parse(error))
+        emitUiEffect(effect)
+    }
+
+    private fun handleUserSignedIn(userStatus: UserStatus) {
+        val effect = when (userStatus) {
+            UserStatus.VERIFIED -> Effect.OpenRetroList
+            UserStatus.NON_VERIFIED -> Effect.OpenEmailVerification
+        }
+        emitUiEffect(effect)
+    }
+
+    private fun handleSignInError(error: Failure) {
+        val effect = if (error is Failure.InvalidUserFailure) {
+            Effect.ShowUnknownUserError(FailureMessage.parse(error))
+        } else Effect.ShowGenericError(FailureMessage.parse(error))
+        emitUiEffect(effect)
     }
 }

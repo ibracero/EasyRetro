@@ -15,7 +15,7 @@ import com.easyretro.analytics.UiValue
 import com.easyretro.analytics.events.PageEnterEvent
 import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.reportAnalytics
-import com.easyretro.common.BaseFragment
+import com.easyretro.common.BaseFlowFragment
 import com.easyretro.common.extensions.hideKeyboard
 import com.easyretro.common.extensions.showErrorSnackbar
 import com.easyretro.common.extensions.viewBinding
@@ -23,6 +23,7 @@ import com.easyretro.databinding.FragmentRetroListBinding
 import com.easyretro.domain.model.Retro
 import com.easyretro.ui.Payload
 import com.easyretro.ui.board.BoardFragment.Companion.ARGUMENT_RETRO_UUID
+import com.easyretro.ui.retros.RetroListContract.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks
@@ -30,8 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
 @AndroidEntryPoint
-class RetroListFragment :
-    BaseFragment<RetroListViewState, RetroListViewEffect, RetroListViewEvent, RetroListViewModel>() {
+class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewModel>(R.layout.fragment_retro_list) {
 
     override val viewModel: RetroListViewModel by viewModels()
 
@@ -49,11 +49,6 @@ class RetroListFragment :
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_retro_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -86,7 +81,7 @@ class RetroListFragment :
         reportAnalytics(event = PageEnterEvent(screen = Screen.RETRO_LIST))
 
         handleDeepLink()
-        viewModel.process(viewEvent = RetroListViewEvent.FetchRetros)
+        viewModel.process(Event.ScreenLoaded)
     }
 
     override fun onStop() {
@@ -94,29 +89,28 @@ class RetroListFragment :
         view.hideKeyboard()
     }
 
-    override fun renderViewState(viewState: RetroListViewState) {
-        when (viewState.fetchRetrosStatus) {
-            is FetchRetrosStatus.Fetched -> showRetros(viewState.fetchRetrosStatus.retros)
+    override fun renderViewState(uiState: State) {
+        when (val retroListState = uiState.retroListState) {
+            is RetroListState.RetroListShown -> showRetros(retroListState.retros)
             else -> Unit
         }
 
-        when (viewState.retroCreationStatus) {
-            RetroCreationStatus.Created -> {
-                retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(true))
-            }
-            RetroCreationStatus.NotCreated -> retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(false))
+        when (uiState.newRetroState) {
+            NewRetroState.AddRetroShown -> retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(true))
+            NewRetroState.TextInputShown -> retroListAdapter.notifyItemChanged(0, Payload.CreateRetroPayload(false))
             else -> Unit
         }
     }
 
-    override fun renderViewEffect(viewEffect: RetroListViewEffect) {
-        when (viewEffect) {
-            is RetroListViewEffect.ShowSnackBar -> showError(viewEffect.errorMessage)
-            is RetroListViewEffect.OpenRetroDetail -> navigateToRetroBoard(viewEffect.retroUuid)
+    override fun renderViewEffect(uiEffect: Effect) {
+        when (uiEffect) {
+            is Effect.OpenRetroDetail -> navigateToRetroBoard(uiEffect.retroUuid)
+            is Effect.ShowSnackBar -> showError(uiEffect.errorMessage)
         }
     }
 
     private fun showRetros(retros: List<Retro>?) {
+        if (retros == null) return
         retroListAdapter.submitList(retros)
     }
 
@@ -127,23 +121,13 @@ class RetroListFragment :
     }
 
     private fun onRetroClicked(retro: Retro) {
-        reportAnalytics(
-            event = TapEvent(
-                screen = Screen.RETRO_LIST,
-                uiValue = UiValue.RETRO_ITEM
-            )
-        )
-        viewModel.process(viewEvent = RetroListViewEvent.RetroClicked(retroUuid = retro.uuid))
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.RETRO_ITEM))
+        viewModel.process(Event.RetroClicked(retro.uuid))
     }
 
     private fun onAddClicked(retroTitle: String) {
-        reportAnalytics(
-            event = TapEvent(
-                screen = Screen.RETRO_LIST,
-                uiValue = UiValue.RETRO_CREATE
-            )
-        )
-        viewModel.process(viewEvent = RetroListViewEvent.CreateRetroClicked(retroTitle = retroTitle))
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.RETRO_CREATE))
+        viewModel.process(Event.CreateRetroClicked(retroTitle = retroTitle))
     }
 
     private fun showError(@StringRes errorMessage: Int) {
@@ -182,7 +166,7 @@ class RetroListFragment :
     private fun onLogoutConfirmed() {
         logoutFromGoogle()
         navigateToLoginScreen()
-        viewModel.process(viewEvent = RetroListViewEvent.LogoutClicked)
+        viewModel.process(Event.LogoutClicked)
     }
 
     private fun logoutFromGoogle() {

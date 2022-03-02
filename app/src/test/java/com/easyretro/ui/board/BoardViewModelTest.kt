@@ -1,20 +1,21 @@
 package com.easyretro.ui.board
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
+import app.cash.turbine.test
 import arrow.core.Either
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.Retro
 import com.easyretro.domain.model.User
+import com.easyretro.ui.CoroutinesTestRule
 import com.easyretro.ui.FailureMessage
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineScope
-import org.junit.After
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -29,202 +30,117 @@ class BoardViewModelTest {
 
     private lateinit var domainRetro: Retro
 
-    private val testCoroutineScope = TestCoroutineScope()
-
     @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
+    var coroutinesTestRule = CoroutinesTestRule()
 
     private val retroRepository = mock<RetroRepository>()
     private val boardRepository = mock<BoardRepository>()
 
     private val viewModel = BoardViewModel(retroRepository = retroRepository, boardRepository = boardRepository)
 
-    private val viewStateObserver = mock<Observer<BoardViewState>>()
-    private val viewEffectsObserver = mock<Observer<BoardViewEffect>>()
 
     @Before
     fun `Set up`() {
         initModelMocks()
-        viewModel.viewStates().observeForever(viewStateObserver)
-        viewModel.viewEffects().observeForever(viewEffectsObserver)
     }
 
-    @After
-    fun `Tear down`() {
-        viewModel.viewStates().removeObserver(viewStateObserver)
-        viewModel.viewEffects().removeObserver(viewEffectsObserver)
-    }
-
-    //region get retro info
     @Test
-    fun `GIVEN success response WHEN getting retro info THEN update viewstate with retro`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.observeRetro(retroUuid))
-                .thenReturn(flowOf(Either.right(domainRetro)))
+    fun `GIVEN success response WHEN getting retro info THEN update viewstate with retro`() = runTest {
+        whenever(retroRepository.observeRetro(retroUuid))
+            .thenReturn(flowOf(Either.right(domainRetro)))
 
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid))
+        viewModel.viewStates().test {
+            viewModel.process(BoardContract.Event.GetRetroInfo(retroUuid))
 
-            verifyZeroInteractions(viewEffectsObserver)
-            verify(viewStateObserver).onChanged(BoardViewState(domainRetro))
+            val state = expectMostRecentItem().retroState
+            assertEquals(BoardContract.RetroState.RetroLoaded(domainRetro), state)
         }
     }
 
     @Test
-    fun `GIVEN failed response WHEN getting retro info THEN update viewstate with retro`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.observeRetro(retroUuid))
-                .thenReturn(flowOf(Either.left(Failure.UnknownError)))
+    fun `GIVEN failed response WHEN getting retro info THEN update viewstate with retro`() = runTest {
+        whenever(retroRepository.observeRetro(retroUuid))
+            .thenReturn(flowOf(Either.left(Failure.UnknownError)))
 
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid))
+        viewModel.viewEffects().test {
+            viewModel.process(BoardContract.Event.GetRetroInfo(retroUuid))
 
-            verifyZeroInteractions(viewStateObserver)
-            verify(viewEffectsObserver).onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)))
-        }
-    }
-    //endregion
-
-    //region join retro
-    @Test
-    fun `GIVEN success response WHEN joining retro THEN do nothing`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.joinRetro(retroUuid))
-                .thenReturn(Either.right(Unit))
-
-            viewModel.process(BoardViewEvent.JoinRetro(retroUuid))
-
-            verifyZeroInteractions(viewEffectsObserver)
-            verifyZeroInteractions(viewStateObserver)
+            val effect = awaitItem()
+            assertEquals(BoardContract.Effect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)), effect)
         }
     }
 
     @Test
-    fun `GIVEN failed response WHEN joining retro THEN do nothing`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.joinRetro(retroUuid))
-                .thenReturn(Either.left(Failure.UnavailableNetwork))
+    fun `GIVEN current retro with deeplink WHEN sharing retro THEN show sharesheet`() = runTest {
+        whenever(retroRepository.observeRetro(retroUuid))
+            .thenReturn(flowOf(Either.right(domainRetro)))
+        viewModel.process(BoardContract.Event.GetRetroInfo(retroUuid))
 
-            viewModel.process(BoardViewEvent.JoinRetro(retroUuid))
+        viewModel.viewEffects().test {
+            viewModel.process(BoardContract.Event.ShareRetroLink)
 
-            verifyZeroInteractions(viewStateObserver)
-            verify(viewEffectsObserver)
-                .onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
-        }
-    }
-    //endregion
-
-    //region share retro
-    @Test
-    fun `GIVEN current retro with deeplink WHEN sharing retro THEN show sharesheet`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.observeRetro(retroUuid))
-                .thenReturn(flowOf(Either.right(domainRetro)))
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid))
-
-            viewModel.process(BoardViewEvent.ShareRetroLink)
-
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                verify(viewStateObserver).onChanged(BoardViewState(domainRetro))
-                verify(viewEffectsObserver).onChanged(
-                    BoardViewEffect.ShowShareSheet(
-                        retroTitle = retroTitle,
-                        deepLink = retroDeepLink
-                    )
-                )
-                verifyNoMoreInteractions(viewEffectsObserver)
-            }
+            val effect = awaitItem()
+            val expected = BoardContract.Effect.ShowShareSheet(retroTitle = retroTitle, deepLink = retroDeepLink)
+            assertEquals(expected, effect)
         }
     }
 
     @Test
-    fun `GIVEN retro without deeplink WHEN sharing retro THEN show snackbar`() {
-        testCoroutineScope.launch {
-            val retroWithoutDeepLink = domainRetro.copy(deepLink = "")
-            whenever(retroRepository.observeRetro(retroUuid))
-                .thenReturn(flowOf(Either.right(retroWithoutDeepLink)))
-            viewModel.process(BoardViewEvent.GetRetroInfo(retroUuid))
+    fun `GIVEN retro without deeplink WHEN sharing retro THEN show snackbar`() = runTest {
+        val retroWithoutDeepLink = domainRetro.copy(deepLink = "")
+        whenever(retroRepository.observeRetro(retroUuid))
+            .thenReturn(flowOf(Either.right(retroWithoutDeepLink)))
+        viewModel.process(BoardContract.Event.GetRetroInfo(retroUuid))
 
-            viewModel.process(BoardViewEvent.ShareRetroLink)
+        viewModel.viewEffects().test {
+            viewModel.process(BoardContract.Event.ShareRetroLink)
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                verify(viewStateObserver).onChanged(BoardViewState(retroWithoutDeepLink))
-                verify(viewEffectsObserver)
-                    .onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)))
-                verifyNoMoreInteractions(viewEffectsObserver)
-            }
-        }
-    }
-    //endregion
-
-    //region lock retro
-    @Test
-    fun `GIVEN success response WHEN protecting retro THEN do nothing`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.protectRetro(retroUuid))
-                .thenReturn(Either.right(Unit))
-
-            viewModel.process(BoardViewEvent.ProtectRetro(retroUuid))
-
-            verifyZeroInteractions(viewEffectsObserver)
-            verifyZeroInteractions(viewStateObserver)
+            val effect = awaitItem()
+            val expected = BoardContract.Effect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError))
+            assertEquals(expected, effect)
         }
     }
 
     @Test
-    fun `GIVEN failed response WHEN protecting retro THEN show snackbar`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.protectRetro(retroUuid))
-                .thenReturn(Either.left(Failure.UnavailableNetwork))
+    fun `GIVEN failed response WHEN protecting retro THEN show snackbar`() = runTest {
+        whenever(retroRepository.protectRetro(retroUuid))
+            .thenReturn(Either.left(Failure.UnavailableNetwork))
 
-            viewModel.process(BoardViewEvent.ProtectRetro(retroUuid))
+        viewModel.viewEffects().test {
+            viewModel.process(BoardContract.Event.ProtectRetro(retroUuid))
 
-            verify(viewEffectsObserver)
-                .onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
-        }
-    }
-    //endregion
-
-    //region unlock retro
-    @Test
-    fun `GIVEN success response WHEN unprotecting retro THEN do nothing`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.unprotectRetro(retroUuid))
-                .thenReturn(Either.right(Unit))
-
-            viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid))
-
-            verifyZeroInteractions(viewEffectsObserver)
-            verifyZeroInteractions(viewStateObserver)
+            val effect = awaitItem()
+            val expected = BoardContract.Effect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork))
+            assertEquals(expected, effect)
         }
     }
 
     @Test
-    fun `GIVEN failed response WHEN unprotecting retro THEN show snackbar`() {
-        testCoroutineScope.launch {
-            whenever(retroRepository.unprotectRetro(retroUuid))
-                .thenReturn(Either.left(Failure.UnavailableNetwork))
+    fun `GIVEN failed response WHEN unprotecting retro THEN show snackbar`() = runTest {
+        whenever(retroRepository.unprotectRetro(retroUuid))
+            .thenReturn(Either.left(Failure.UnavailableNetwork))
 
-            viewModel.process(BoardViewEvent.UnprotectRetro(retroUuid))
+        viewModel.viewEffects().test {
+            viewModel.process(BoardContract.Event.UnprotectRetro(retroUuid))
 
-            verify(viewEffectsObserver)
-                .onChanged(BoardViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
+            val effect = awaitItem()
+            val expected = BoardContract.Effect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork))
+            assertEquals(expected, effect)
         }
     }
-    //endregion
 
-    //region start observing details
     @Test
     fun `GIVEN a valid uuid WHEN subscribing retro details THEN call repository`() {
-        testCoroutineScope.launch {
+        return runTest {
             whenever(retroRepository.startObservingRetroDetails(retroUuid)).thenReturn(flowOf(Either.right(Unit)))
             whenever(boardRepository.startObservingStatements(retroUuid)).thenReturn(flowOf(Either.right(Unit)))
 
-            viewModel.process(BoardViewEvent.SubscribeRetroDetails(retroUuid))
+            viewModel.process(BoardContract.Event.SubscribeRetroDetails(retroUuid))
 
             verify(retroRepository).startObservingRetroDetails(retroUuid)
             verify(boardRepository).startObservingStatements(retroUuid)
         }
     }
-    //endregion
 
     private fun initModelMocks() {
         val retroTimestamp = 1586705438L

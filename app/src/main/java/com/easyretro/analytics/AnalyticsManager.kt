@@ -18,7 +18,7 @@ object AnalyticsManager {
 
     fun logEvent(event: AnalyticsEvent) {
         Timber.d("Event logged: ${event.type} ==> ${event.properties}")
-        firebaseAnalytics?.logEvent(event.type.toLowerCase(Locale.getDefault()), event.properties.asBundle())
+        firebaseAnalytics?.logEvent(event.type.lowercase(Locale.getDefault()), event.properties.asBundle())
     }
 
     private fun Map<String, String>?.asBundle(): Bundle? {

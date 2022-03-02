@@ -1,27 +1,20 @@
 package com.easyretro.ui.welcome
 
-import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
-import androidx.fragment.app.Fragment
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import arrow.core.Either
 import com.easyretro.R
 import com.easyretro.analytics.Screen
-import com.easyretro.analytics.UiValue
 import com.easyretro.analytics.events.PageEnterEvent
-import com.easyretro.analytics.events.TapEvent
-import com.easyretro.analytics.events.UserGoogleSignedInEvent
 import com.easyretro.analytics.reportAnalytics
+import com.easyretro.common.BaseFlowFragment
 import com.easyretro.common.extensions.*
 import com.easyretro.databinding.FragmentWelcomeBinding
-import com.easyretro.domain.model.Failure
-import com.easyretro.domain.model.UserStatus
-import com.easyretro.ui.FailureMessage
 import com.easyretro.ui.account.AccountFragment.Companion.ARG_IS_NEW_ACCOUNT
+import com.easyretro.ui.welcome.WelcomeContract.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -31,23 +24,26 @@ import timber.log.Timber
 
 
 @AndroidEntryPoint
-class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
+class WelcomeFragment : BaseFlowFragment<State, Effect, Event, WelcomeViewModel>(R.layout.fragment_welcome) {
 
-    companion object {
-        const val GOOGLE_SIGN_IN_REQUEST_CODE = 2901
-        const val STARTUP_DELAY = 1500L
-    }
-
+    override val viewModel: WelcomeViewModel by viewModels()
     private val binding by viewBinding(FragmentWelcomeBinding::bind)
-    private val buttonsLayoutHandler = Handler(Looper.getMainLooper())
-    private val welcomeViewModel: WelcomeViewModel by viewModels()
+
+    private val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        try {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            val account = task.getResult(ApiException::class.java)
+            this.viewModel.process(Event.GoogleSignInResultReceived(account))
+        } catch (e: ApiException) {
+            Timber.e(e)
+            this.viewModel.process(Event.GoogleSignInResultReceived(null))
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        this.viewModel.process(Event.ScreenLoaded)
         initUi()
-        welcomeViewModel.googleSignInLiveData.observe(viewLifecycleOwner, { processGoogleSignInResponse(it) })
-        welcomeViewModel.userSessionLiveData.observe(viewLifecycleOwner, { processUserSession(it) })
     }
 
     override fun onStart() {
@@ -55,91 +51,45 @@ class WelcomeFragment : Fragment(R.layout.fragment_welcome) {
         reportAnalytics(event = PageEnterEvent(screen = Screen.WELCOME))
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == GOOGLE_SIGN_IN_REQUEST_CODE) {
-            try {
-                binding.groupButtons.invisible()
-                binding.loading.visible()
-                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-                val account = task?.getResult(ApiException::class.java)
-                welcomeViewModel.handleSignInResult(account)
-            } catch (e: ApiException) {
-                Timber.e(e)
-                processGoogleSignInResponse(Either.left(Failure.UnknownError))
-            }
+    override fun renderViewState(uiState: State) {
+        binding.groupPostIt.visible()
+        binding.groupButtons.visibleOrInvisible(uiState.areLoginButtonsShown)
+        binding.loading.visibleOrGone(uiState.isLoadingShown)
+    }
+
+    override fun renderViewEffect(uiEffect: Effect) {
+        when (uiEffect) {
+            Effect.NavigateToGoogleSignIn -> launchGoogleSignIn()
+            Effect.NavigateToEmailLogin -> navigateToLogin()
+            Effect.NavigateToRetros -> navigateToRetroList()
+            Effect.NavigateToSignUp -> navigateToRegister()
+            is Effect.ShowError -> onGoogleSignInError(uiEffect.errorRes)
         }
     }
 
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        buttonsLayoutHandler.removeCallbacksAndMessages(null)
-    }
-
-    private fun processUserSession(userStatus: Either<Failure, UserStatus>) {
-        userStatus.fold({
-            showButtons()
-        }, {
-            when (it) {
-                UserStatus.VERIFIED -> buttonsLayoutHandler.postDelayed({ navigateToRetroList() }, STARTUP_DELAY)
-                else -> showButtons()
-            }
-        })
-    }
-
-    private fun processGoogleSignInResponse(response: Either<Failure, Unit>) {
-        response.fold({
-            binding.root.showErrorSnackbar(message = FailureMessage.parse(it), duration = Snackbar.LENGTH_LONG)
-            binding.loading.gone()
-            binding.groupButtons.visible()
-        }, {
-            reportAnalytics(event = UserGoogleSignedInEvent)
-            navigateToRetroList()
-        })
+    private fun onGoogleSignInError(@StringRes errorRes: Int) {
+        binding.root.showErrorSnackbar(message = errorRes, duration = Snackbar.LENGTH_LONG)
+        binding.loading.gone()
+        binding.groupButtons.visible()
     }
 
     private fun initUi() {
         with(binding) {
-            groupPostIt.visible()
-
             googleSignIn.setOnClickListener {
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.WELCOME,
-                        uiValue = UiValue.GOOGLE_SIGN_IN
-                    )
-                )
-                launchGoogleSignIn(it)
+                this@WelcomeFragment.viewModel.process(Event.GoogleSignInClicked)
             }
             emailSignIn.setOnClickListener {
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.WELCOME,
-                        uiValue = UiValue.WELCOME_EMAIL_SIGN_IN
-                    )
-                )
-                navigateToLogin()
+                this@WelcomeFragment.viewModel.process(Event.EmailSignInClicked)
             }
             signUpButton.setOnClickListener {
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.WELCOME,
-                        uiValue = UiValue.WELCOME_EMAIL_SIGN_UP
-                    )
-                )
-                navigateToRegister()
+                this@WelcomeFragment.viewModel.process(Event.SignUpClicked)
             }
         }
     }
 
-    private fun showButtons() {
-        binding.groupButtons.visible()
-    }
-
-    private fun launchGoogleSignIn(it: View) {
-        val signInIntent = GoogleSignIn.getClient(it.context, getSignInOptions()).signInIntent
-        startActivityForResult(signInIntent, GOOGLE_SIGN_IN_REQUEST_CODE)
+    private fun launchGoogleSignIn() {
+        val signInIntent = GoogleSignIn.getClient(requireActivity(), getSignInOptions()).signInIntent
+        resultLauncher.launch(signInIntent)
     }
 
     private fun navigateToRetroList() {
