@@ -1,230 +1,155 @@
 package com.easyretro.ui.account
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
+import app.cash.turbine.test
 import arrow.core.Either
 import com.easyretro.domain.AccountRepository
 import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
+import com.easyretro.ui.CoroutinesTestRule
 import com.easyretro.ui.FailureMessage
-import com.nhaarman.mockitokotlin2.*
+import com.easyretro.ui.account.AccountContract.*
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestCoroutineScope
-import org.junit.After
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class AccountViewModelTest {
-    
-    private val testCoroutineScope = TestCoroutineScope()
 
     @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
+    var coroutinesTestRule = CoroutinesTestRule()
 
     private val accountRepository = mock<AccountRepository>()
 
     private val viewModel = AccountViewModel(repository = accountRepository)
 
-    private val viewStateObserver = mock<Observer<AccountViewState>>()
-    private val viewEffectsObserver = mock<Observer<AccountViewEffect>>()
-
     private val userEmail = "user@email.com"
     private val userPassword = "password"
 
-    @After
-    fun `Tear down`() {
-        viewModel.viewStates().removeObserver(viewStateObserver)
-        viewModel.viewEffects().removeObserver(viewEffectsObserver)
-    }
-
-    //region sign in
     @Test
-    fun `GIVEN success response AND verified user WHEN signing in THEN open retro list`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
-                .thenReturn(Either.right(UserStatus.VERIFIED))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN screen loaded event WHEN signing up THEN show sign up form`() = runTest {
 
-            viewModel.process(AccountViewEvent.SignIn(email = userEmail, password = userPassword))
+        viewModel.viewStates().test {
+            viewModel.process(Event.ScreenLoaded(isNewAccount = true))
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val viewStateCaptor = argumentCaptor<AccountViewState>()
-                verify(viewStateObserver, times(2)).onChanged(viewStateCaptor.capture())
-                assertEquals(SigningState.Loading, viewStateCaptor.firstValue.signingState)
-                assertEquals(SigningState.RequestDone, viewStateCaptor.secondValue.signingState)
-
-                verify(viewEffectsObserver).onChanged(AccountViewEffect.OpenRetroList)
-            }
+            val state = expectMostRecentItem().formState
+            assertEquals(FormState.SignUpForm, state)
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN success response AND non verified user WHEN signing in THEN open email verification`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
-                .thenReturn(Either.right(UserStatus.NON_VERIFIED))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN screen loaded event WHEN signing in THEN show sign in form`() = runTest {
 
-            viewModel.process(AccountViewEvent.SignIn(email = userEmail, password = userPassword))
+        viewModel.viewStates().test {
+            viewModel.process(Event.ScreenLoaded(isNewAccount = false))
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val viewStateCaptor = argumentCaptor<AccountViewState>()
-                verify(viewStateObserver, times(2)).onChanged(viewStateCaptor.capture())
-                assertEquals(SigningState.Loading, viewStateCaptor.firstValue.signingState)
-                assertEquals(SigningState.RequestDone, viewStateCaptor.secondValue.signingState)
-
-                verify(viewEffectsObserver).onChanged(AccountViewEffect.OpenEmailVerification)
-            }
+            val state = expectMostRecentItem().formState
+            assertEquals(FormState.SignInForm, state)
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN failed response (invalid user) WHEN signing in THEN show specific error message`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
-                .thenReturn(Either.left(Failure.InvalidUserFailure))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN success response AND verified user WHEN signing in THEN open retro list`() = runTest {
+        whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
+            .thenReturn(Either.right(UserStatus.VERIFIED))
 
-            viewModel.process(AccountViewEvent.SignIn(email = userEmail, password = userPassword))
+        viewModel.viewEffects().test() {
+            viewModel.process(Event.SignInClicked(email = userEmail, password = userPassword))
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val viewStateCaptor = argumentCaptor<AccountViewState>()
-                verify(viewStateObserver, times(2)).onChanged(viewStateCaptor.capture())
-                assertEquals(SigningState.Loading, viewStateCaptor.firstValue.signingState)
-                assertEquals(SigningState.RequestDone, viewStateCaptor.secondValue.signingState)
-
-                verify(viewEffectsObserver).onChanged(
-                    AccountViewEffect.ShowUnknownUserSnackBar(
-                        FailureMessage.parse(
-                            Failure.InvalidUserFailure
-                        )
-                    )
-                )
-            }
+            assertEquals(Effect.OpenRetroList, awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN failed response WHEN signing in THEN show generic error message`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
-                .thenReturn(Either.left(Failure.UnknownError))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN success response AND non verified user WHEN signing in THEN open email verification`() = runTest {
+        whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
+            .thenReturn(Either.right(UserStatus.NON_VERIFIED))
 
-            viewModel.process(AccountViewEvent.SignIn(email = userEmail, password = userPassword))
+        viewModel.viewEffects().test() {
+            viewModel.process(Event.SignInClicked(email = userEmail, password = userPassword))
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val viewStateCaptor = argumentCaptor<AccountViewState>()
-                verify(viewStateObserver, times(2)).onChanged(viewStateCaptor.capture())
-                assertEquals(SigningState.Loading, viewStateCaptor.firstValue.signingState)
-                assertEquals(SigningState.RequestDone, viewStateCaptor.secondValue.signingState)
-
-                verify(viewEffectsObserver).onChanged(
-                    AccountViewEffect.ShowGenericSnackBar(
-                        FailureMessage.parse(
-                            Failure.UnknownError
-                        )
-                    )
-                )
-            }
-        }
-    }
-    //endregion
-
-    //region sign up
-    @Test
-    fun `GIVEN success response WHEN signing up THEN open verification email`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signUpWithEmail(email = userEmail, password = userPassword))
-                .thenReturn(Either.right(Unit))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
-
-            viewModel.process(AccountViewEvent.SignUp(email = userEmail, password = userPassword))
-
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val viewStateCaptor = argumentCaptor<AccountViewState>()
-                verify(viewStateObserver, times(2)).onChanged(viewStateCaptor.capture())
-                assertEquals(SigningState.Loading, viewStateCaptor.firstValue.signingState)
-                assertEquals(SigningState.RequestDone, viewStateCaptor.secondValue.signingState)
-
-                verify(viewEffectsObserver).onChanged(AccountViewEffect.OpenEmailVerification)
-            }
+            assertEquals(Effect.OpenEmailVerification, awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN failed response (existing user) WHEN signing up THEN show specific snackbar`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signUpWithEmail(email = userEmail, password = userPassword))
-                .thenReturn(Either.left(Failure.UserCollisionFailure))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN failed response (invalid user) WHEN signing in THEN show specific error message`() = runTest {
+        whenever(accountRepository.signInWithEmail(email = userEmail, password = userPassword))
+            .thenReturn(Either.left(Failure.UnknownError))
 
-            viewModel.process(AccountViewEvent.SignUp(email = userEmail, password = userPassword))
+        viewModel.viewEffects().test() {
+            viewModel.process(Event.SignInClicked(email = userEmail, password = userPassword))
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val viewStateCaptor = argumentCaptor<AccountViewState>()
-                verify(viewStateObserver, times(2)).onChanged(viewStateCaptor.capture())
-                assertEquals(SigningState.Loading, viewStateCaptor.firstValue.signingState)
-                assertEquals(SigningState.RequestDone, viewStateCaptor.secondValue.signingState)
-
-                verify(viewEffectsObserver).onChanged(
-                    AccountViewEffect.ShowExistingUserSnackBar(
-                        FailureMessage.parse(
-                            Failure.UserCollisionFailure
-                        )
-                    )
-                )
-            }
+            val errorMessage = FailureMessage.parse(Failure.UnknownError)
+            assertEquals(Effect.ShowGenericError(errorMessage), awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
 
     @Test
-    fun `GIVEN failed response WHEN signing up THEN show generic snackbar`() {
-        testCoroutineScope.launch {
-            whenever(accountRepository.signUpWithEmail(email = userEmail, password = userPassword))
-                .thenReturn(Either.left(Failure.UnknownError))
-            viewModel.viewStates().observeForever(viewStateObserver)
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN success response WHEN signing up THEN open email verification`() = runTest {
+        whenever(accountRepository.signUpWithEmail(email = userEmail, password = userPassword))
+            .thenReturn(Either.right(Unit))
 
-            viewModel.process(AccountViewEvent.SignUp(email = userEmail, password = userPassword))
+        viewModel.viewEffects().test() {
+            viewModel.process(Event.SignUpClicked(email = userEmail, password = userPassword))
 
-            inOrder(viewStateObserver, viewEffectsObserver) {
-                val viewStateCaptor = argumentCaptor<AccountViewState>()
-                verify(viewStateObserver, times(2)).onChanged(viewStateCaptor.capture())
-                assertEquals(SigningState.Loading, viewStateCaptor.firstValue.signingState)
-                assertEquals(SigningState.RequestDone, viewStateCaptor.secondValue.signingState)
-
-                verify(viewEffectsObserver).onChanged(
-                    AccountViewEffect.ShowGenericSnackBar(
-                        FailureMessage.parse(
-                            Failure.UnknownError
-                        )
-                    )
-                )
-            }
+            assertEquals(Effect.OpenEmailVerification, awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
-    //endregion
 
-    //region reset password
     @Test
-    fun `GIVEN reset password viewEvent WHEN user taps reset password THEN open reset password`() {
-        testCoroutineScope.launch {
-            viewModel.viewEffects().observeForever(viewEffectsObserver)
+    fun `GIVEN failed response  WHEN signing up THEN show specific error message`() = runTest {
+        whenever(accountRepository.signUpWithEmail(email = userEmail, password = userPassword))
+            .thenReturn(Either.left(Failure.UnknownError))
 
-            viewModel.process(AccountViewEvent.ResetPassword)
+        viewModel.viewEffects().test() {
+            viewModel.process(Event.SignUpClicked(email = userEmail, password = userPassword))
 
-            verify(viewEffectsObserver).onChanged(AccountViewEffect.OpenResetPassword)
+            val errorMessage = FailureMessage.parse(Failure.UnknownError)
+            assertEquals(Effect.ShowGenericError(errorMessage), awaitItem())
+            cancelAndConsumeRemainingEvents()
         }
     }
-    //endregion
+
+    @Test
+    fun `GIVEN reset password uiEvent WHEN user taps reset password THEN open reset password`() = runTest {
+
+        viewModel.viewEffects().test() {
+            viewModel.process(Event.ResetPasswordClicked)
+
+            assertEquals(Effect.OpenResetPassword, awaitItem())
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `GIVEN sign in uiEvent WHEN user taps snackbar THEN show sign in form`() = runTest {
+
+        viewModel.viewStates().test() {
+            viewModel.process(Event.SnackBarSignInClicked)
+
+            assertEquals(FormState.SignInForm, expectMostRecentItem().formState)
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `GIVEN sign up uiEvent WHEN user taps snackbar THEN show sign up form`() = runTest {
+
+        viewModel.viewStates().test() {
+            viewModel.process(Event.SnackBarSignUpClicked)
+
+            assertEquals(FormState.SignUpForm, expectMostRecentItem().formState)
+            cancelAndConsumeRemainingEvents()
+        }
+    }
 }

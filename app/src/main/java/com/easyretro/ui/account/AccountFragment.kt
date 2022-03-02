@@ -107,8 +107,9 @@ class AccountFragment : BaseFlowFragment<State, Effect, Event, AccountViewModel>
 
         val email = emailInputField.text.toString()
         val password = passwordInputField.text.toString()
-        val event = if (viewModel.currentState.formState is FormState.SignInForm) Event.SignInClicked(email, password)
-        else Event.SignUpClicked(email, password)
+        val event =
+            if (viewModel.currentState.formState is FormState.SignInForm) Event.SignInClicked(email, password)
+            else Event.SignUpClicked(email, password)
         viewModel.process(uiEvent = event)
     }
 
@@ -122,13 +123,12 @@ class AccountFragment : BaseFlowFragment<State, Effect, Event, AccountViewModel>
         })
 
         passwordInputField.addTextWatcher(afterTextChanged = {
-            when {
-                passwordRegex.matches(passwordInputField.text.toString()) -> passwordInputLayout.error = null
-                passwordInputField.length() < MINIMUM_PASSWORD_LENGTH -> {
-                    passwordInputLayout.error = getString(R.string.password_minimum_length_validation_error)
-                }
-                else -> passwordInputLayout.error = getString(R.string.password_alphanumeric_validation_error)
+            val error = when {
+                passwordRegex.matches(passwordInputField.text.toString()) -> null
+                passwordInputField.length() < MINIMUM_PASSWORD_LENGTH -> getString(R.string.password_minimum_length_validation_error)
+                else -> getString(R.string.password_alphanumeric_validation_error)
             }
+            passwordInputLayout.error = error
 
             checkFieldErrors()
         })

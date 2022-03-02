@@ -30,13 +30,13 @@ abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), View
     }
 
     protected fun emitViewState(reduce: UiState.() -> UiState) {
-        viewModelScope.launch() {
+        viewModelScope.launch {
             viewStates.value = currentState.reduce()
         }
     }
 
     protected fun emitViewEffect(uiEffect: UiEffect) {
-        viewModelScope.launch() {
+        viewModelScope.launch {
             viewEffects.emit(uiEffect)
         }
     }

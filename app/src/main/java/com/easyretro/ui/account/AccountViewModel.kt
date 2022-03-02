@@ -8,6 +8,7 @@ import com.easyretro.domain.model.Failure
 import com.easyretro.domain.model.UserStatus
 import com.easyretro.ui.FailureMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,8 +35,8 @@ class AccountViewModel @Inject constructor(
     }
 
     private fun signIn(email: String, password: String) {
-        emitViewState { copy(formState = FormState.Loading) }
         viewModelScope.launch {
+            emitViewState { copy(formState = FormState.Loading) }
             val signInResult = repository.signInWithEmail(email, password)
             emitViewState { copy(formState = FormState.SignInForm) }
             signInResult.fold(
@@ -45,8 +46,8 @@ class AccountViewModel @Inject constructor(
     }
 
     private fun signUp(email: String, password: String) {
-        emitViewState { copy(formState = FormState.Loading) }
         viewModelScope.launch {
+            emitViewState { copy(formState = FormState.Loading) }
             val signInResult = repository.signUpWithEmail(email, password)
             emitViewState { copy(formState = FormState.SignUpForm) }
             signInResult.fold(
