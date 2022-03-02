@@ -51,7 +51,7 @@ class BoardRepositoryImpl(
                 statementRemote = StatementRemote(
                     userEmail = userEmail,
                     description = description,
-                    statementType = type.toString().toLowerCase(Locale.getDefault())
+                    statementType = type.toString().lowercase(Locale.getDefault())
                 )
             )
         }

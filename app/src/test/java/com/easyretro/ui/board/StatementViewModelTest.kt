@@ -3,7 +3,6 @@ package com.easyretro.ui.board
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import arrow.core.Either
-import com.easyretro.common.CoroutineDispatcherProvider
 import com.easyretro.domain.BoardRepository
 import com.easyretro.domain.RetroRepository
 import com.easyretro.domain.model.*
@@ -36,8 +35,8 @@ class StatementViewModelTest {
 
     private lateinit var viewModel: StatementViewModel
 
-    private val viewStateObserver = mock<Observer<StatementListViewState>>()
-    private val viewEffectsObserver = mock<Observer<StatementListViewEffect>>()
+    private val viewStateObserver = mock<Observer<State>>()
+    private val viewEffectsObserver = mock<Observer<Effect>>()
 
     @Before
     fun `Set up`() {
@@ -54,9 +53,9 @@ class StatementViewModelTest {
             whenever(boardRepository.getStatements(retroUuid, StatementType.POSITIVE))
                 .thenReturn(flowOf(statementList))
 
-            viewModel.process(StatementListViewEvent.FetchStatements(retroUuid, StatementType.POSITIVE))
+            viewModel.process(Event.FetchStatements(retroUuid, StatementType.POSITIVE))
 
-            val argumentCaptor = argumentCaptor<StatementListViewState>()
+            val argumentCaptor = argumentCaptor<State>()
             verify(viewStateObserver, times(2)).onChanged(argumentCaptor.capture())
             assertEquals(emptyList<Statement>(), argumentCaptor.firstValue.statements)
             assertEquals(statementList, argumentCaptor.secondValue.statements)
@@ -73,9 +72,9 @@ class StatementViewModelTest {
             whenever(retroRepository.observeRetro(retroUuid))
                 .thenReturn(flowOf(protectedRetro, unprotectedRetro, protectedRetro))
 
-            viewModel.process(StatementListViewEvent.CheckRetroLock(retroUuid))
+            viewModel.process(Event.CheckRetroLock(retroUuid))
 
-            val argumentCaptor = argumentCaptor<StatementListViewState>()
+            val argumentCaptor = argumentCaptor<State>()
             verify(viewStateObserver, times(4)).onChanged(argumentCaptor.capture())
             assertEquals(StatementAddState.Hidden, argumentCaptor.firstValue.addState)
             assertEquals(StatementAddState.Hidden, argumentCaptor.secondValue.addState)
@@ -90,10 +89,10 @@ class StatementViewModelTest {
             whenever(retroRepository.observeRetro(retroUuid))
                 .thenReturn(flowOf(Either.left(Failure.RetroNotFoundError)))
 
-            viewModel.process(StatementListViewEvent.CheckRetroLock(retroUuid))
+            viewModel.process(Event.CheckRetroLock(retroUuid))
 
             verify(viewEffectsObserver)
-                .onChanged(StatementListViewEffect.ShowSnackBar(FailureMessage.parse(Failure.RetroNotFoundError)))
+                .onChanged(Effect.ShowSnackBar(FailureMessage.parse(Failure.RetroNotFoundError)))
         }
     }
     //endregion
@@ -112,13 +111,13 @@ class StatementViewModelTest {
             ).thenReturn(Either.right(Unit))
 
             viewModel.process(
-                StatementListViewEvent.AddStatement(
+                Event.AddStatement(
                     retroUuid = retroUuid,
                     description = statementDescription,
                     type = StatementType.NEGATIVE
                 )
             )
-            verify(viewEffectsObserver).onChanged(StatementListViewEffect.CreateItemSuccess)
+            verify(viewEffectsObserver).onChanged(Effect.CreateItemSuccess)
         }
     }
 
@@ -135,16 +134,16 @@ class StatementViewModelTest {
             ).thenReturn(Either.left(Failure.UnavailableNetwork))
 
             viewModel.process(
-                StatementListViewEvent.AddStatement(
+                Event.AddStatement(
                     retroUuid = retroUuid,
                     description = statementDescription,
                     type = StatementType.NEGATIVE
                 )
             )
             verify(viewEffectsObserver)
-                .onChanged(StatementListViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
+                .onChanged(Effect.ShowSnackBar(FailureMessage.parse(Failure.UnavailableNetwork)))
             verify(viewEffectsObserver)
-                .onChanged(StatementListViewEffect.CreateItemFailed)
+                .onChanged(Effect.CreateItemFailed)
         }
     }
     //endregion
@@ -158,7 +157,7 @@ class StatementViewModelTest {
                 .thenReturn(Either.right(Unit))
 
             viewModel.process(
-                StatementListViewEvent.RemoveStatement(
+                Event.RemoveStatement(
                     retroUuid = retroUuid,
                     statementUuid = statementUuid
                 )
@@ -176,14 +175,14 @@ class StatementViewModelTest {
                 .thenReturn(Either.left(Failure.UnknownError))
 
             viewModel.process(
-                StatementListViewEvent.RemoveStatement(
+                Event.RemoveStatement(
                     retroUuid = retroUuid,
                     statementUuid = statementUuid
                 )
             )
 
             verify(viewEffectsObserver)
-                .onChanged(StatementListViewEffect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)))
+                .onChanged(Effect.ShowSnackBar(FailureMessage.parse(Failure.UnknownError)))
         }
     }
     //endregion

@@ -160,7 +160,7 @@ class BoardRepositoryTest {
             val statementToAdd = StatementRemote(
                 userEmail = userEmail,
                 description = statementDescription,
-                statementType = statementType.toString().toLowerCase()
+                statementType = statementType.toString().lowercase()
             )
             whenever(remoteDataStore.addStatementToBoard(retroUuid, statementToAdd)).thenReturn(
                 Either.right(Unit)
@@ -190,7 +190,7 @@ class BoardRepositoryTest {
             val statementToAdd = StatementRemote(
                 userEmail = userEmail,
                 description = statementDescription,
-                statementType = statementType.toString().toLowerCase()
+                statementType = statementType.toString().lowercase()
             )
             whenever(remoteDataStore.addStatementToBoard(retroUuid, statementToAdd))
                 .thenReturn(Either.left(Failure.UnknownError))
@@ -310,7 +310,7 @@ class BoardRepositoryTest {
                 retroUuid = retroUuid,
                 userEmail = userEmail,
                 description = "This is the description of the mock statement",
-                statementType = StatementType.POSITIVE.toString().toLowerCase(),
+                statementType = StatementType.POSITIVE.toString().lowercase(),
                 timestamp = 100012038L,
                 isRemovable = true
             )

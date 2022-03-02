@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 
-abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), ViewModelContract<UiEvent> {
+abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), ViewModelFlowContract<UiEvent> {
 
     val currentState: UiState
         get() = viewStates.value
@@ -47,5 +47,5 @@ interface UiEvent
 interface UiEffect
 
 internal interface ViewModelFlowContract<UiEvent> {
-    fun process(viewEvent: UiEvent)
+    fun process(uiEvent: UiEvent)
 }

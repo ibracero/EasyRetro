@@ -13,7 +13,7 @@ import com.easyretro.analytics.UiValue
 import com.easyretro.analytics.events.StatementCreatedEvent
 import com.easyretro.analytics.events.TapEvent
 import com.easyretro.analytics.reportAnalytics
-import com.easyretro.common.BaseFragment
+import com.easyretro.common.BaseFlowFragment
 import com.easyretro.common.extensions.exhaustive
 import com.easyretro.common.extensions.showErrorSnackbar
 import com.easyretro.common.extensions.viewBinding
@@ -21,9 +21,10 @@ import com.easyretro.databinding.FragmentStatementsBinding
 import com.easyretro.domain.model.Statement
 import com.easyretro.domain.model.StatementType
 import com.easyretro.ui.Payload
+import com.easyretro.ui.board.StatementListContract.*
 
 abstract class StatementFragment :
-    BaseFragment<StatementListViewState, StatementListViewEffect, StatementListViewEvent, StatementViewModel>() {
+    BaseFlowFragment<State, Effect, Event, StatementViewModel>(R.layout.fragment_statements) {
 
     override val viewModel: StatementViewModel by viewModels()
 
@@ -45,27 +46,27 @@ abstract class StatementFragment :
     override fun onStart() {
         super.onStart()
         val retroUuid = getRetroUuidArgument().orEmpty()
-        viewModel.process(StatementListViewEvent.FetchStatements(retroUuid = retroUuid, type = statementType))
-        viewModel.process(StatementListViewEvent.CheckRetroLock(retroUuid = retroUuid))
+        viewModel.process(Event.FetchStatements(retroUuid = retroUuid, type = statementType))
+        viewModel.process(Event.CheckRetroLock(retroUuid = retroUuid))
     }
 
-    override fun renderViewState(viewState: StatementListViewState) {
-        adapter.submitList(viewState.statements)
-        when (viewState.addState) {
+    override fun renderViewState(uiState: State) {
+        adapter.submitList(uiState.statements)
+        when (uiState.addState) {
             StatementAddState.Shown -> showAddItem()
             StatementAddState.Hidden -> hideAddItem()
         }.exhaustive
     }
 
     @Suppress("IMPLICIT_CAST_TO_ANY")
-    override fun renderViewEffect(viewEffect: StatementListViewEffect) {
-        when (viewEffect) {
-            is StatementListViewEffect.ShowSnackBar -> binding.root.showErrorSnackbar(viewEffect.errorMessage)
-            StatementListViewEffect.CreateItemSuccess -> {
+    override fun renderViewEffect(uiEffect: Effect) {
+        when (uiEffect) {
+            is Effect.ShowSnackBar -> binding.root.showErrorSnackbar(uiEffect.errorMessage)
+            Effect.CreateItemSuccess -> {
                 reportAnalytics(event = StatementCreatedEvent)
                 resetAddItem(success = true)
             }
-            StatementListViewEffect.CreateItemFailed -> resetAddItem(success = false)
+            Effect.CreateItemFailed -> resetAddItem(success = false)
         }.exhaustive
     }
 
@@ -76,17 +77,12 @@ abstract class StatementFragment :
     private fun getRetroUuidArgument() = arguments?.getString(BoardFragment.ARGUMENT_RETRO_UUID)
 
     private fun onAddClicked(description: String) {
-        reportAnalytics(
-            event = TapEvent(
-                screen = Screen.RETRO_BOARD,
-                uiValue = UiValue.STATEMENT_CREATE
-            )
-        )
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.STATEMENT_CREATE))
         viewModel.process(
-            StatementListViewEvent.AddStatement(
-                getRetroUuidArgument().orEmpty(),
-                description,
-                statementType
+            Event.AddStatement(
+                retroUuid = getRetroUuidArgument().orEmpty(),
+                description = description,
+                type = statementType
             )
         )
     }
@@ -105,12 +101,7 @@ abstract class StatementFragment :
 
     private fun onRemoveClicked(statement: Statement) {
         val safeContext = context ?: return
-        reportAnalytics(
-            event = TapEvent(
-                screen = Screen.RETRO_BOARD,
-                uiValue = UiValue.STATEMENT_REMOVE
-            )
-        )
+        reportAnalytics(event = TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.STATEMENT_REMOVE))
         createRemoveStatementConfirmationDialog(safeContext, statement).show()
     }
 
@@ -127,7 +118,7 @@ abstract class StatementFragment :
                     )
                 )
                 viewModel.process(
-                    StatementListViewEvent.RemoveStatement(
+                    Event.RemoveStatement(
                         retroUuid = statement.retroUuid,
                         statementUuid = statement.uuid
                     )

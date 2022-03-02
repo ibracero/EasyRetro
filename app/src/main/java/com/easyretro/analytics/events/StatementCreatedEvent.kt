@@ -6,7 +6,7 @@ import java.util.*
 
 object StatementCreatedEvent : AnalyticsEvent {
     override val type: String
-        get() = EventType.STATEMENT_CREATED.toString().toLowerCase(Locale.getDefault())
+        get() = EventType.STATEMENT_CREATED.toString().lowercase(Locale.getDefault())
 
     override val properties: Map<String, String>? = null
 }

@@ -6,7 +6,7 @@ import java.util.*
 
 object UserSignedInEvent : AnalyticsEvent {
     override val type: String
-        get() = EventType.USER_SIGNED_IN.toString().toLowerCase(Locale.getDefault())
+        get() = EventType.USER_SIGNED_IN.toString().lowercase(Locale.getDefault())
 
     override val properties: Map<String, String>? = null
 }
