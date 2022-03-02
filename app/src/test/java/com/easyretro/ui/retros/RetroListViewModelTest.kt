@@ -19,7 +19,6 @@ import org.junit.Test
 @ExperimentalCoroutinesApi
 class RetroListViewModelTest {
 
-
     @get:Rule
     var coroutinesTestRule = CoroutinesTestRule()
 
