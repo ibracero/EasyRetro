@@ -30,7 +30,6 @@ class AccountRepositoryImpl(
         withContext(dispatchers.io()) {
             authDataStore.signInWithToken(token = idToken)
             val signInEither = authDataStore.signInWithToken(token = idToken)
-
             if (signInEither.isLeft()) signInEither
             else startUserSession(user)
         }
@@ -39,13 +38,10 @@ class AccountRepositoryImpl(
         withContext(dispatchers.io()) {
             authDataStore.signInWithEmailAndPassword(email = email, password = password)
                 .map { isUserVerified ->
-                    when (isUserVerified) {
-                        true -> {
-                            sessionManager.setSessionStarted()
-                            UserStatus.VERIFIED
-                        }
-                        false -> UserStatus.NON_VERIFIED
-                    }
+                    if (isUserVerified) {
+                        sessionManager.setSessionStarted()
+                        UserStatus.VERIFIED
+                    } else UserStatus.NON_VERIFIED
                 }
         }
 
@@ -77,22 +73,18 @@ class AccountRepositoryImpl(
         withContext(dispatchers.io()) {
             authDataStore.isUserVerified()
                 .map { userVerified ->
-                    when (userVerified ?: sessionManager.isSessionStarted()) {
-                        true -> {
-                            UserStatus.VERIFIED
-                        }
-                        false -> UserStatus.NON_VERIFIED
-                    }
+                    if (userVerified ?: sessionManager.isSessionStarted()) UserStatus.VERIFIED
+                    else UserStatus.NON_VERIFIED
                 }
         }
 
-    private suspend fun startUserSession(account: User): Either<Failure, Unit> =
-        remoteDataStore.createUser(
-            UserRemote(
-                email = account.email,
-                firstName = account.firstName,
-                lastName = account.lastName,
-                photoUrl = account.photoUrl
-            )
-        ).map { sessionManager.setSessionStarted() }
+    private suspend fun startUserSession(account: User): Either<Failure, Unit> {
+        val remoteUser = UserRemote(
+            email = account.email,
+            firstName = account.firstName,
+            lastName = account.lastName,
+            photoUrl = account.photoUrl
+        )
+        return remoteDataStore.createUser(remoteUser).map { sessionManager.setSessionStarted() }
+    }
 }

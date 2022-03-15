@@ -25,9 +25,9 @@ class RetroListViewModel @Inject constructor(
         super.process(uiEvent)
         when (uiEvent) {
             Event.ScreenLoaded -> fetchRetros()
+            Event.LogoutClicked -> logout()
             is Event.CreateRetroClicked -> createRetro(uiEvent.retroTitle)
             is Event.RetroClicked -> openRetro(uiEvent.retroUuid)
-            Event.LogoutClicked -> logout()
         }
     }
 
@@ -37,7 +37,6 @@ class RetroListViewModel @Inject constructor(
             retroRepository.getRetros()
                 .collect {
                     it.fold({ failure ->
-                        emitUiState { copy(retroListState = RetroListState.RetroListShown(null)) }
                         emitUiEffect(failure.toUiEffect())
                     }, { retros ->
                         emitUiState { copy(retroListState = RetroListState.RetroListShown(retros)) }

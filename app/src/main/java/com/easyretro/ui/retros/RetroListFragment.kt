@@ -91,7 +91,7 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
 
     override fun renderViewState(uiState: State) {
         when (val retroListState = uiState.retroListState) {
-            is RetroListState.RetroListShown -> showRetros(retroListState.retros)
+            is RetroListState.RetroListShown -> retroListAdapter.submitList(retroListState.retros)
             else -> Unit
         }
 
@@ -109,13 +109,7 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
         }
     }
 
-    private fun showRetros(retros: List<Retro>?) {
-        if (retros == null) return
-        retroListAdapter.submitList(retros)
-    }
-
     private fun initUi() {
-        binding.retroListToolbar.title = ""
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.retroListToolbar)
         binding.retroRecyclerView.adapter = retroListAdapter
     }
@@ -142,21 +136,11 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
             .setTitle(R.string.confirm_logout)
             .setMessage(getString(R.string.confirm_logout_message))
             .setPositiveButton(R.string.action_yes) { _, _ ->
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.RETRO_LIST,
-                        uiValue = UiValue.SIGN_OUT_CONFIRMATION
-                    )
-                )
+                reportAnalytics(TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT_CONFIRMATION))
                 onLogoutConfirmed()
             }
             .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.RETRO_LIST,
-                        uiValue = UiValue.SIGN_OUT_DISMISS
-                    )
-                )
+                reportAnalytics(TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT_DISMISS))
                 dialogInterface.dismiss()
             }
             .create()
@@ -191,9 +175,7 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
                 .addOnSuccessListener {
                     activity?.intent = null
                     Timber.d("User is logged in. Handling deeplink: ${it?.link?.toString()}")
-                    it?.link?.let { uri ->
-                        navigateToRetroBoard(uri.lastPathSegment.orEmpty())
-                    }
+                    it?.link?.let { uri -> navigateToRetroBoard(uri.lastPathSegment.orEmpty()) }
                 }
                 .addOnFailureListener {
                     Timber.e(it)

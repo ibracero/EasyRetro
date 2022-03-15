@@ -28,11 +28,7 @@ class RetroListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         return when (viewType) {
-            VIEW_TYPE_ADD -> AddItemViewHolder(
-                parent,
-                onAddClicked,
-                AddItemViewHolder.ItemType.RETRO
-            )
+            VIEW_TYPE_ADD -> AddItemViewHolder(parent, onAddClicked, AddItemViewHolder.ItemType.RETRO)
             else -> RetroViewHolder(parent, onRetroClicked)
         }
     }
@@ -48,9 +44,7 @@ class RetroListAdapter(
         if (payloads.isEmpty()) onBindViewHolder(holder, position)
 
         payloads.forEach {
-            when (it) {
-                is Payload.CreateRetroPayload -> (holder as AddItemViewHolder).bindResult(success = it.success)
-            }
+            if (it is Payload.CreateRetroPayload) (holder as AddItemViewHolder).bindResult(success = it.success)
         }
     }
 
