@@ -17,7 +17,6 @@
 		android:paddingStart="@dimen/standard_margin"
 		android:paddingEnd="@dimen/standard_margin"
 		android:text="@string/sign_in_with_google"
-		android:visibility="gone"
 		app:layout_constraintBottom_toTopOf="@id/email_sign_in"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
@@ -33,7 +32,6 @@
 		android:paddingStart="@dimen/standard_margin"
 		android:paddingEnd="@dimen/standard_margin"
 		android:text="@string/sign_in_with_email"
-		android:visibility="gone"
 		app:layout_constraintBottom_toTopOf="@id/divider"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
@@ -85,10 +83,10 @@
 		android:paddingStart="2dp"
 		android:paddingTop="48dp"
 		android:rotation="-2"
-		android:textStyle="bold"
 		android:text="@string/app_name_two_lines"
 		android:textAppearance="@style/TextAppearance.AppCompat.Headline"
 		android:textColor="@color/colorPrimaryDark"
+		android:textStyle="bold"
 		app:layout_constraintBottom_toBottomOf="@id/post_it_image"
 		app:layout_constraintEnd_toEndOf="@id/post_it_image"
 		app:layout_constraintStart_toStartOf="@id/post_it_image"
@@ -120,6 +118,7 @@
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:visibility="gone"
-		app:constraint_referenced_ids="google_sign_in,email_sign_in,sign_up_button,divider" />
+		app:constraint_referenced_ids="divider,google_sign_in,email_sign_in,sign_up_button"
+		tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

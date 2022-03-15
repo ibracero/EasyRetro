@@ -15,7 +15,7 @@ class StatementRemoteToDbMapper @Inject constructor() : Mapper<StatementRemote, 
             retroUuid = from.retroUuid.orEmpty(),
             userEmail = from.userEmail,
             description = from.description,
-            type = StatementType.valueOf(from.statementType.toUpperCase(Locale.getDefault())),
+            type = StatementType.valueOf(from.statementType.uppercase(Locale.getDefault())),
             timestamp = from.timestamp ?: 0,
             removable = from.isRemovable ?: false
         )

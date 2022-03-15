@@ -25,7 +25,7 @@ class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                     .apply(RequestOptions.circleCropTransform())
                     .into(userImage)
             } else {
-                userLabel.text = getInitials(user).toUpperCase(Locale.getDefault())
+                userLabel.text = getInitials(user).uppercase(Locale.getDefault())
                 userImage.gone()
                 userLabel.visible()
             }

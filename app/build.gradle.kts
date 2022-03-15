@@ -142,7 +142,11 @@ dependencies {
     testImplementation(TestLibraries.androidx_core_testing)
     testImplementation(TestLibraries.turbine)
 
-    androidTestImplementation(TestLibraries.androidx_test_espresso_core)
+    androidTestImplementation(TestLibraries.androidx_navigation_testing)
+    androidTestImplementation(TestLibraries.android_test_junit)
+    androidTestImplementation(TestLibraries.androidx_espresso)
+
+    debugImplementation(TestLibraries.androidx_fragment_testing)
 }
 
 kapt {

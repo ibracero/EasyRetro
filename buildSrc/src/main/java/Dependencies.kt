@@ -19,8 +19,10 @@ import Libraries.Versions.play_services_auth_version
 import Libraries.Versions.room_version
 import Libraries.Versions.timber_version
 import Libraries.Versions.turbine_version
+import TestLibraries.Versions.android_test_junit_version
+import TestLibraries.Versions.androidx_espresso_version
+import TestLibraries.Versions.androidx_fragment
 import TestLibraries.Versions.androidx_testing_version
-import TestLibraries.Versions.espresso_version
 import TestLibraries.Versions.junit_version
 import TestLibraries.Versions.mockito_inline_version
 import TestLibraries.Versions.mockito_version
@@ -125,17 +127,22 @@ object Libraries {
 object TestLibraries {
     private object Versions {
         const val junit_version = "4.13.2"
-        const val espresso_version = "3.4.0"
         const val mockito_version = "2.2.0"
         const val mockito_inline_version = "4.3.1"
         const val androidx_testing_version = "2.1.0"
+        const val android_test_junit_version = "1.1.1"
+        const val androidx_fragment = "1.4.1"
+        const val androidx_espresso_version = "3.4.0"
     }
 
     const val junit = "junit:junit:$junit_version"
     const val mockito_kotlin = "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_version"
     const val mockito_inline = "org.mockito:mockito-inline:$mockito_inline_version"
     const val coroutines_test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
-    const val androidx_core_testing = "androidx.arch.core:core-testing:$androidx_testing_version"
-    const val androidx_test_espresso_core = "androidx.test.espresso:espresso-core:$espresso_version"
     const val turbine = "app.cash.turbine:turbine:$turbine_version"
+    const val androidx_core_testing = "androidx.arch.core:core-testing:$androidx_testing_version"
+    const val androidx_navigation_testing = "androidx.navigation:navigation-testing:$androidx_navigation_version"
+    const val androidx_fragment_testing = "androidx.fragment:fragment-testing:$androidx_fragment"
+    const val android_test_junit = "androidx.test.ext:junit:$android_test_junit_version"
+    const val androidx_espresso = "androidx.test.espresso:espresso-core:$androidx_espresso_version"
 }
