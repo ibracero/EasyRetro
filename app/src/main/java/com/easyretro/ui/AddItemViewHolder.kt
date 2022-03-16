@@ -3,10 +3,8 @@ package com.easyretro.ui
 import android.view.KeyEvent.KEYCODE_ENTER
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo.IME_ACTION_DONE
-import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import com.easyretro.R
-import com.easyretro.common.BaseViewHolder
 import com.easyretro.common.extensions.*
 import com.easyretro.databinding.ItemAddBinding
 
@@ -15,7 +13,7 @@ class AddItemViewHolder(
     parent: ViewGroup,
     private val onAddClicked: (String) -> Unit,
     type: ItemType
-) : BaseViewHolder(parent.inflate(R.layout.item_add)) {
+) : RecyclerView.ViewHolder(parent.inflate(R.layout.item_add)) {
 
     enum class ItemType {
         RETRO,

@@ -110,6 +110,7 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
     }
 
     private fun initUi() {
+        binding.retroListToolbar.title = ""
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.retroListToolbar)
         binding.retroRecyclerView.adapter = retroListAdapter
     }
