@@ -54,29 +54,26 @@ class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.l
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.usersRecyclerview.adapter = userListAdapter
-
-        getRetroUuidArgument()?.let { uuid ->
-            viewModel.process(Event.JoinRetro(retroUuid = uuid))
-            viewModel.process(Event.GetRetroInfo(retroUuid = uuid))
+        binding.run {
+            usersRecyclerview.adapter = userListAdapter
+            dismissProtectedMessageButton.setOnClickListener {
+                protectedMessage.gone()
+                dismissProtectedMessageButton.gone()
+            }
         }
-
-        binding.dismissProtectedMessageButton.setOnClickListener {
-            binding.protectedMessage.gone()
-            binding.dismissProtectedMessageButton.gone()
-        }
-
-        if (!isPortraitMode() && isTablet()) initLandscapeUi()
+        if (!context.isPortraitMode() && context.isTablet()) initLandscapeUi()
         else initPortraitUi()
     }
 
     override fun onStart() {
         super.onStart()
-        reportAnalytics(event = PageEnterEvent(screen = Screen.RETRO_BOARD))
+        reportAnalytics(PageEnterEvent(screen = Screen.RETRO_BOARD))
 
         requireActivity().onBackPressedDispatcher.addCallback(backPressedCallback)
 
         getRetroUuidArgument()?.let {
+            viewModel.process(Event.JoinRetro(it))
+            viewModel.process(Event.GetRetroInfo(it))
             viewModel.process(Event.SubscribeRetroDetails(it))
         }
     }
@@ -108,7 +105,10 @@ class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.l
     override fun renderViewEffect(uiEffect: Effect) {
         when (uiEffect) {
             is Effect.ShowSnackBar -> binding.boardRoot.showErrorSnackbar(message = uiEffect.errorMessage)
-            is Effect.ShowShareSheet -> displayShareSheet(retroName = uiEffect.retroTitle, shortLink = uiEffect.deepLink)
+            is Effect.ShowShareSheet -> displayShareSheet(
+                retroName = uiEffect.retroTitle,
+                shortLink = uiEffect.deepLink
+            )
         }.exhaustive
     }
 
@@ -116,12 +116,7 @@ class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.l
         binding.boardToolbar.run {
             title = retroTitle
             setNavigationOnClickListener {
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.RETRO_BOARD,
-                        uiValue = UiValue.BACK
-                    )
-                )
+                reportAnalytics(TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.BACK))
                 backPressedCallback.handleOnBackPressed()
             }
             setOnMenuItemClickListener { menuItem ->
@@ -136,12 +131,14 @@ class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.l
     }
 
     private fun setupLockMode(retroProtected: Boolean, lockingAllowed: Boolean) {
-        if (lockingAllowed) {
-            binding.boardToolbar.menu.findItem(R.id.action_lock).isVisible = !retroProtected
-            binding.boardToolbar.menu.findItem(R.id.action_unlock).isVisible = retroProtected
+        binding.run {
+            if (lockingAllowed) {
+                boardToolbar.menu.findItem(R.id.action_lock).isVisible = !retroProtected
+                boardToolbar.menu.findItem(R.id.action_unlock).isVisible = retroProtected
+            }
+            protectedMessage.visibleOrGone(retroProtected && !lockingAllowed)
+            dismissProtectedMessageButton.visibleOrGone(retroProtected && !lockingAllowed)
         }
-        binding.protectedMessage.visibleOrGone(retroProtected && !lockingAllowed)
-        binding.dismissProtectedMessageButton.visibleOrGone(retroProtected && !lockingAllowed)
     }
 
     private fun initPortraitUi() {
@@ -164,11 +161,11 @@ class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.l
         }
 
         val currentPositionId = navController.currentDestination?.id
-        if (selectedPositionId != -1 && selectedPositionId != currentPositionId) {
+        if (selectedPositionId != -1 && selectedPositionId != currentPositionId && currentPositionId != null) {
             navController.navigate(
                 selectedPositionId,
                 arguments,
-                getTransitionAnimation(currentPositionId!!, selectedPositionId)
+                getTransitionAnimation(currentPositionId, selectedPositionId)
             )
         }
     }
@@ -208,9 +205,9 @@ class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.l
 
     private fun initLandscapeUi() {
         childFragmentManager.beginTransaction().run {
-            add(R.id.positive_container, PositiveFragment.newInstance(getRetroUuidArgument()))
-            add(R.id.negative_container, NegativeFragment.newInstance(getRetroUuidArgument()))
-            add(R.id.actions_container, ActionsFragment.newInstance(getRetroUuidArgument()))
+            replace(R.id.positive_container, PositiveFragment.newInstance(getRetroUuidArgument()))
+            replace(R.id.negative_container, NegativeFragment.newInstance(getRetroUuidArgument()))
+            replace(R.id.actions_container, ActionsFragment.newInstance(getRetroUuidArgument()))
         }.commit()
     }
 
@@ -221,10 +218,7 @@ class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.l
     private fun displayShareSheet(shortLink: String, retroName: String) {
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(
-                Intent.EXTRA_TEXT,
-                getString(R.string.retro_invitation_message, retroName, shortLink)
-            )
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.retro_invitation_message, retroName, shortLink))
             type = "text/plain"
         }
 
@@ -234,68 +228,32 @@ class BoardFragment : BaseFlowFragment<State, Effect, Event, BoardViewModel>(R.l
 
     private fun getRetroUuidArgument(): String? = arguments?.getString(ARGUMENT_RETRO_UUID)
 
-    private fun isPortraitMode() = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-
-    private fun isTablet(): Boolean {
-        val metrics = context?.resources?.displayMetrics ?: return false
-        val widthDp = metrics.widthPixels / metrics.density
-        val heightDp = metrics.heightPixels / metrics.density
-        return min(widthDp, heightDp) >= 720
-    }
-
     private fun createLockConfirmationDialog(context: Context, retroUuid: String): AlertDialog {
-        reportAnalytics(
-            event = TapEvent(
-                screen = Screen.RETRO_BOARD,
-                uiValue = UiValue.RETRO_PROTECT
-            )
-        )
+        reportAnalytics(TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT))
         return AlertDialog.Builder(context)
             .setCancelable(true)
             .setTitle(R.string.lock_confirmation_title)
             .setMessage(R.string.lock_confirmation_message)
-            .setPositiveButton(R.string.action_yes) { _, _ ->
-                onProtectConfirmed(retroUuid = retroUuid)
-            }
+            .setPositiveButton(R.string.action_yes) { _, _ -> onProtectConfirmed(retroUuid = retroUuid) }
             .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.RETRO_BOARD,
-                        uiValue = UiValue.RETRO_PROTECT_DISMISS
-                    )
-                )
+                reportAnalytics(TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT_DISMISS))
                 dialogInterface.dismiss()
             }
             .create()
     }
 
     private fun onProtectConfirmed(retroUuid: String) {
-        reportAnalytics(
-            event = TapEvent(
-                screen = Screen.RETRO_BOARD,
-                uiValue = UiValue.RETRO_PROTECT_CONFIRMATION
-            )
-        )
+        reportAnalytics(TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_PROTECT_CONFIRMATION))
         viewModel.process(Event.ProtectRetro(retroUuid = retroUuid))
     }
 
     private fun onUnprotectClicked(retroUuid: String) {
-        reportAnalytics(
-            event = TapEvent(
-                screen = Screen.RETRO_BOARD,
-                uiValue = UiValue.RETRO_UNPROTECT
-            )
-        )
+        reportAnalytics(TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_UNPROTECT))
         viewModel.process(Event.UnprotectRetro(retroUuid = retroUuid))
     }
 
     private fun onInviteClicked() {
-        reportAnalytics(
-            event = TapEvent(
-                screen = Screen.RETRO_BOARD,
-                uiValue = UiValue.RETRO_INVITE
-            )
-        )
+        reportAnalytics(TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.RETRO_INVITE))
         viewModel.process(Event.ShareRetroLink)
     }
 }

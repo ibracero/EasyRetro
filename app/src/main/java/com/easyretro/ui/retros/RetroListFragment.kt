@@ -57,25 +57,6 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
         initUi()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.retro_list_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem) =
-        when (item.itemId) {
-            R.id.action_logout -> {
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.RETRO_LIST,
-                        uiValue = UiValue.SIGN_OUT
-                    )
-                )
-                showLogoutConfirmationDialog()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-
     override fun onStart() {
         super.onStart()
         reportAnalytics(event = PageEnterEvent(screen = Screen.RETRO_LIST))
@@ -88,6 +69,20 @@ class RetroListFragment : BaseFlowFragment<State, Effect, Event, RetroListViewMo
         super.onStop()
         view.hideKeyboard()
     }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.retro_list_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) =
+        when (item.itemId) {
+            R.id.action_logout -> {
+                reportAnalytics(TapEvent(screen = Screen.RETRO_LIST, uiValue = UiValue.SIGN_OUT))
+                showLogoutConfirmationDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
 
     override fun renderViewState(uiState: State) {
         when (val retroListState = uiState.retroListState) {

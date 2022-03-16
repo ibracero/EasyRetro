@@ -34,10 +34,6 @@ abstract class StatementFragment :
 
     abstract val statementType: StatementType
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_statements, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initUi()
@@ -55,10 +51,9 @@ abstract class StatementFragment :
         when (uiState.addState) {
             StatementAddState.Shown -> showAddItem()
             StatementAddState.Hidden -> hideAddItem()
-        }.exhaustive
+        }
     }
 
-    @Suppress("IMPLICIT_CAST_TO_ANY")
     override fun renderViewEffect(uiEffect: Effect) {
         when (uiEffect) {
             is Effect.ShowSnackBar -> binding.root.showErrorSnackbar(uiEffect.errorMessage)
@@ -67,7 +62,7 @@ abstract class StatementFragment :
                 resetAddItem(success = true)
             }
             Effect.CreateItemFailed -> resetAddItem(success = false)
-        }.exhaustive
+        }
     }
 
     private fun initUi() {
@@ -111,12 +106,7 @@ abstract class StatementFragment :
             .setTitle(R.string.remove_confirmation_title)
             .setMessage(statement.description)
             .setPositiveButton(R.string.action_yes) { _, _ ->
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.RETRO_BOARD,
-                        uiValue = UiValue.STATEMENT_REMOVE_CONFIRMATION
-                    )
-                )
+                reportAnalytics(TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.STATEMENT_REMOVE_CONFIRMATION))
                 viewModel.process(
                     Event.RemoveStatement(
                         retroUuid = statement.retroUuid,
@@ -125,12 +115,7 @@ abstract class StatementFragment :
                 )
             }
             .setNegativeButton(R.string.action_no) { dialogInterface, _ ->
-                reportAnalytics(
-                    event = TapEvent(
-                        screen = Screen.RETRO_BOARD,
-                        uiValue = UiValue.STATEMENT_REMOVE_DISMISS
-                    )
-                )
+                reportAnalytics(TapEvent(screen = Screen.RETRO_BOARD, uiValue = UiValue.STATEMENT_REMOVE_DISMISS))
                 dialogInterface.dismiss()
             }
             .create()

@@ -30,12 +30,14 @@ abstract class BaseFlowViewModel<UiState, UiEffect, UiEvent> : ViewModel(), View
     }
 
     protected fun emitUiState(reduce: UiState.() -> UiState) {
+        Timber.d("emitting viewState: ${currentState.reduce()}")
         viewModelScope.launch {
             viewStates.value = currentState.reduce()
         }
     }
 
     protected fun emitUiEffect(uiEffect: UiEffect) {
+        Timber.d("emitting viewState: $uiEffect")
         viewModelScope.launch {
             viewEffects.emit(uiEffect)
         }
