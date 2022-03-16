@@ -49,7 +49,7 @@ class RetroListViewModelTest {
             viewModel.process(RetroListContract.Event.ScreenLoaded)
 
             val state = expectMostRecentItem()
-            assertEquals(RetroListContract.RetroListState.RetroListShown(null), state.retroListState)
+            assertEquals(RetroListContract.RetroListState.RetroListShown(emptyList()), state.retroListState)
             assertEquals(RetroListContract.NewRetroState.AddRetroShown, state.newRetroState)
             cancelAndConsumeRemainingEvents()
         }
